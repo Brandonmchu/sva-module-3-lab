@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Group-trip product data",
+  "type": "object",
+  "required": [
+    "version",
+    "trips",
+    "travelers",
+    "activities",
+    "responses"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "trips": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/trip"
+      }
+    },
+    "travelers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/traveler"
+      }
+    },
+    "activities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/activity"
+      }
+    },
+    "responses": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/response"
+      }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "trip": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "destination",
+        "start_date",
+        "end_date",
+        "budget_per_person",
+        "currency",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "destination": {
+          "type": "string",
+          "minLength": 1
+        },
+        "start_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "format": "date"
+        },
+        "end_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "format": "date"
+        },
+        "budget_per_person": {
+          "type": "number",
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "planning",
+            "confirmed",
+            "cancelled"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "traveler": {
+      "type": "object",
+      "required": [
+        "id",
+        "trip_id",
+        "name",
+        "available_from",
+        "available_to",
+        "budget",
+        "interests"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trip_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "available_from": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "format": "date"
+        },
+        "available_to": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "format": "date"
+        },
+        "budget": {
+          "type": "number",
+          "minimum": 0
+        },
+        "interests": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "activity": {
+      "type": "object",
+      "required": [
+        "id",
+        "trip_id",
+        "title",
+        "date",
+        "category",
+        "estimated_cost_per_person",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trip_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "format": "date"
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "estimated_cost_per_person": {
+          "type": "number",
+          "minimum": 0
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "proposed",
+            "accepted",
+            "removed"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "response": {
+      "type": "object",
+      "required": [
+        "id",
+        "trip_id",
+        "traveler_id",
+        "activity_id",
+        "vote",
+        "comment"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trip_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "traveler_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "activity_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vote": {
+          "type": "string",
+          "enum": [
+            "yes",
+            "no",
+            "maybe"
+          ]
+        },
+        "comment": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

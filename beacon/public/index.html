@@ -15,18 +15,20 @@
 <body>
   <p>MODULE 3 · COMPANY LAB</p>
   <h1>Beacon</h1>
-  <p>Your starter is running. Build your product here when the problem is announced.</p>
+  <p>Your starter is running. Build your group-trip product here. The shared model and sample data are ready.</p>
   <p id="status" role="status">Reading the local event store…</p>
   <button id="refresh" type="button">Refresh data</button>
   <pre id="preview"></pre>
   <script type="module">
     async function refresh() {
       try {
-        const response = await fetch('/api/events');
-        const events = await response.json();
-        if (!response.ok) throw new Error(events.error);
-        document.querySelector('#status').textContent = events.length + ' events in the local data store.';
-        document.querySelector('#preview').textContent = events.length ? JSON.stringify(events.slice(-3), null, 2) : 'No events yet.';
+        const responses = await Promise.all([fetch('/api/product'), fetch('/api/events')]);
+        const [product, events] = await Promise.all(responses.map(response => response.json()));
+        if (!responses[0].ok) throw new Error(product.error);
+        if (!responses[1].ok) throw new Error(events.error);
+        document.querySelector('#status').textContent = product.trips.length + ' trips · ' + product.travelers.length + ' travelers · ' + product.activities.length + ' activities · ' + product.responses.length + ' responses · ' + events.length + ' usage events';
+        document.querySelector('#preview').textContent = JSON.stringify(product, null, 2);
+
       } catch (error) {
         document.querySelector('#status').textContent = error.message;
       }

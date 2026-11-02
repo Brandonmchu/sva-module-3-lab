@@ -5,7 +5,7 @@ This folder is your whole project. It has no dependency on another team folder.
 ## Your company
 
 Your company helps groups of friends plan a weekend away that everyone wants to join.
-Use AI for as much of the work as you can. Your team chooses how the company operates.
+Use AI for as much of the work as you can.
 
 The minimum product must let customers:
 
@@ -14,24 +14,38 @@ The minimum product must let customers:
 - Make a shared itinerary with activities and estimated costs.
 - Respond to the plan and revise it.
 
-Save trip data and changes in data/events.jsonl so they survive a restart.
-Mock travel details are enough. You can take turns as different travelers on one local screen.
+Include a landing page with clear positioning and a simple path to the first trip.
+Save product state in data/product.json. Record product use in data/events.jsonl.
+Use the supplied model and fictional sample data. Read DATA-MODEL.md before you build.
+
+## Three people, three roles
+
+Assign one person to each role:
+
+| Role | Responsible for |
+|---|---|
+| Product manager | Features and product behavior |
+| Designer | Design, interaction design, and product aesthetics |
+| Product marketer | Positioning, the landing page, and onboarding |
+
+Each person leads their area and uses AI to do as much work as possible.
+Work together on decisions that cross roles.
 
 ## Three phases
 
-1. Build your first product: 30 minutes, including setup. Save a v1 screenshot and commit reference in your folder.
-2. Use another team's product: 30 minutes. Give qualitative feedback and add journeys for 100 distinct simulated customers.
-3. Analyze and iterate: 30 minutes. Use 15 minutes to improve and retest, then 15 minutes for all five team presentations.
+1. Build: 30 minutes, with four minutes of setup and 26 minutes to build. Save a v1 screenshot and commit reference.
+2. Be customers: 30 minutes. Give qualitative feedback and create journeys for 100 distinct simulated customers.
+3. Analyze and iterate: 30 minutes. Improve and retest for 15 minutes, then present in the main room for 15 minutes.
 
-Each team presents for three minutes: original product, feedback and data, then the iteration and retest.
-Explain what AI did and what your humans decided.
+Each of the six or seven teams presents for two minutes. The screen-share handoff counts inside that time.
+Show the original, feedback and data, then the iteration and retest.
+Explain what AI did and what the humans decided.
 
-Your team uses **Atlas** during the customer rotation.
+Your team uses **Fjord** during the customer rotation.
 
 ## Run it
 
-Install Node.js 24 LTS if you do not already have Node.js 22 or newer.
-
+Use Node.js 22 or newer. Node.js 24 LTS is suitable.
 From this folder:
 
 ```sh
@@ -39,40 +53,34 @@ npm start
 ```
 
 Open http://127.0.0.1:3005.
-No package install, account, API key, or hosted database is needed.
-Use Ctrl+C to stop.
-
-Open this folder in your AI coding tool.
-Start with AGENTS.md and mockdata.md.
+No package install, account, API key, or hosted database is necessary.
+Open this folder in your AI tool. Read AGENTS.md, DATA-MODEL.md, and mockdata.md.
 
 ## Files
 
 | File | Use |
 |---|---|
-| AGENTS.md | Your team's agent instructions |
-| mockdata.md | Shared data format and examples |
-| data/schema.json | Shared event schema |
-| data/events.jsonl | The committed local data store |
-| feedback.md | Notes from the customer rotation |
-| public/ | The prototype; index.html is the current start page |
-| app.mjs | Local server and event API |
-| package.json | Start and data-check commands |
+| AGENTS.md | Folder-only prime directive and human roles |
+| DATA-MODEL.md | Starter entities, relationships, and API examples |
+| data/product.json | Current product state with sample data |
+| data/product.schema.json | Base product fields and types |
+| data/events.jsonl | Committed usage events, initially empty |
+| data/schema.json | Shared event shape |
+| mockdata.md | Product data and simulation instructions |
+| feedback.md | Customer observations and scenario assumptions |
+| public/ | Your interface and landing page |
+| app.mjs | Local server, product API, event API, and data checks |
 
 ## Build and exchange
 
-Replace the starter page with your prototype.
-Keep the project runnable from this folder with npm start.
-Keep the shared event format so another team can add simulation data.
-
-During a customer rotation, run atlas/ as the active project.
-Change only the host feedback.md and data/events.jsonl in this phase.
-Add observations to that folder's feedback.md.
-Add simulated events to that folder's data/events.jsonl.
-Commit the changes so the original team can pull them.
+Replace the starter page with your product. Keep this folder independently runnable with npm start.
+During the customer phase, open the host folder as the active project.
+Change only its feedback.md, data/product.json, and data/events.jsonl. Commit and push those files.
+Return to your own folder for the iteration and pull the latest data first.
 
 ```sh
 npm run check
 ```
 
-This checks the event format and duplicate IDs.
-Git handoff commands are in the repository README.
+The check covers product fields, IDs, dates, relationships, and event IDs.
+Use the path-scoped Git commands in AGENTS.md. Coordinate commits and pushes with your teammates.

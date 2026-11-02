@@ -22,4 +22,14 @@ If a change outside this folder is necessary, stop and ask Brandon.
 
 ## Data
 
-Use the synthetic data described in mockdata.md.
+Read DATA-MODEL.md and mockdata.md before you build.
+Use the supplied data/product.json model and fictional sample data.
+Save product state through /api/product and append usage through /api/events.
+Keep both data files inside this project folder.
+
+## Human roles
+
+The product manager leads feature decisions.
+The designer leads design, interaction design, and product aesthetics.
+The product marketer leads positioning, the landing page, and onboarding.
+Each role uses AI for execution. Keep decisions across roles visible to the humans.

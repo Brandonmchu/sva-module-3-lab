@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { readFileSync, appendFileSync } from 'node:fs';
+import { readFileSync, appendFileSync, writeFileSync, renameSync } from 'node:fs';
 import { dirname, resolve, sep, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
@@ -8,8 +8,87 @@ const root = dirname(fileURLToPath(import.meta.url));
 const publicRoot = resolve(root, 'public');
 const dataFile = resolve(root, 'data/events.jsonl');
 const schema = JSON.parse(readFileSync(resolve(root, 'data/schema.json'), 'utf8'));
+const productFile = resolve(root, 'data/product.json');
+const productSchema = JSON.parse(readFileSync(resolve(root, 'data/product.schema.json'), 'utf8'));
 const config = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
 const fail = (message, status = 400) => Object.assign(new Error(message), { status });
+
+function validateValue(value, rule, label) {
+  if (rule.$ref) rule = productSchema.$defs[rule.$ref.split('/').at(-1)];
+  if (!rule) throw fail('Unknown model definition at ' + label);
+  if (rule.type === 'object') {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) throw fail(label + ' must be an object.');
+    for (const key of rule.required || []) if (!(key in value)) throw fail(label + '.' + key + ' is required.');
+    for (const [key, item] of Object.entries(value)) {
+      if (rule.properties?.[key]) validateValue(item, rule.properties[key], label + '.' + key);
+    }
+  } else if (rule.type === 'array') {
+    if (!Array.isArray(value)) throw fail(label + ' must be an array.');
+    value.forEach((item, index) => validateValue(item, rule.items, label + '[' + index + ']'));
+  } else if (rule.type === 'number' || rule.type === 'integer') {
+    if (typeof value !== 'number' || !Number.isFinite(value) || (rule.type === 'integer' && !Number.isInteger(value))) {
+      throw fail(label + ' must be a finite ' + rule.type + '.');
+    }
+    if (rule.minimum !== undefined && value < rule.minimum) throw fail(label + ' must be at least ' + rule.minimum + '.');
+  } else if (typeof value !== rule.type || (rule.minLength && value.length < rule.minLength)) {
+    throw fail(label + ' must be a non-empty ' + rule.type + '.');
+  }
+  if (rule.enum && !rule.enum.includes(value)) throw fail(label + ' must be one of: ' + rule.enum.join(', '));
+  if (rule.pattern && !new RegExp(rule.pattern).test(value)) throw fail(label + ' has an invalid format.');
+  if (rule.format === 'date') {
+    const date = new Date(value + 'T00:00:00.000Z');
+    if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== value) throw fail(label + ' must be a valid YYYY-MM-DD date.');
+  }
+}
+
+function validateProduct(product) {
+  validateValue(product, productSchema, 'product');
+  const records = {};
+  for (const table of ['trips', 'travelers', 'activities', 'responses']) {
+    records[table] = new Map();
+    for (const row of product[table]) {
+      if (records[table].has(row.id)) throw fail('Duplicate ' + table + ' id: ' + row.id);
+      records[table].set(row.id, row);
+    }
+  }
+  for (const trip of product.trips) if (trip.start_date > trip.end_date) throw fail('Trip end_date must follow start_date.');
+  for (const table of ['travelers', 'activities', 'responses']) {
+    for (const row of product[table]) if (!records.trips.has(row.trip_id)) throw fail(table + ' references an unknown trip_id: ' + row.trip_id);
+  }
+  for (const traveler of product.travelers) {
+    if (traveler.available_from > traveler.available_to) throw fail('Traveler available_to must follow available_from.');
+  }
+  for (const response of product.responses) {
+    if (records.travelers.get(response.traveler_id)?.trip_id !== response.trip_id) throw fail('Response traveler_id must belong to its trip.');
+    if (records.activities.get(response.activity_id)?.trip_id !== response.trip_id) throw fail('Response activity_id must belong to its trip.');
+  }
+}
+
+function readProduct() {
+  const product = JSON.parse(readFileSync(productFile, 'utf8'));
+  validateProduct(product);
+  return product;
+}
+
+function saveProduct(product) {
+  validateProduct(product);
+  const temporary = productFile + '.tmp';
+  writeFileSync(temporary, JSON.stringify(product, null, 2) + '\n');
+  renameSync(temporary, productFile);
+}
+
+async function readJson(request) {
+  if (!request.headers['content-type']?.startsWith('application/json')) throw fail('Send application/json.', 415);
+  if (request.headers.origin && request.headers.origin !== 'http://' + request.headers.host) throw fail('Cross-origin writes are not supported.', 403);
+  const chunks = [];
+  let bytes = 0;
+  for await (const chunk of request) {
+    bytes += chunk.length;
+    if (bytes > 5 * 1024 * 1024) throw fail('Keep each request under 5 MB.', 413);
+    chunks.push(chunk);
+  }
+  return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+}
 
 function validateEvent(event) {
   if (!event || typeof event !== 'object' || Array.isArray(event)) throw fail('Each event must be an object.');
@@ -76,8 +155,10 @@ function json(response, status, value) {
 }
 
 try {
+  const product = readProduct();
   const events = readEvents();
   if (process.argv.includes('--check')) {
+    console.log('Valid product: ' + product.trips.length + ' trips, ' + product.travelers.length + ' travelers, ' + product.activities.length + ' activities, ' + product.responses.length + ' responses.');
     console.log('Valid data: ' + events.length + ' events.');
   } else {
     const port = Number(process.env.PORT ?? config.config.port);
@@ -86,19 +167,18 @@ try {
     const server = createServer(async (request, response) => {
       try {
         const pathname = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
+        if (pathname === '/api/product') {
+          if (request.method === 'GET') return json(response, 200, readProduct());
+          if (request.method === 'PUT') {
+            saveProduct(await readJson(request));
+            return json(response, 200, { saved: true });
+          }
+          throw fail('Use GET or PUT for the product.', 405);
+        }
         if (pathname === '/api/events') {
           if (request.method === 'GET') return json(response, 200, readEvents());
           if (request.method === 'POST') {
-            if (!request.headers['content-type']?.startsWith('application/json')) throw fail('Send application/json.', 415);
-            if (request.headers.origin && request.headers.origin !== 'http://' + request.headers.host) throw fail('Cross-origin writes are not supported.', 403);
-            const chunks = [];
-            let bytes = 0;
-            for await (const chunk of request) {
-              bytes += chunk.length;
-              if (bytes > 5 * 1024 * 1024) throw fail('Keep each request under 5 MB.', 413);
-              chunks.push(chunk);
-            }
-            const count = appendEvents(JSON.parse(Buffer.concat(chunks).toString('utf8')));
+            const count = appendEvents(await readJson(request));
             return json(response, 201, { added: count });
           }
           throw fail('Use GET or POST for events.', 405);

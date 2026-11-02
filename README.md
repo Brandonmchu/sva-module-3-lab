@@ -1,6 +1,7 @@
 # Module 3 · Company lab
 
-Five teams share one repository. Each folder is a complete, independent project.
+Seven standalone company folders support six or seven teams of three.
+Use Atlas through Fjord for six teams. Add Grove for seven.
 
 | Team | Folder | Local URL |
 |---|---|---|
@@ -9,11 +10,13 @@ Five teams share one repository. Each folder is a complete, independent project.
 | Cedar | cedar/ | http://127.0.0.1:3003 |
 | Drift | drift/ | http://127.0.0.1:3004 |
 | Ember | ember/ | http://127.0.0.1:3005 |
+| Fjord | fjord/ | http://127.0.0.1:3006 |
+| Grove | grove/ | http://127.0.0.1:3007 |
 
 ## Your company
 
 Your company helps groups of friends plan a weekend away that everyone wants to join.
-Use AI for as much of the work as you can. Your team chooses how the company operates.
+Use AI for as much of the work as you can.
 
 The minimum product must let customers:
 
@@ -22,20 +25,38 @@ The minimum product must let customers:
 - Make a shared itinerary with activities and estimated costs.
 - Respond to the plan and revise it.
 
-Save trip data and changes in data/events.jsonl so they survive a restart.
-Mock travel details are enough. You can take turns as different travelers on one local screen.
+Include a landing page with clear positioning and a simple path to the first trip.
+Save product state in data/product.json. Record product use in data/events.jsonl.
+Use the supplied model and fictional sample data. Read DATA-MODEL.md before you build.
+
+## Three people, three roles
+
+Assign one person to each role:
+
+| Role | Responsible for |
+|---|---|
+| Product manager | Features and product behavior |
+| Designer | Design, interaction design, and product aesthetics |
+| Product marketer | Positioning, the landing page, and onboarding |
+
+Each person leads their area and uses AI to do as much work as possible.
+Work together on decisions that cross roles.
 
 ## Three phases
 
-1. Build your first product: 30 minutes, including setup. Save a v1 screenshot and commit reference in your folder.
-2. Use another team's product: 30 minutes. Give qualitative feedback and add journeys for 100 distinct simulated customers.
-3. Analyze and iterate: 30 minutes. Use 15 minutes to improve and retest, then 15 minutes for all five team presentations.
+1. Build: 30 minutes, with four minutes of setup and 26 minutes to build. Save a v1 screenshot and commit reference.
+2. Be customers: 30 minutes. Give qualitative feedback and create journeys for 100 distinct simulated customers.
+3. Analyze and iterate: 30 minutes. Improve and retest for 15 minutes, then present in the main room for 15 minutes.
 
-Each team presents for three minutes: original product, feedback and data, then the iteration and retest.
-Explain what AI did and what your humans decided.
+Each of the six or seven teams presents for two minutes. The screen-share handoff counts inside that time.
+Show the original, feedback and data, then the iteration and retest.
+Explain what AI did and what the humans decided.
 
-Customer rotation: Atlas → Beacon → Cedar → Drift → Ember → Atlas.
-Stay with your team and open the next team's folder.
+## Customer rotation
+
+Seven teams: Atlas → Beacon → Cedar → Drift → Ember → Fjord → Grove → Atlas.
+Six teams: Atlas → Beacon → Cedar → Drift → Ember → Fjord → Atlas.
+Stay with your three-person team and open the next company's folder.
 
 ## Start
 
@@ -71,15 +92,11 @@ All team files stay inside the team folder. You can also copy one folder elsewhe
 
 ## Shared data
 
-Each team has the same schema in data/schema.json.
-Its local data store is data/events.jsonl: one fictional event per line.
-Custom product data goes in each event's properties object.
-Each folder's mockdata.md explains the format and API.
-
-The data file is committed to Git. It does not live in browser localStorage or a hosted service.
-In Phase 2, an agent appends usage journeys for 100 distinct simulated customers.
-Set source to "simulation" and identify the reviewer team in properties.reviewer_team.
-Each team has its own data file, so teams do not share a live database.
+Each folder has the same starter product model and fictional sample data.
+DATA-MODEL.md explains trips, travelers, activities, responses, and usage events.
+GET /api/product reads data/product.json. PUT /api/product validates and saves the whole snapshot.
+GET and POST /api/events read and append the separate data/events.jsonl log.
+All data stays inside the active team folder and travels through Git.
 
 ## Handoffs
 
@@ -91,7 +108,7 @@ Commit only the active project folder. Coordinate pushes inside your team.
 During a rotation, open the host team's folder as your project.
 Its AGENTS.md applies, so feedback and simulation changes stay in that folder.
 
-Everyone uses the same main branch. Once you accept your collaborator invitation, you can pull and push across all five folders.
+Everyone uses the same main branch. Once you accept your collaborator invitation, you can pull and push across all seven folders.
 
 From your project folder, stop the server, check the data, and commit your work:
 
@@ -112,7 +129,7 @@ If another team pushed first, pull their changes and retry the push.
 Resolve any same-file conflict with the people who edited it. Do not force-push.
 
 Before the rotation, publish the product and its data.
-After customer feedback, publish the host folder's feedback.md and data/events.jsonl.
+After customer feedback, publish the host folder's feedback.md, data/product.json, and data/events.jsonl.
 Before iteration, the original team pulls main again and restarts its app.
 
 The repository is private. A link alone does not grant access.

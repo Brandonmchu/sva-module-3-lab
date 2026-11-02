@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "trips": [
+    {
+      "id": "trip-001",
+      "title": "A weekend with friends",
+      "destination": "Demo Lake (fictional)",
+      "start_date": "2026-11-06",
+      "end_date": "2026-11-08",
+      "budget_per_person": 350,
+      "currency": "CAD",
+      "status": "planning"
+    }
+  ],
+  "travelers": [
+    {
+      "id": "traveler-001",
+      "trip_id": "trip-001",
+      "name": "Alex",
+      "available_from": "2026-11-06",
+      "available_to": "2026-11-08",
+      "budget": 350,
+      "interests": [
+        "outdoors",
+        "food"
+      ]
+    },
+    {
+      "id": "traveler-002",
+      "trip_id": "trip-001",
+      "name": "Sam",
+      "available_from": "2026-11-07",
+      "available_to": "2026-11-08",
+      "budget": 300,
+      "interests": [
+        "food",
+        "art"
+      ]
+    },
+    {
+      "id": "traveler-003",
+      "trip_id": "trip-001",
+      "name": "Jordan",
+      "available_from": "2026-11-06",
+      "available_to": "2026-11-08",
+      "budget": 450,
+      "interests": [
+        "outdoors",
+        "music"
+      ]
+    }
+  ],
+  "activities": [
+    {
+      "id": "activity-001",
+      "trip_id": "trip-001",
+      "title": "Lakeside walk",
+      "date": "2026-11-06",
+      "category": "outdoors",
+      "estimated_cost_per_person": 0,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-002",
+      "trip_id": "trip-001",
+      "title": "Market lunch",
+      "date": "2026-11-07",
+      "category": "food",
+      "estimated_cost_per_person": 35,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-003",
+      "trip_id": "trip-001",
+      "title": "Canoe afternoon",
+      "date": "2026-11-07",
+      "category": "outdoors",
+      "estimated_cost_per_person": 80,
+      "status": "proposed"
+    }
+  ],
+  "responses": [
+    {
+      "id": "response-001",
+      "trip_id": "trip-001",
+      "traveler_id": "traveler-001",
+      "activity_id": "activity-003",
+      "vote": "yes",
+      "comment": "I would enjoy this."
+    },
+    {
+      "id": "response-002",
+      "trip_id": "trip-001",
+      "traveler_id": "traveler-002",
+      "activity_id": "activity-003",
+      "vote": "maybe",
+      "comment": "Can we find a cheaper option?"
+    }
+  ]
+}

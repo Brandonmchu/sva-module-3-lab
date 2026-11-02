@@ -46,7 +46,7 @@ Identify the reviewer team in properties.reviewer_team.
 Create journeys for exactly 100 distinct fictional actor_id values across group trips.
 Reuse each customer's actor_id across their events. Keep trip references consistent in properties.
 
-Append records without replacing existing data. Use unique event IDs.
+Append records to the file. Preserve all earlier data. Use unique event IDs.
 The scenario can include completed plans, abandoned journeys, and changes to dates or budgets.
 Record qualitative feedback and explain the simulation in feedback.md.
 Commit both the feedback and the changed data file.

@@ -18,7 +18,7 @@ The schema is in data/schema.json.
 | properties | An object for any product-specific values |
 
 Keep these shared fields. Put extra fields inside properties.
-Event names and properties are open. The product problem is not set yet.
+Use event names and properties that fit your group-trip product.
 
 This is a format example. It is not in the data file:
 
@@ -41,6 +41,12 @@ Run npm run check before you commit.
 
 Reload the app after a pull or data change.
 
-For a customer simulation, use fictional actors and identify your team in source.
+For a customer simulation, set source to "simulation".
+Identify the reviewer team in properties.reviewer_team.
+Create journeys for exactly 100 distinct fictional actor_id values across group trips.
+Reuse each customer's actor_id across their events. Keep trip references consistent in properties.
+
+Append records without replacing existing data. Use unique event IDs.
+The scenario can include completed plans, abandoned journeys, and changes to dates or budgets.
 Record qualitative feedback and explain the simulation in feedback.md.
 Commit both the feedback and the changed data file.

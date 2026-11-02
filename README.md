@@ -10,8 +10,32 @@ Five teams share one repository. Each folder is a complete, independent project.
 | Drift | drift/ | http://127.0.0.1:3004 |
 | Ember | ember/ | http://127.0.0.1:3005 |
 
-The product problem, roles, and exercise constraints are still open.
-This repo provides the local runtime, a common data format, and a place for feedback.
+## Your company
+
+Your company helps groups of friends plan a weekend away that everyone wants to join.
+Use AI for as much of the work as you can. Your team chooses how the company operates.
+
+The minimum product must let customers:
+
+- Create a trip with a destination, dates, and a budget per person.
+- Add each traveler's availability, budget, and interests.
+- Make a shared itinerary with activities and estimated costs.
+- Respond to the plan and revise it.
+
+Save trip data and changes in data/events.jsonl so they survive a restart.
+Mock travel details are enough. You can take turns as different travelers on one local screen.
+
+## Three phases
+
+1. Build your first product: 30 minutes, including setup. Save a v1 screenshot and commit reference in your folder.
+2. Use another team's product: 30 minutes. Give qualitative feedback and add journeys for 100 distinct simulated customers.
+3. Analyze and iterate: 30 minutes. Use 15 minutes to improve and retest, then 15 minutes for all five team presentations.
+
+Each team presents for three minutes: original product, feedback and data, then the iteration and retest.
+Explain what AI did and what your humans decided.
+
+Customer rotation: Atlas → Beacon → Cedar → Drift → Ember → Atlas.
+Stay with your team and open the next team's folder.
 
 ## Start
 
@@ -53,7 +77,8 @@ Custom product data goes in each event's properties object.
 Each folder's mockdata.md explains the format and API.
 
 The data file is committed to Git. It does not live in browser localStorage or a hosted service.
-An agent can append one thousand synthetic customer events, then commit those rows.
+In Phase 2, an agent appends usage journeys for 100 distinct simulated customers.
+Set source to "simulation" and identify the reviewer team in properties.reviewer_team.
 Each team has its own data file, so teams do not share a live database.
 
 ## Handoffs

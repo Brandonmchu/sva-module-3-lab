@@ -20,6 +20,13 @@ git commit --only -m "Beacon: project update" -- .
 
 If a change outside this folder is necessary, stop and ask Brandon.
 
+## Starting point
+
+The basic app already works. Run it and try a complete trip before you make changes.
+Use AI to develop your team's customer promise, features, design, positioning, and onboarding.
+Keep the core trip flow usable during the customer rotation.
+The editable frontend files are public/index.html, public/styles.css, and public/app.js.
+
 ## Data
 
 Read DATA-MODEL.md and mockdata.md before you build.

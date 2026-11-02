@@ -3,38 +3,92 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fjord — Company lab</title>
-  <style>
-    body { font: 17px/1.6 system-ui, sans-serif; max-width: 52rem; margin: 64px auto; padding: 0 24px; color: #202020; }
-    h1 { font-size: 2.5rem; line-height: 1.1; margin-bottom: 16px; }
-    p { max-width: 42rem; }
-    pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 18px; background: #f3f3f3; font-size: 14px; }
-    button { font: inherit; padding: 6px 16px; cursor: pointer; }
-  </style>
+  <meta name="description" content="Plan a weekend away with friends. Keep dates, budgets, ideas, and responses together.">
+  <title>Group trip</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" type="module"></script>
 </head>
 <body>
-  <p>MODULE 3 · COMPANY LAB</p>
-  <h1>Fjord</h1>
-  <p>Your starter is running. Build your group-trip product here. The shared model and sample data are ready.</p>
-  <p id="status" role="status">Reading the local event store…</p>
-  <button id="refresh" type="button">Refresh data</button>
-  <pre id="preview"></pre>
-  <script type="module">
-    async function refresh() {
-      try {
-        const responses = await Promise.all([fetch('/api/product'), fetch('/api/events')]);
-        const [product, events] = await Promise.all(responses.map(response => response.json()));
-        if (!responses[0].ok) throw new Error(product.error);
-        if (!responses[1].ok) throw new Error(events.error);
-        document.querySelector('#status').textContent = product.trips.length + ' trips · ' + product.travelers.length + ' travelers · ' + product.activities.length + ' activities · ' + product.responses.length + ' responses · ' + events.length + ' usage events';
-        document.querySelector('#preview').textContent = JSON.stringify(product, null, 2);
+  <header class="site-header">
+    <a class="wordmark" href="#home">Group trip<span class="wordmark-dot" aria-hidden="true"></span></a>
+    <nav aria-label="Main navigation">
+      <a href="#home">Home</a>
+      <a id="planner-link" href="#home" hidden>Open planner</a>
+      <a class="button small" href="#new">Start a trip</a>
+    </nav>
+  </header>
 
-      } catch (error) {
-        document.querySelector('#status').textContent = error.message;
-      }
-    }
-    document.querySelector('#refresh').addEventListener('click', refresh);
-    refresh();
-  </script>
+  <div id="notice" class="notice" role="status" hidden></div>
+  <div id="app-loading" class="loading-state" role="status"><div class="skeleton wide"></div><div class="skeleton"></div><p>Loading your trips…</p></div>
+  <div id="load-error" class="load-error" role="alert" hidden><h1>We could not load your trips.</h1><p id="load-error-message"></p><button id="retry-load" type="button">Try again</button></div>
+
+  <main>
+    <!-- Product marketers: start with the promise, calls to action, and onboarding in this file. -->
+    <section id="home-view" class="view landing" hidden>
+      <div class="landing-copy">
+        <p class="eyebrow">A weekend with your people</p>
+        <h1>Make a plan<br>everyone can join.</h1>
+        <p class="intro">Keep the dates, budget, and ideas in one place. Build a weekend plan your group can agree on.</p>
+        <div class="actions"><a class="button" href="#new">Plan a weekend</a><a id="sample-link" class="text-link" href="#home" hidden>Try the sample trip</a></div>
+        <p class="quiet">Start a trip. Add your people. Decide together.</p>
+      </div>
+      <div id="sample-preview" class="sample-preview"></div>
+      <div class="landing-note"><b>One shared plan.</b><p>Everyone can add their preferences, propose activities, and respond to the ideas.</p></div>
+    </section>
+
+    <section id="new-view" class="view narrow" hidden>
+      <a class="text-link back-link" href="#home">Back to home</a>
+      <p id="onboarding-step" class="eyebrow">Step 1 of 2</p>
+      <h1 id="onboarding-heading">Give your weekend a starting point.</h1>
+      <p id="onboarding-intro" class="intro">Choose a destination, dates, and a budget. You can change these later.</p>
+      <form id="new-trip-form" class="form-panel">
+        <fieldset id="trip-basics"><legend class="sr-only">Trip details</legend>
+          <label>Trip name<input name="title" required maxlength="100" placeholder="A weekend with friends"></label>
+          <label>Destination<input name="destination" required maxlength="150" placeholder="Where would you like to go?"></label>
+          <div class="form-grid"><label>Start date<input name="start_date" type="date" required></label><label>End date<input name="end_date" type="date" required></label></div>
+          <div class="form-grid"><label>Budget per person<input name="budget_per_person" type="number" min="0" step="0.01" required placeholder="350"></label><label>Currency<input name="currency" value="CAD" pattern="[A-Za-z]{3}" maxlength="3" required aria-describedby="currency-help"><span id="currency-help" class="field-help">Three-letter code, such as CAD.</span></label></div>
+        </fieldset>
+        <fieldset id="organizer-details" hidden disabled><legend class="sr-only">Your preferences</legend>
+          <label>Your name<input name="name" required maxlength="80" autocomplete="given-name"></label>
+          <div class="form-grid"><label>Available from<input name="available_from" type="date" required></label><label>Available until<input name="available_to" type="date" required></label></div>
+          <label>Your budget<input name="budget" type="number" min="0" step="0.01" required></label>
+          <label>Your interests<input name="interests" placeholder="Food, outdoors, art"><span class="field-help">Separate interests with commas.</span></label>
+        </fieldset>
+        <p class="form-error" role="alert"></p>
+        <div class="form-actions"><button id="onboarding-back" class="secondary" type="button" hidden>Back</button><button id="onboarding-submit" type="submit">Continue</button></div>
+      </form>
+    </section>
+
+    <!-- Product managers: planner views and interactions are in app.js. Designers: shared styles are in styles.css. -->
+    <section id="planner-view" class="view planner" hidden></section>
+  </main>
+
+  <dialog id="trip-dialog" aria-labelledby="trip-dialog-heading">
+    <form id="trip-form"><div class="dialog-header"><h2 id="trip-dialog-heading">Edit trip</h2><button type="button" class="text-button" data-close="trip-dialog">Close</button></div>
+      <label>Trip name<input name="title" required maxlength="100"></label><label>Destination<input name="destination" required maxlength="150"></label>
+      <div class="form-grid"><label>Start date<input name="start_date" type="date" required></label><label>End date<input name="end_date" type="date" required></label></div>
+      <div class="form-grid"><label>Budget per person<input name="budget_per_person" type="number" min="0" step="0.01" required></label><label>Currency<input name="currency" required pattern="[A-Za-z]{3}" maxlength="3"></label></div>
+      <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save trip</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="traveler-dialog" aria-labelledby="traveler-dialog-heading">
+    <form id="traveler-form"><div class="dialog-header"><h2 id="traveler-dialog-heading">Add traveler</h2><button type="button" class="text-button" data-close="traveler-dialog">Close</button></div>
+      <input name="id" type="hidden"><label>Name<input name="name" required maxlength="80"></label>
+      <div class="form-grid"><label>Available from<input name="available_from" type="date" required></label><label>Available until<input name="available_to" type="date" required></label></div>
+      <label>Budget per person<input name="budget" type="number" min="0" step="0.01" required></label><label>Interests<input name="interests" placeholder="Food, outdoors, art"><span class="field-help">Separate interests with commas.</span></label>
+      <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save traveler</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="activity-dialog" aria-labelledby="activity-dialog-heading">
+    <form id="activity-form"><div class="dialog-header"><h2 id="activity-dialog-heading">Add an activity</h2><button type="button" class="text-button" data-close="activity-dialog">Close</button></div>
+      <input name="id" type="hidden"><label>Activity name<input name="title" required maxlength="120"></label>
+      <div class="form-grid"><label>Date<input name="date" type="date" required></label><label>Category<input name="category" required placeholder="Food, outdoors, music"></label></div>
+      <div class="form-grid"><label>Estimated cost per person<input name="estimated_cost_per_person" type="number" min="0" step="0.01" required></label><label>Plan status<select name="status"><option value="proposed">Proposed</option><option value="accepted">Agreed</option><option value="removed">Removed</option></select></label></div>
+      <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save activity</button></div>
+    </form>
+  </dialog>
 </body>
 </html>

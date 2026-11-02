@@ -1,7 +1,7 @@
 # Starter data model
 
 Every company starts with the same model and fictional sample data.
-The model gives your agents a common structure. Your team builds the product experience.
+The working app uses this model. Your team chooses how to change the product experience.
 
 ## Product data
 

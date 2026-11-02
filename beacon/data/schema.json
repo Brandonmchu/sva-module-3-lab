@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Company lab event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "event",
+    "actor_id",
+    "at",
+    "source",
+    "properties"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC ISO timestamp with milliseconds, such as 2026-11-03T23:00:00.000Z",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "properties": {
+      "type": "object"
+    }
+  }
+}

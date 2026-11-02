@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Drift — Company lab</title>
+  <style>
+    body { font: 17px/1.6 system-ui, sans-serif; max-width: 52rem; margin: 64px auto; padding: 0 24px; color: #202020; }
+    h1 { font-size: 2.5rem; line-height: 1.1; margin-bottom: 16px; }
+    p { max-width: 42rem; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 18px; background: #f3f3f3; font-size: 14px; }
+    button { font: inherit; padding: 6px 16px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <p>MODULE 3 · COMPANY LAB</p>
+  <h1>Drift</h1>
+  <p>Your starter is running. Build your product here when the problem is announced.</p>
+  <p id="status" role="status">Reading the local event store…</p>
+  <button id="refresh" type="button">Refresh data</button>
+  <pre id="preview"></pre>
+  <script type="module">
+    async function refresh() {
+      try {
+        const response = await fetch('/api/events');
+        const events = await response.json();
+        if (!response.ok) throw new Error(events.error);
+        document.querySelector('#status').textContent = events.length + ' events in the local data store.';
+        document.querySelector('#preview').textContent = events.length ? JSON.stringify(events.slice(-3), null, 2) : 'No events yet.';
+      } catch (error) {
+        document.querySelector('#status').textContent = error.message;
+      }
+    }
+    document.querySelector('#refresh').addEventListener('click', refresh);
+    refresh();
+  </script>
+</body>
+</html>

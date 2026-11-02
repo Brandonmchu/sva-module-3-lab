@@ -9,9 +9,9 @@ Install Node.js 24 LTS if you do not already have Node.js 22 or newer.
 
 From this folder:
 
-~~~sh
+```sh
 npm start
-~~~
+```
 
 Open http://127.0.0.1:3001.
 No package install, account, API key, or hosted database is needed.
@@ -44,9 +44,9 @@ Add observations to that folder's feedback.md.
 Add simulated events to that folder's data/events.jsonl.
 Commit the changes so the original team can pull them.
 
-~~~sh
+```sh
 npm run check
-~~~
+```
 
 This checks the event format and duplicate IDs.
 Git handoff commands are in the repository README.

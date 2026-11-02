@@ -22,9 +22,9 @@ Event names and properties are open. The product problem is not set yet.
 
 This is a format example. It is not in the data file:
 
-~~~json
+```json
 {"id":"example-001","event":"signup","actor_id":"customer-001","at":"2026-11-03T23:00:00.000Z","source":"example","properties":{"scenario":"format example"}}
-~~~
+```
 
 ## Use the data
 
@@ -34,11 +34,11 @@ POST /api/events appends one event or an array of events.
 Supply event and actor_id.
 The server fills id, at, source, and properties if absent.
 
-
 The server rejects invalid rows and duplicate IDs.
 
 Your agent can also append complete rows directly to data/events.jsonl.
 Run npm run check before you commit.
+
 Reload the app after a pull or data change.
 
 For a customer simulation, use fictional actors and identify your team in source.

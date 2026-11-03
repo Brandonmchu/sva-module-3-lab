@@ -3,15 +3,15 @@
 Seven standalone company folders support six or seven teams of three.
 Use Atlas through Fjord for six teams. Add Grove for seven.
 
-| Team | Folder | Local URL |
-|---|---|---|
-| Atlas | atlas/ | http://127.0.0.1:3001 |
-| Beacon | beacon/ | http://127.0.0.1:3002 |
-| Cedar | cedar/ | http://127.0.0.1:3003 |
-| Drift | drift/ | http://127.0.0.1:3004 |
-| Ember | ember/ | http://127.0.0.1:3005 |
-| Fjord | fjord/ | http://127.0.0.1:3006 |
-| Grove | grove/ | http://127.0.0.1:3007 |
+| Team | Folder | Shared branch | Local URL |
+|---|---|---|---|
+| Atlas | atlas/ | team/atlas | http://127.0.0.1:3001 |
+| Beacon | beacon/ | team/beacon | http://127.0.0.1:3002 |
+| Cedar | cedar/ | team/cedar | http://127.0.0.1:3003 |
+| Drift | drift/ | team/drift | http://127.0.0.1:3004 |
+| Ember | ember/ | team/ember | http://127.0.0.1:3005 |
+| Fjord | fjord/ | team/fjord | http://127.0.0.1:3006 |
+| Grove | grove/ | team/grove | http://127.0.0.1:3007 |
 
 ## Your company
 
@@ -81,6 +81,7 @@ npm start
 
 Open the URL for your team. No package install is needed.
 Use your own team's folder instead of atlas.
+These commands preview the starter. Before product work, follow your folder's AGENTS.md to create a session worktree.
 
 ## Download only one team folder
 
@@ -118,29 +119,28 @@ Commit only the active project folder. Coordinate pushes inside your team.
 During a rotation, open the host team's folder as your project.
 Its AGENTS.md applies, so feedback and simulation changes stay in that folder.
 
-Everyone uses the same main branch. Once you accept your collaborator invitation, you can pull and push across all seven folders.
+Each company has one shared branch: team/atlas through team/grove.
+The main branch holds the instructor's starter. Students do not push to main.
 
-From your project folder, stop the server, check the data, and commit your work:
+Each AI session uses a unique local session branch and worktree from its company's remote branch.
+Open the company folder inside that worktree.
+Commit often inside the session. Merge ready work into the company branch, then push that branch.
+Keep session branches local.
+Choose one teammate to merge and push at a time.
+Different companies can publish independently.
+AGENTS.md in each company folder gives the exact commands and conflict rules.
 
-```sh
-npm run check
-git status
-git add -- .
-git diff --cached --name-only
-git commit --only -m "Atlas: prototype handoff" -- .
-git pull --no-rebase origin main
-git push origin main
-```
+During the customer rotation, fetch the host company's branch.
+Create a fresh session worktree from that branch and open the host folder.
+For example, Atlas reviews Beacon from origin/team/beacon.
+Change only the host feedback.md, data/product.json, and data/events.jsonl.
+Merge that session into team/beacon and push team/beacon.
+Keep Atlas product commits on team/atlas. Never merge team/atlas into team/beacon.
+The host builders pause until the customer team finishes.
+Before iteration, the host starts fresh sessions from its updated remote branch.
 
-Run these commands inside the active team folder.
-The path-scoped commit excludes staged files from other folders.
-Use your team's name in the commit message.
-If another team pushed first, pull their changes and retry the push.
-Resolve any same-file conflict with the people who edited it. Do not force-push.
-
-Before the rotation, publish the product and its data.
-After customer feedback, publish the host folder's feedback.md, data/product.json, and data/events.jsonl.
-Before iteration, the original team pulls main again and restarts its app.
+A ZIP supports a local app preview. Clone the private repository for Git worktrees and shared handoffs.
+The folder boundary and branch rules guide agents. They do not enforce GitHub access limits.
 
 The repository is private. A link alone does not grant access.
 Accept your GitHub invitation first.

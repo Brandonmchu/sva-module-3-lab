@@ -53,7 +53,18 @@ Explain what AI did and what the humans decided.
 
 Your team uses **Fjord** during the customer rotation.
 
-## Run it
+## Git sessions and team branch
+
+Your shared branch is `team/ember`.
+Each AI session uses a unique local session branch and worktree from `origin/team/ember`.
+Read AGENTS.md for the exact setup and merge commands before you start.
+One teammate merges ready sessions into the team branch and pushes it.
+Keep local session branches off GitHub. Keep all product changes inside `ember/`.
+During a review, use the host team's branch and folder.
+Merge feedback into that host branch before its builders resume.
+A ZIP can run the app. Clone the repository for branches, worktrees, and team handoffs.
+
+## Start the app
 
 Use Node.js 22 or newer. Node.js 24 LTS is suitable.
 From this folder:
@@ -70,7 +81,7 @@ Open this folder in your AI tool. Read AGENTS.md, DATA-MODEL.md, and mockdata.md
 
 | File | Use |
 |---|---|
-| AGENTS.md | Folder-only prime directive and human roles |
+| AGENTS.md | Folder boundary, team branch, session worktrees, merge rules, and human roles |
 | DATA-MODEL.md | Starter entities, relationships, and API examples |
 | data/product.json | Current product state with sample data |
 | data/product.schema.json | Base product fields and types |
@@ -95,4 +106,4 @@ npm run check
 ```
 
 The check covers product fields, IDs, dates, relationships, and event IDs.
-Use the path-scoped Git commands in AGENTS.md. Coordinate commits and pushes with your teammates.
+Use the worktree and merge commands in AGENTS.md. Coordinate one team-branch publisher at a time.

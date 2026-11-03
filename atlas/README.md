@@ -60,6 +60,7 @@ Each AI session uses a unique local session branch and worktree from `origin/tea
 Read AGENTS.md for the exact setup and merge commands before you start.
 One teammate merges ready sessions into the team branch and pushes it.
 Keep local session branches off GitHub. Keep all product changes inside `atlas/`.
+
 During a review, use the host team's branch and folder.
 Merge feedback into that host branch before its builders resume.
 A ZIP can run the app. Clone the repository for branches, worktrees, and team handoffs.
@@ -97,6 +98,7 @@ Open this folder in your AI tool. Read AGENTS.md, DATA-MODEL.md, and mockdata.md
 ## Build and exchange
 
 Start with the working app. Change it for your chosen customer. Keep this folder independently runnable with npm start.
+
 During the customer phase, open the host folder as the active project.
 Change only its feedback.md, data/product.json, and data/events.jsonl. Commit and push those files.
 Return to your own folder for the iteration and pull the latest data first.

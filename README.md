@@ -126,6 +126,7 @@ Each AI session uses a unique local session branch and worktree from its company
 Open the company folder inside that worktree.
 Commit often inside the session. Merge ready work into the company branch, then push that branch.
 Keep session branches local.
+
 Choose one teammate to merge and push at a time.
 Different companies can publish independently.
 AGENTS.md in each company folder gives the exact commands and conflict rules.
@@ -135,6 +136,7 @@ Create a fresh session worktree from that branch and open the host folder.
 For example, Atlas reviews Beacon from origin/team/beacon.
 Change only the host feedback.md, data/product.json, and data/events.jsonl.
 Merge that session into team/beacon and push team/beacon.
+
 Keep Atlas product commits on team/atlas. Never merge team/atlas into team/beacon.
 The host builders pause until the customer team finishes.
 Before iteration, the host starts fresh sessions from its updated remote branch.

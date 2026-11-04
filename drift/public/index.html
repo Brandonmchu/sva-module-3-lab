@@ -68,22 +68,22 @@
         <p class="gx-kicker">Made for every kind of crew</p>
         <h2>What's the occasion?</h2>
         <div class="gx-trips">
-          <a class="gx-trip" href="#new">
+          <a class="gx-trip" href="#new" data-occasion="bachelor">
             <span class="gx-trip-icon" aria-hidden="true">🎉</span>
             <h3>Celebrations</h3>
             <p>Bachelor &amp; bachelorette parties, milestone birthdays, graduation trips</p>
           </a>
-          <a class="gx-trip" href="#new">
+          <a class="gx-trip" href="#new" data-occasion="reunion">
             <span class="gx-trip-icon" aria-hidden="true">🤝</span>
             <h3>Reunions</h3>
             <p>College roommates, the yearly friendsgiving, wedding-guest crews</p>
           </a>
-          <a class="gx-trip" href="#new">
+          <a class="gx-trip" href="#new" data-occasion="concert">
             <span class="gx-trip-icon" aria-hidden="true">🎸</span>
             <h3>Concerts &amp; hobbies</h3>
             <p>Festivals and tours, ski weekends, golf trips, away games</p>
           </a>
-          <a class="gx-trip" href="#new">
+          <a class="gx-trip" href="#new" data-occasion="getaway">
             <span class="gx-trip-icon" aria-hidden="true">🌴</span>
             <h3>Girls' &amp; couples' trips</h3>
             <p>Beach and wellness weekends, three or four couples in one house</p>
@@ -122,27 +122,39 @@
       </div>
     </section>
 
-    <section id="new-view" class="view narrow" hidden>
-      <a class="text-link back-link" href="#home">Back to home</a>
-      <p id="onboarding-step" class="eyebrow">Step 1 of 2</p>
-      <h1 id="onboarding-heading">Give your trip a starting point.</h1>
-      <p id="onboarding-intro" class="intro">Choose a destination, dates, and a budget. You can change these later.</p>
+    <section id="new-view" class="view narrow gx-onboard" hidden>
+      <a class="text-link back-link" href="#home">← Back to home</a>
+      <div class="gx-progress" aria-hidden="true"><span id="gx-progress-1" class="is-on"></span><span id="gx-progress-2"></span></div>
+      <p id="onboarding-step" class="eyebrow">Step 1 of 2 · The trip</p>
+      <h1 id="onboarding-heading">Let's get this trip started.</h1>
+      <p id="onboarding-intro" class="intro">Pick the occasion, then the basics. Nothing is locked in, so you can change anything later.</p>
       <form id="new-trip-form" class="form-panel">
         <fieldset id="trip-basics"><legend class="sr-only">Trip details</legend>
-          <label>Trip name<input name="title" required maxlength="100" placeholder="Our next trip together"></label>
-          <label>Destination<input name="destination" required maxlength="150" placeholder="Where would you like to go?"></label>
+          <!-- Occasion personalizes the hints on these screens. It is not saved with the trip (no new data field). -->
+          <div class="gx-occasions" role="radiogroup" aria-labelledby="gx-occasion-label">
+            <p id="gx-occasion-label" class="gx-field-label">What's the occasion?</p>
+            <label class="gx-chip"><input type="radio" name="occasion" value="bachelor" checked><span><span aria-hidden="true">🎉</span>Bachelor / bachelorette</span></label>
+            <label class="gx-chip"><input type="radio" name="occasion" value="birthday"><span><span aria-hidden="true">🎂</span>Milestone birthday</span></label>
+            <label class="gx-chip"><input type="radio" name="occasion" value="reunion"><span><span aria-hidden="true">🤝</span>Reunion</span></label>
+            <label class="gx-chip"><input type="radio" name="occasion" value="concert"><span><span aria-hidden="true">🎸</span>Concert or festival</span></label>
+            <label class="gx-chip"><input type="radio" name="occasion" value="sport"><span><span aria-hidden="true">⛷️</span>Ski, golf or sports</span></label>
+            <label class="gx-chip"><input type="radio" name="occasion" value="getaway"><span><span aria-hidden="true">🌴</span>Girls' or couples' trip</span></label>
+          </div>
+          <label>Give it a name<input name="title" required maxlength="100" placeholder="Jake's last ride"></label>
+          <label>Where to?<input name="destination" required maxlength="150" placeholder="Nashville, Vegas, Miami…"></label>
           <div class="form-grid"><label>Start date<input name="start_date" type="date" required></label><label>End date<input name="end_date" type="date" required></label></div>
-          <div class="form-grid"><label>Budget per person<input name="budget_per_person" type="number" min="0" step="0.01" required placeholder="350"></label><label>Currency<input name="currency" value="CAD" pattern="[A-Za-z]{3}" maxlength="3" required aria-describedby="currency-help"><span id="currency-help" class="field-help">Three-letter code, such as CAD.</span></label></div>
+          <div class="form-grid"><label>Budget per person<input name="budget_per_person" type="number" min="0" step="0.01" required placeholder="600" aria-describedby="budget-help"><span id="budget-help" class="field-help">What each friend should expect to spend. It keeps the plan doable for everyone.</span></label><label>Currency<input name="currency" value="CAD" pattern="[A-Za-z]{3}" maxlength="3" required aria-describedby="currency-help"><span id="currency-help" class="field-help">Three-letter code, such as CAD.</span></label></div>
         </fieldset>
         <fieldset id="organizer-details" hidden disabled><legend class="sr-only">Your preferences</legend>
-          <label>Your name<input name="name" required maxlength="80" autocomplete="given-name"></label>
-          <div class="form-grid"><label>Available from<input name="available_from" type="date" required></label><label>Available until<input name="available_to" type="date" required></label></div>
+          <label>Your name<input name="name" required maxlength="80" autocomplete="given-name" placeholder="So your crew knows who's organizing"></label>
+          <div class="form-grid"><label>You're free from<input name="available_from" type="date" required></label><label>You're free until<input name="available_to" type="date" required></label></div>
           <label>Your budget<input name="budget" type="number" min="0" step="0.01" required></label>
-          <label>Your interests<input name="interests" placeholder="Food, outdoors, art"><span class="field-help">Separate interests with commas.</span></label>
+          <label>What you're into<input name="interests" placeholder="Nightlife, good food, the pool"><span class="field-help">Separate with commas. Your friends add theirs next.</span></label>
         </fieldset>
         <p class="form-error" role="alert"></p>
-        <div class="form-actions"><button id="onboarding-back" class="secondary" type="button" hidden>Back</button><button id="onboarding-submit" type="submit">Continue</button></div>
+        <div class="form-actions"><button id="onboarding-back" class="secondary" type="button" hidden>Back</button><button id="onboarding-submit" type="submit">Next: add yourself →</button></div>
       </form>
+      <p class="gx-reassure">💙 You're the organizer, not the debt collector. Everyone adds their own dates, budget and votes.</p>
     </section>
 
     <!-- Product managers: planner views and interactions are in app.js. Designers: shared styles are in styles.css. -->

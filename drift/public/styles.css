@@ -1010,3 +1010,63 @@ body:has(#home-view.gx-home:not([hidden])) { background:linear-gradient(180deg,#
 body:has(#home-view.gx-home:not([hidden])) .site-header { border-bottom-color:transparent }
 body:has(#home-view.gx-home:not([hidden])) .site-header .button { background:#0f2a4a; border-color:#0f2a4a; border-radius:999px }
 body:has(#home-view.gx-home:not([hidden])) .wordmark-dot { background:#2f8cff }
+
+/* ===== Groupation onboarding (marketing · Ronak). Scoped to #new-view.gx-onboard. ===== */
+body:has(#new-view.gx-onboard:not([hidden])) { background:linear-gradient(180deg,#eef7ff 0%,#f7fbff 100%) }
+body:has(#new-view.gx-onboard:not([hidden])) .site-header { border-bottom-color:transparent }
+body:has(#new-view.gx-onboard:not([hidden])) .site-header .button { background:#0f2a4a; border-color:#0f2a4a; border-radius:999px }
+body:has(#new-view.gx-onboard:not([hidden])) .wordmark-dot { background:#2f8cff }
+#new-view.gx-onboard { --sky:#2f8cff; --sky-3:#e6f4ff; --sun:#ffd43b; --ink:#0f2a4a; --ink-soft:#4a6382; color:var(--ink) }
+.gx-onboard .back-link { color:var(--ink-soft); text-decoration:none; font-weight:600; margin-bottom:22px }
+.gx-progress { display:flex; gap:8px; margin-bottom:18px }
+.gx-progress span { height:6px; flex:1; border-radius:999px; background:#d7e8fb; transition:background .2s ease }
+.gx-progress span.is-on { background:var(--sky) }
+.gx-onboard .eyebrow { color:var(--sky); margin-bottom:10px }
+.gx-onboard h1 { color:var(--ink); font-size:clamp(30px,4.4vw,42px); font-weight:800; letter-spacing:-.03em; line-height:1.1; margin:0 }
+.gx-onboard .intro { color:var(--ink-soft); margin-top:14px }
+.gx-onboard .form-panel {
+  border:0;
+  border-radius:26px;
+  padding:30px;
+  box-shadow:0 1px 0 rgba(15,42,74,.06),0 24px 48px -30px rgba(15,42,74,.45)
+}
+.gx-onboard label { color:var(--ink); font-size:13px; font-weight:700 }
+.gx-onboard input:not([type=radio]) { border-color:#cfe0f3; border-radius:12px; min-height:46px; color:var(--ink) }
+.gx-onboard input:not([type=radio]):focus { outline:3px solid rgba(47,140,255,.3); border-color:var(--sky) }
+.gx-onboard .field-help { color:var(--ink-soft); font-weight:500 }
+
+/* Occasion chips */
+.gx-occasions { display:flex; flex-wrap:wrap; gap:10px; margin:0 0 24px }
+.gx-field-label { width:100%; margin:0 0 2px; font-size:13px; font-weight:700 }
+.gx-onboard label.gx-chip { margin:0; display:inline-flex; position:relative; cursor:pointer }
+.gx-chip input { position:absolute; opacity:0; width:1px; height:1px; min-height:0; padding:0; margin:0 }
+.gx-chip > span {
+  display:inline-flex;
+  align-items:center;
+  min-height:44px;
+  padding:0 16px;
+  border-radius:999px;
+  background:var(--sky-3);
+  border:2px solid transparent;
+  font-size:14px;
+  font-weight:650;
+  color:var(--ink);
+  transition:background .15s ease,border-color .15s ease
+}
+.gx-chip:hover > span { border-color:#b9d8fb }
+.gx-chip input:checked + span { background:var(--sky); border-color:var(--sky); color:#fff }
+.gx-chip input:focus-visible + span { outline:3px solid rgba(47,140,255,.45); outline-offset:2px }
+
+/* Buttons */
+.gx-onboard .form-actions { margin-top:8px; flex-wrap:wrap }
+.gx-onboard #onboarding-submit { background:var(--ink); border-color:var(--ink); border-radius:999px; padding:14px 26px; min-height:48px; font-size:15px; font-weight:700 }
+.gx-onboard #onboarding-back { border-radius:999px; min-height:48px; padding:14px 22px; background:#fff; color:var(--ink); border-color:#cfe0f3 }
+.gx-reassure { margin:20px 4px 0; color:var(--ink-soft); font-size:14px }
+
+@media(max-width:700px) {
+  .gx-onboard .form-panel { padding:22px 18px; border-radius:22px }
+  .gx-onboard .form-actions { flex-direction:column-reverse; align-items:stretch }
+  .gx-onboard #onboarding-submit,.gx-onboard #onboarding-back { width:100%; justify-content:center }
+}
+@media(prefers-reduced-motion:reduce) { .gx-progress span,.gx-chip > span { transition:none } }
+.gx-chip > span { gap:.45em; word-spacing:.05em }

@@ -109,11 +109,36 @@ function openEditor(kind, id) {
   $('#' + kind + '-dialog').showModal();
 }
 
+// Marketing: the occasion only personalizes onboarding hints. It is not saved with the trip.
+const OCCASIONS = {
+  bachelor: { title: "Jake's last ride", destination: 'Nashville, Vegas, Miami…', interests: 'Nightlife, good food, the pool' },
+  birthday: { title: "Sam's 30th in the sun", destination: 'Cancún, Lisbon, Montréal…', interests: 'Beach, brunch, a big dinner' },
+  reunion: { title: "Class of '16, back together", destination: 'Somewhere in the middle for everyone', interests: 'Catching up, hikes, a long dinner' },
+  concert: { title: 'The concert weekend', destination: 'Wherever the show is', interests: 'The show, pre-drinks, late-night food' },
+  sport: { title: 'Whistler ski weekend', destination: 'Whistler, Banff, Mont-Tremblant…', interests: 'Ski, hot tub, après' },
+  getaway: { title: "Girls' beach weekend", destination: 'Tulum, Muskoka, Napa…', interests: 'Spa, wine, the beach' }
+};
+let pendingOccasion;
+
+function applyOccasion(key) {
+  const hints = OCCASIONS[key] || OCCASIONS.bachelor;
+  const fields = $('#new-trip-form').elements;
+  fields.namedItem('title').placeholder = hints.title;
+  fields.namedItem('destination').placeholder = hints.destination;
+  fields.namedItem('interests').placeholder = hints.interests;
+}
+
 function resetOnboarding() {
   wizardStep = 1;
   tripDraft = undefined;
   $('#new-trip-form').reset();
   $('.form-error', $('#new-trip-form')).textContent = '';
+  if (pendingOccasion && OCCASIONS[pendingOccasion]) {
+    const choice = $(`#new-trip-form input[name="occasion"][value="${pendingOccasion}"]`);
+    if (choice) choice.checked = true;
+  }
+  pendingOccasion = undefined;
+  applyOccasion($('#new-trip-form input[name="occasion"]:checked')?.value);
   renderOnboardingStep();
 }
 
@@ -124,11 +149,20 @@ function renderOnboardingStep() {
   $('#organizer-details').hidden = basics;
   $('#organizer-details').disabled = basics;
   $('#onboarding-back').hidden = basics;
-  $('#onboarding-step').textContent = `Step ${wizardStep} of 2`;
-  $('#onboarding-heading').textContent = basics ? 'Give your trip a starting point.' : 'Add your preferences.';
-  $('#onboarding-intro').textContent = basics ? 'Choose a destination, dates, and a budget. You can change these later.' : 'Tell the group when you can go and what you enjoy. Add the other travelers next.';
-  $('#onboarding-submit').textContent = basics ? 'Continue' : 'Create trip';
+  $('#gx-progress-2')?.classList.toggle('is-on', !basics);
+  $('#onboarding-step').textContent = `Step ${wizardStep} of 2 · ${basics ? 'The trip' : 'You'}`;
+  $('#onboarding-heading').textContent = basics ? "Let's get this trip started." : "Now you. You're the organizer.";
+  $('#onboarding-intro').textContent = basics ? 'Pick the occasion, then the basics. Nothing is locked in, so you can change anything later.' : "Add your own dates, budget and what you're into. Then add your friends, and each of them fills in theirs. No more chasing.";
+  $('#onboarding-submit').textContent = basics ? 'Next: add yourself →' : 'Create trip & add the crew';
 }
+
+$('#new-trip-form').addEventListener('change', eventObject => {
+  if (eventObject.target.name === 'occasion') applyOccasion(eventObject.target.value);
+});
+document.addEventListener('click', eventObject => {
+  const card = eventObject.target.closest?.('[data-occasion]');
+  if (card) pendingOccasion = card.dataset.occasion;
+});
 
 function renderHome() {
   const sample = product.trips[0];

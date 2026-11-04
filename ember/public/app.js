@@ -35,7 +35,7 @@ const interests = value => [...new Set(value.split(',').map(item => item.trim())
 const dateText = value => new Intl.DateTimeFormat('en-CA', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(value + 'T12:00:00Z'));
 const dateRange = (start, end) => dateText(start) + ' – ' + dateText(end);
 const money = (value, currency = trip()?.currency || 'CAD') => new Intl.NumberFormat('en-CA', { style: 'currency', currency, maximumFractionDigits: 2 }).format(value);
-const statusName = value => ({ draft: 'Draft', planning: 'Planning', confirmed: 'Ready', cancelled: 'Cancelled', proposed: 'Proposed', accepted: 'Agreed', removed: 'Removed' })[value] || value;
+const statusName = value => ({ draft: 'Draft', planning: 'Planning', confirmed: 'Locked in', cancelled: 'Cancelled', proposed: 'Proposed', accepted: 'Agreed', removed: 'Removed' })[value] || value;
 
 function notice(message, isError = false) {
   const element = $('#notice');
@@ -106,7 +106,7 @@ function openEditor(kind, id) {
   if (kind === 'traveler') {
     const existing = product.travelers.find(person => person.id === id) || { id: '', name: '', available_from: current.start_date, available_to: current.end_date, budget: current.budget_per_person, interests: [] };
     values = { ...existing, is_bachelorette: Boolean(id) && current.bachelorette_id === id };
-    $('#traveler-dialog-heading').textContent = id ? 'Edit traveler' : 'Add traveler';
+    $('#traveler-dialog-heading').textContent = id ? 'Edit squad member' : 'Add to the squad';
     $('#bride-row').hidden = viewerIsBride(current);
   }
   if (kind === 'activity') {
@@ -115,7 +115,7 @@ function openEditor(kind, id) {
     // The bachelorette never sees the surprise control, so the feature itself stays a secret.
     const bride = brideFor(current);
     $('#surprise-row').hidden = !bride || viewerIsBride(current);
-    if (bride) $('#surprise-help').textContent = `${bride.name} won't see this activity, its cost, or the group's responses.`;
+    if (bride) $('#surprise-help').textContent = `${bride.name} won't see this activity, its cost, or the squad's votes.`;
   }
   fillForm(form, values);
   $('#' + kind + '-dialog').showModal();
@@ -137,8 +137,8 @@ function renderOnboardingStep() {
   $('#organizer-details').disabled = basics;
   $('#onboarding-back').hidden = basics;
   $('#onboarding-step').textContent = `Step ${wizardStep} of 2`;
-  $('#onboarding-heading').textContent = basics ? 'Give your weekend a starting point.' : 'Add your preferences.';
-  $('#onboarding-intro').textContent = basics ? 'Choose a destination, dates, and a budget. You can change these later.' : 'Tell the group when you can go and what you enjoy. Add the other travelers next.';
+  $('#onboarding-heading').textContent = basics ? 'Let\'s start the bachelorette trip.' : 'Now, a little about you.';
+  $('#onboarding-intro').textContent = basics ? 'Pick a destination, dates and a budget per person. You can change these later.' : 'Tell the squad when you are free and what you are into. Add everyone else, including the bachelorette, next.';
   $('#onboarding-submit').textContent = basics ? 'Continue' : 'Create trip';
 }
 
@@ -146,14 +146,14 @@ function renderHome() {
   const sample = product.trips[0];
   $('#sample-link').hidden = !sample;
   if (!sample) {
-    $('#sample-preview').innerHTML = '<h2>Your next weekend starts here.</h2><p class="intro">Create a trip and invite your group into the plan.</p>';
+    $('#sample-preview').innerHTML = '<h2>The bachelorette trip starts here.</h2><p class="intro">Create a trip and bring the squad into the plan.</p>';
     return;
   }
   // The landing page is shared, so it never previews surprise activities.
   const ideas = activitiesFor(sample.id).filter(activity => activity.status !== 'removed' && !isSurprise(activity));
   $('#sample-link').href = '#trip/' + encodeURIComponent(sample.id);
   $('#sample-preview').innerHTML = `<p class="eyebrow">A sample to try</p><h2>${escapeHtml(sample.title)}</h2><p class="quiet">${escapeHtml(sample.destination)} · ${dateRange(sample.start_date, sample.end_date)}</p>
-    <div class="sample-meta"><div><span>Travelers</span><b>${travelersFor(sample.id).length} people</b></div><div><span>Budget per person</span><b>${escapeHtml(money(sample.budget_per_person, sample.currency))}</b></div></div>
+    <div class="sample-meta"><div><span>The squad</span><b>${travelersFor(sample.id).length} people</b></div><div><span>Budget per person</span><b>${escapeHtml(money(sample.budget_per_person, sample.currency))}</b></div></div>
     ${ideas.slice(0, 3).map(activity => `<div class="sample-activity"><span>${escapeHtml(activity.title)}</span><b>${escapeHtml(money(activity.estimated_cost_per_person, sample.currency))}</b></div>`).join('')}
     <a class="text-link" href="#trip/${encodeURIComponent(sample.id)}">Open this trip</a>`;
 }
@@ -178,11 +178,11 @@ function renderActivity(activity, current, people) {
     <div class="activity-meta"><span>${escapeHtml(activity.category)}</span><span class="status-badge ${activity.status === 'proposed' ? 'proposed' : ''}">${escapeHtml(statusName(activity.status))}</span>${surprise && showSurpriseControls ? `<span class="status-badge surprise">Surprise · hidden from ${escapeHtml(bride.name)}</span>` : ''}<span class="vote-totals">${totals}</span></div>
     ${outsideDates ? '<p class="budget-message">This activity is outside the trip dates.</p>' : ''}
     <div class="activity-actions"><button class="text-button" data-action="edit-activity" data-id="${escapeHtml(activity.id)}">Edit activity</button>${surpriseToggle}${activity.status !== 'accepted' ? `<button class="text-button" data-action="accept-activity" data-id="${escapeHtml(activity.id)}">Mark agreed</button>` : ''}<button class="text-button danger" data-action="remove-activity" data-id="${escapeHtml(activity.id)}">Remove</button></div>
-    <form class="response-form" data-activity-id="${escapeHtml(activity.id)}"><fieldset ${person ? '' : 'disabled'}><legend>${person ? 'Your response as ' + escapeHtml(person.name) : 'Add a traveler to respond'}</legend>
+    <form class="response-form" data-activity-id="${escapeHtml(activity.id)}"><fieldset ${person ? '' : 'disabled'}><legend>${person ? 'Your vote as ' + escapeHtml(person.name) : 'Add someone to the squad to vote'}</legend>
       <div class="response-fields"><label>Vote<select name="vote" required><option value="" disabled ${mine ? '' : 'selected'}>Choose</option>${['yes', 'maybe', 'no'].map(vote => `<option value="${vote}" ${mine?.vote === vote ? 'selected' : ''}>${vote[0].toUpperCase() + vote.slice(1)}</option>`).join('')}</select></label>
-      <label>Comment<input name="comment" value="${escapeHtml(mine?.comment || '')}" placeholder="An optional note" maxlength="500"></label><button class="secondary small" type="submit">Save response</button></div>
+      <label>Comment<input name="comment" value="${escapeHtml(mine?.comment || '')}" placeholder="An optional note" maxlength="500"></label><button class="secondary small" type="submit">Save vote</button></div>
       <p class="form-error" role="alert"></p></fieldset></form>
-    ${responses.length ? `<details class="group-responses"><summary>View ${responses.length} group ${responses.length === 1 ? 'response' : 'responses'}</summary>${responses.map(item => `<div class="group-response"><b>${escapeHtml(item.person.name)} · ${item.response.vote}</b>${item.response.comment ? `<p>${escapeHtml(item.response.comment)}</p>` : ''}</div>`).join('')}</details>` : ''}
+    ${responses.length ? `<details class="group-responses"><summary>See how the squad voted (${responses.length})</summary>${responses.map(item => `<div class="group-response"><b>${escapeHtml(item.person.name)} · ${item.response.vote}</b>${item.response.comment ? `<p>${escapeHtml(item.response.comment)}</p>` : ''}</div>`).join('')}</details>` : ''}
   </article>`;
 }
 
@@ -217,17 +217,17 @@ function renderPlanner() {
     : '';
   const cost = activities.reduce((total, activity) => total + activity.estimated_cost_per_person, 0);
   const days = [...new Set(activities.map(activity => activity.date))];
-  $('#planner-view').innerHTML = `<div class="planner-top"><div><p class="eyebrow">Your shared weekend</p><h1>${escapeHtml(current.title)}</h1><p>${escapeHtml(current.destination)} · ${dateRange(current.start_date, current.end_date)}</p></div>
+  $('#planner-view').innerHTML = `<div class="planner-top"><div><p class="eyebrow">Your bachelorette trip</p><h1>${escapeHtml(current.title)}</h1><p>${escapeHtml(current.destination)} · ${dateRange(current.start_date, current.end_date)}</p></div>
     <label class="trip-selector">Your trips<select id="trip-select">${product.trips.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current.id ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}</select></label></div>
-    <div class="planner-toolbar"><span class="status-badge">${escapeHtml(statusName(current.status))}</span><div class="planner-actions"><button class="secondary small" data-action="edit-trip">Edit trip</button><button class="small" data-action="confirm-plan">${current.status === 'confirmed' ? 'Reopen planning' : 'Confirm plan'}</button></div></div>
-    <div class="planner-columns"><div class="itinerary"><div class="section-heading"><h2>Shared itinerary</h2><button class="small" data-action="add-activity">Add activity</button></div>
+    <div class="planner-toolbar"><span class="status-badge">${escapeHtml(statusName(current.status))}</span><div class="planner-actions"><button class="secondary small" data-action="edit-trip">Edit trip</button><button class="small" data-action="confirm-plan">${current.status === 'confirmed' ? 'Reopen planning' : 'Lock it in'}</button></div></div>
+    <div class="planner-columns"><div class="itinerary"><div class="section-heading"><h2>The itinerary</h2><button class="small" data-action="add-activity">Add activity</button></div>
       <div class="itinerary-summary"><strong>${escapeHtml(money(cost))}</strong><span>estimated per person · activities only</span><span>Trip budget: ${escapeHtml(money(current.budget_per_person))}</span></div>
       ${cost > current.budget_per_person ? '<p class="budget-message">The activities exceed the trip budget per person.</p>' : ''}
       ${surpriseNote}
-      ${activities.length ? days.map(day => `<h3 class="day-heading">${dateText(day)}</h3>${activities.filter(activity => activity.date === day).map(activity => renderActivity(activity, current, people)).join('')}`).join('') : '<div class="empty-state"><h3>The plan is open.</h3><p>Add an activity, give it a date and cost, then ask the group to respond.</p><button data-action="add-activity">Add the first activity</button></div>'}
+      ${activities.length ? days.map(day => `<h3 class="day-heading">${dateText(day)}</h3>${activities.filter(activity => activity.date === day).map(activity => renderActivity(activity, current, people)).join('')}`).join('') : '<div class="empty-state"><h3>The plan is open.</h3><p>Add an activity, give it a date and cost, then let the squad vote.</p><button data-action="add-activity">Add the first activity</button></div>'}
       ${removed.length ? `<details class="removed-list"><summary>Removed activities (${removed.length})</summary>${removed.map(activity => `<div class="removed-row"><span>${escapeHtml(activity.title)}</span><button class="text-button" data-action="restore-activity" data-id="${escapeHtml(activity.id)}">Restore</button></div>`).join('')}</details>` : ''}
-    </div><aside class="people-panel"><div class="section-heading"><h2>Travelers</h2><button class="text-button" data-action="add-traveler">Add traveler</button></div>
-      ${people.length ? `<label class="viewing-as">Viewing as<select id="traveler-select">${people.map(person => `<option value="${escapeHtml(person.id)}" ${person.id === selectedTravelers.get(current.id) ? 'selected' : ''}>${escapeHtml(person.name)}${person.id === current.bachelorette_id ? ' (bachelorette)' : ''}</option>`).join('')}</select><span class="field-help">Take turns as different travelers on this screen.</span></label>${people.map(person => renderPerson(person, current)).join('')}` : '<div class="empty-state"><p>Add the people who are going on this trip.</p><button data-action="add-traveler">Add a traveler</button></div>'}
+    </div><aside class="people-panel"><div class="section-heading"><h2>The squad</h2><button class="text-button" data-action="add-traveler">Add to squad</button></div>
+      ${people.length ? `<label class="viewing-as">Viewing as<select id="traveler-select">${people.map(person => `<option value="${escapeHtml(person.id)}" ${person.id === selectedTravelers.get(current.id) ? 'selected' : ''}>${escapeHtml(person.name)}${person.id === current.bachelorette_id ? ' (bachelorette)' : ''}</option>`).join('')}</select><span class="field-help">Switch to see the trip as each person in the squad.</span></label>${people.map(person => renderPerson(person, current)).join('')}` : '<div class="empty-state"><p>Add everyone who is coming, including the bachelorette.</p><button data-action="add-traveler">Add the first person</button></div>'}
     </aside></div>`;
 }
 
@@ -355,7 +355,7 @@ document.addEventListener('submit', eventObject => {
   submitForm(form, async () => {
     const current = trip();
     const travelerId = selectedTravelers.get(current.id);
-    if (!travelerId) throw new Error('Add a traveler first.');
+    if (!travelerId) throw new Error('Add someone to the squad first.');
     const activityId = form.dataset.activityId;
     const values = Object.fromEntries(new FormData(form));
     const previous = responseFor(activityId, travelerId);

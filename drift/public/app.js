@@ -173,10 +173,10 @@ function renderHome() {
   }
   const ideas = activitiesFor(sample.id).filter(activity => activity.status !== 'removed');
   $('#sample-link').href = '#trip/' + encodeURIComponent(sample.id);
-  $('#sample-preview').innerHTML = `<p class="eyebrow">A sample to try</p><h2>${escapeHtml(sample.title)}</h2><p class="quiet">${escapeHtml(sample.destination)} · ${dateRange(sample.start_date, sample.end_date)}</p>
+  $('#sample-preview').innerHTML = `<p class="eyebrow">Sample trip · try it</p><h2>${escapeHtml(sample.title)}</h2><p class="quiet">${escapeHtml(sample.destination)} · ${dateRange(sample.start_date, sample.end_date)}</p>
     <div class="sample-meta"><div><span>Travelers</span><b>${travelersFor(sample.id).length} people</b></div><div><span>Budget per person</span><b>${escapeHtml(money(sample.budget_per_person, sample.currency))}</b></div></div>
     ${ideas.slice(0, 3).map(activity => `<div class="sample-activity"><span>${escapeHtml(activity.title)}</span><b>${escapeHtml(money(activity.estimated_cost_per_person, sample.currency))}</b></div>`).join('')}
-    <a class="text-link" href="#trip/${encodeURIComponent(sample.id)}">Open this trip</a>`;
+    <a class="text-link" href="#trip/${encodeURIComponent(sample.id)}">Open the sample trip</a>`;
 }
 
 function responseFor(activityId, travelerId) {

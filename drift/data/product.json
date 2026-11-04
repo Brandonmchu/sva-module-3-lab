@@ -3,12 +3,12 @@
   "trips": [
     {
       "id": "trip-001",
-      "title": "A weekend with friends",
-      "destination": "Demo Lake (fictional)",
+      "title": "Maya's Nashville bachelorette",
+      "destination": "Nashville, TN (sample trip)",
       "start_date": "2026-11-06",
       "end_date": "2026-11-08",
-      "budget_per_person": 350,
-      "currency": "CAD",
+      "budget_per_person": 600,
+      "currency": "USD",
       "status": "planning"
     }
   ],
@@ -16,36 +16,36 @@
     {
       "id": "traveler-001",
       "trip_id": "trip-001",
-      "name": "Alex",
+      "name": "Priya",
       "available_from": "2026-11-06",
       "available_to": "2026-11-08",
-      "budget": 350,
+      "budget": 650,
       "interests": [
-        "outdoors",
+        "nightlife",
         "food"
       ]
     },
     {
       "id": "traveler-002",
       "trip_id": "trip-001",
-      "name": "Sam",
-      "available_from": "2026-11-07",
+      "name": "Maya",
+      "available_from": "2026-11-06",
       "available_to": "2026-11-08",
-      "budget": 300,
+      "budget": 500,
       "interests": [
-        "food",
-        "art"
+        "music",
+        "spa"
       ]
     },
     {
       "id": "traveler-003",
       "trip_id": "trip-001",
-      "name": "Jordan",
-      "available_from": "2026-11-06",
+      "name": "Dani",
+      "available_from": "2026-11-07",
       "available_to": "2026-11-08",
       "budget": 450,
       "interests": [
-        "outdoors",
+        "nightlife",
         "music"
       ]
     }
@@ -54,28 +54,28 @@
     {
       "id": "activity-001",
       "trip_id": "trip-001",
-      "title": "Lakeside walk",
+      "title": "Rooftop welcome drinks",
       "date": "2026-11-06",
-      "category": "outdoors",
-      "estimated_cost_per_person": 0,
+      "category": "nightlife",
+      "estimated_cost_per_person": 40,
       "status": "proposed"
     },
     {
       "id": "activity-002",
       "trip_id": "trip-001",
-      "title": "Market lunch",
+      "title": "Line-dancing lesson",
       "date": "2026-11-07",
-      "category": "food",
-      "estimated_cost_per_person": 35,
+      "category": "music",
+      "estimated_cost_per_person": 30,
       "status": "proposed"
     },
     {
       "id": "activity-003",
       "trip_id": "trip-001",
-      "title": "Canoe afternoon",
+      "title": "Group dinner and live music",
       "date": "2026-11-07",
-      "category": "outdoors",
-      "estimated_cost_per_person": 80,
+      "category": "food",
+      "estimated_cost_per_person": 90,
       "status": "proposed"
     }
   ],
@@ -86,7 +86,7 @@
       "traveler_id": "traveler-001",
       "activity_id": "activity-003",
       "vote": "yes",
-      "comment": "I would enjoy this."
+      "comment": "Yes! Let's book the big table early."
     },
     {
       "id": "response-002",
@@ -94,7 +94,7 @@
       "traveler_id": "traveler-002",
       "activity_id": "activity-003",
       "vote": "maybe",
-      "comment": "Can we find a cheaper option?"
+      "comment": "Love it, but can we keep it under $70?"
     }
   ]
 }

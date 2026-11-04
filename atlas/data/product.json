@@ -10,6 +10,66 @@
       "budget_per_person": 350,
       "currency": "CAD",
       "status": "planning"
+    },
+    {
+      "id": "trip-002",
+      "title": "Harbor day escape",
+      "destination": "Harbor Point (fictional)",
+      "start_date": "2026-11-03",
+      "end_date": "2026-11-03",
+      "budget_per_person": 120,
+      "currency": "CAD",
+      "status": "planning"
+    },
+    {
+      "id": "trip-003",
+      "title": "Maplewood cabin weekend",
+      "destination": "Maplewood (fictional)",
+      "start_date": "2026-11-14",
+      "end_date": "2026-11-15",
+      "budget_per_person": 275,
+      "currency": "CAD",
+      "status": "planning"
+    },
+    {
+      "id": "trip-004",
+      "title": "Old Town holiday market",
+      "destination": "Old Town (fictional)",
+      "start_date": "2026-11-27",
+      "end_date": "2026-11-29",
+      "budget_per_person": 350,
+      "currency": "CAD",
+      "status": "planning"
+    },
+    {
+      "id": "trip-005",
+      "title": "Winter lights getaway",
+      "destination": "Snowfall Village (fictional)",
+      "start_date": "2026-12-05",
+      "end_date": "2026-12-06",
+      "budget_per_person": 240,
+      "currency": "CAD",
+      "status": "planning"
+    },
+    {
+      "id": "trip-006",
+      "title": "North Lake snow weekend",
+      "destination": "North Lake (fictional)",
+      "start_date": "2026-12-12",
+      "end_date": "2026-12-13",
+      "budget_per_person": 320,
+      "currency": "CAD",
+      "status": "planning"
+    },
+    {
+      "id": "trip-007",
+      "title": "New Year cabin gathering",
+      "destination": "Pine Ridge (fictional)",
+      "start_date": "2026-12-29",
+      "end_date": "2026-12-31",
+      "budget_per_person": 410,
+      "currency": "CAD",
+      "status": "planning"
     }
   ],
   "travelers": [
@@ -48,6 +108,168 @@
         "outdoors",
         "music"
       ]
+    },
+    {
+      "id": "traveler-004",
+      "trip_id": "trip-002",
+      "name": "Casey",
+      "available_from": "2026-11-03",
+      "available_to": "2026-11-03",
+      "budget": 120,
+      "interests": ["coffee", "waterfront"]
+    },
+    {
+      "id": "traveler-005",
+      "trip_id": "trip-002",
+      "name": "Riley",
+      "available_from": "2026-11-03",
+      "available_to": "2026-11-03",
+      "budget": 100,
+      "interests": ["food", "walking"]
+    },
+    {
+      "id": "traveler-006",
+      "trip_id": "trip-002",
+      "name": "Morgan",
+      "available_from": "2026-11-03",
+      "available_to": "2026-11-03",
+      "budget": 140,
+      "interests": ["photography", "coffee"]
+    },
+    {
+      "id": "traveler-007",
+      "trip_id": "trip-003",
+      "name": "Jamie",
+      "available_from": "2026-11-14",
+      "available_to": "2026-11-15",
+      "budget": 275,
+      "interests": ["hiking", "food"]
+    },
+    {
+      "id": "traveler-008",
+      "trip_id": "trip-003",
+      "name": "Taylor",
+      "available_from": "2026-11-14",
+      "available_to": "2026-11-15",
+      "budget": 250,
+      "interests": ["cabins", "outdoors"]
+    },
+    {
+      "id": "traveler-009",
+      "trip_id": "trip-003",
+      "name": "Avery",
+      "available_from": "2026-11-14",
+      "available_to": "2026-11-15",
+      "budget": 300,
+      "interests": ["cider", "hiking"]
+    },
+    {
+      "id": "traveler-010",
+      "trip_id": "trip-004",
+      "name": "Drew",
+      "available_from": "2026-11-27",
+      "available_to": "2026-11-29",
+      "budget": 350,
+      "interests": ["markets", "music"]
+    },
+    {
+      "id": "traveler-011",
+      "trip_id": "trip-004",
+      "name": "Quinn",
+      "available_from": "2026-11-27",
+      "available_to": "2026-11-29",
+      "budget": 320,
+      "interests": ["food", "crafts"]
+    },
+    {
+      "id": "traveler-012",
+      "trip_id": "trip-004",
+      "name": "Skyler",
+      "available_from": "2026-11-27",
+      "available_to": "2026-11-29",
+      "budget": 380,
+      "interests": ["lights", "history"]
+    },
+    {
+      "id": "traveler-013",
+      "trip_id": "trip-005",
+      "name": "Parker",
+      "available_from": "2026-12-05",
+      "available_to": "2026-12-06",
+      "budget": 240,
+      "interests": ["winter walks", "dessert"]
+    },
+    {
+      "id": "traveler-014",
+      "trip_id": "trip-005",
+      "name": "Reese",
+      "available_from": "2026-12-05",
+      "available_to": "2026-12-06",
+      "budget": 220,
+      "interests": ["lights", "shopping"]
+    },
+    {
+      "id": "traveler-015",
+      "trip_id": "trip-005",
+      "name": "Cameron",
+      "available_from": "2026-12-05",
+      "available_to": "2026-12-06",
+      "budget": 260,
+      "interests": ["photography", "food"]
+    },
+    {
+      "id": "traveler-016",
+      "trip_id": "trip-006",
+      "name": "Robin",
+      "available_from": "2026-12-12",
+      "available_to": "2026-12-13",
+      "budget": 320,
+      "interests": ["snowshoeing", "sauna"]
+    },
+    {
+      "id": "traveler-017",
+      "trip_id": "trip-006",
+      "name": "Kendall",
+      "available_from": "2026-12-12",
+      "available_to": "2026-12-13",
+      "budget": 300,
+      "interests": ["lakes", "outdoors"]
+    },
+    {
+      "id": "traveler-018",
+      "trip_id": "trip-006",
+      "name": "Emerson",
+      "available_from": "2026-12-12",
+      "available_to": "2026-12-13",
+      "budget": 350,
+      "interests": ["winter", "wellness"]
+    },
+    {
+      "id": "traveler-019",
+      "trip_id": "trip-007",
+      "name": "Finley",
+      "available_from": "2026-12-29",
+      "available_to": "2026-12-31",
+      "budget": 410,
+      "interests": ["cooking", "board games"]
+    },
+    {
+      "id": "traveler-020",
+      "trip_id": "trip-007",
+      "name": "Hayden",
+      "available_from": "2026-12-29",
+      "available_to": "2026-12-31",
+      "budget": 390,
+      "interests": ["cabins", "stargazing"]
+    },
+    {
+      "id": "traveler-021",
+      "trip_id": "trip-007",
+      "name": "Sage",
+      "available_from": "2026-12-29",
+      "available_to": "2026-12-31",
+      "budget": 430,
+      "interests": ["hiking", "food"]
     }
   ],
   "activities": [
@@ -76,6 +298,141 @@
       "date": "2026-11-07",
       "category": "outdoors",
       "estimated_cost_per_person": 80,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-004",
+      "trip_id": "trip-002",
+      "title": "Harbor coffee crawl",
+      "date": "2026-11-03",
+      "category": "food",
+      "estimated_cost_per_person": 18,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-005",
+      "trip_id": "trip-002",
+      "title": "Waterfront sunset walk",
+      "date": "2026-11-03",
+      "category": "outdoors",
+      "estimated_cost_per_person": 0,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-006",
+      "trip_id": "trip-003",
+      "title": "Maple loop hike",
+      "date": "2026-11-14",
+      "category": "outdoors",
+      "estimated_cost_per_person": 0,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-007",
+      "trip_id": "trip-003",
+      "title": "Cider house lunch",
+      "date": "2026-11-15",
+      "category": "food",
+      "estimated_cost_per_person": 32,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-008",
+      "trip_id": "trip-004",
+      "title": "Market square stroll",
+      "date": "2026-11-27",
+      "category": "culture",
+      "estimated_cost_per_person": 0,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-009",
+      "trip_id": "trip-004",
+      "title": "Holiday market dinner",
+      "date": "2026-11-28",
+      "category": "food",
+      "estimated_cost_per_person": 55,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-010",
+      "trip_id": "trip-004",
+      "title": "Canal lights walk",
+      "date": "2026-11-29",
+      "category": "outdoors",
+      "estimated_cost_per_person": 10,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-011",
+      "trip_id": "trip-005",
+      "title": "Ski hill shuttle",
+      "date": "2026-12-05",
+      "category": "outdoors",
+      "estimated_cost_per_person": 48,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-012",
+      "trip_id": "trip-005",
+      "title": "Village cocoa stop",
+      "date": "2026-12-05",
+      "category": "food",
+      "estimated_cost_per_person": 12,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-013",
+      "trip_id": "trip-005",
+      "title": "Winter lights trail",
+      "date": "2026-12-06",
+      "category": "culture",
+      "estimated_cost_per_person": 0,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-014",
+      "trip_id": "trip-006",
+      "title": "Lakeside sauna session",
+      "date": "2026-12-12",
+      "category": "wellness",
+      "estimated_cost_per_person": 44,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-015",
+      "trip_id": "trip-006",
+      "title": "Snowshoe rental",
+      "date": "2026-12-13",
+      "category": "outdoors",
+      "estimated_cost_per_person": 38,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-016",
+      "trip_id": "trip-007",
+      "title": "Cabin supper",
+      "date": "2026-12-29",
+      "category": "food",
+      "estimated_cost_per_person": 60,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-017",
+      "trip_id": "trip-007",
+      "title": "Pine Ridge lookout",
+      "date": "2026-12-30",
+      "category": "outdoors",
+      "estimated_cost_per_person": 15,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-018",
+      "trip_id": "trip-007",
+      "title": "New Year brunch",
+      "date": "2026-12-31",
+      "category": "food",
+      "estimated_cost_per_person": 28,
       "status": "proposed"
     }
   ],

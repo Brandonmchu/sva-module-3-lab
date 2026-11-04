@@ -485,9 +485,9 @@ function renderCalendar() {
   const start = calendarView === 'day' ? calendarDate : calendarView === 'week' ? startOfWeek(calendarDate) : startOfWeek(calendarDate.slice(0, 7) + '-01');
   const end = calendarView === 'day' ? calendarDate : calendarView === 'week' ? addDays(start, 6) : addDays(start, 41);
   $('#calendar-view').innerHTML = `<div class="calendar-header"><div><p class="eyebrow">Plan together</p><h1>Trip calendar</h1><p class="calendar-intro">See what’s on across your group trips.</p></div>
-    <label class="calendar-trip-filter">Trip name<select id="calendar-trip-filter"><option value="">All trips</option>${tripOptions}</select></label></div>
-    <div class="calendar-toolbar"><div class="calendar-view-switch" role="group" aria-label="Calendar view">${['day', 'week', 'month'].map(view => `<button type="button" class="calendar-view-button${calendarView === view ? ' active' : ''}" data-calendar-view="${view}" aria-pressed="${calendarView === view}">${view[0].toUpperCase() + view.slice(1)}</button>`).join('')}</div>
-      <div class="calendar-date-nav"><button type="button" class="secondary small" data-calendar-shift="-1" aria-label="Previous ${calendarView}">‹</button><button type="button" class="secondary small" data-calendar-today>Today</button><button type="button" class="secondary small" data-calendar-shift="1" aria-label="Next ${calendarView}">›</button><h2>${escapeHtml(heading)}</h2></div></div>
+    </div><div class="calendar-toolbar"><div class="calendar-view-switch" role="group" aria-label="Calendar view">${['day', 'week', 'month'].map(view => `<button type="button" class="calendar-view-button${calendarView === view ? ' active' : ''}" data-calendar-view="${view}" aria-pressed="${calendarView === view}">${view[0].toUpperCase() + view.slice(1)}</button>`).join('')}</div>
+      <div class="calendar-date-nav"><button type="button" class="secondary small" data-calendar-shift="-1" aria-label="Previous ${calendarView}">‹</button><button type="button" class="secondary small" data-calendar-today>Today</button><button type="button" class="secondary small" data-calendar-shift="1" aria-label="Next ${calendarView}">›</button><h2>${escapeHtml(heading)}</h2></div>
+      <label class="calendar-trip-filter">Trip name<select id="calendar-trip-filter"><option value="">All trips</option>${tripOptions}</select></label></div>
     ${calendarView === 'month' ? renderCalendarMonth() : `<div class="calendar-list">${renderCalendarList(start, end)}</div>`}`;
 }
 

@@ -834,7 +834,7 @@ dialog::backdrop {
   font-size:14px
 }
 .calendar-trip-filter {
-  width:min(280px,100%);
+  width:min(230px,100%);
   margin:0
 }
 .calendar-trip-filter select {

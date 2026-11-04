@@ -191,17 +191,43 @@ main {
 .landing-copy {
   padding:30px 0
 }
-.landing-note {
-  border-top:1px solid var(--line);
-  padding-top:24px;
+.landing-copy h1 {
+  max-width:12ch
+}
+.benefit-grid {
   grid-column:1/-1;
   display:grid;
-  grid-template-columns:1fr 2fr;
-  gap:40px;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px
+}
+.benefit {
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:24px
+}
+.benefit-number {
+  display:block;
+  color:var(--accent);
+  font-size:11px;
+  font-weight:750;
+  letter-spacing:.12em;
+  margin-bottom:22px
+}
+.benefit h2 {
+  font-size:19px;
+  margin-bottom:10px
+}
+.benefit p {
+  color:var(--muted);
   font-size:14px
 }
-.landing-note p {
-  color:var(--muted)
+.landing-note {
+  border-top:1px solid var(--line);
+  padding-top:22px;
+  grid-column:1/-1;
+  color:var(--muted);
+  font-size:14px
 }
 .sample-preview {
   background:#eef1e9;
@@ -362,6 +388,27 @@ textarea {
   align-items:center;
   gap:24px;
   padding:22px 0
+}
+.invite-card {
+  display:grid;
+  grid-template-columns:minmax(180px,.7fr) minmax(0,2fr) auto;
+  align-items:center;
+  gap:18px;
+  background:var(--tint);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:20px;
+  margin:20px 0 28px
+}
+.invite-card .eyebrow {
+  margin-bottom:7px
+}
+.invite-card h2 {
+  font-size:18px
+}
+.invite-card textarea {
+  min-height:66px;
+  background:var(--paper)
 }
 .status-badge {
   display:inline-flex;
@@ -655,8 +702,20 @@ dialog::backdrop {
     padding:20px 0
   }
   .landing-note {
+    grid-template-columns:1fr
+  }
+  .benefit-grid {
+    grid-template-columns:1fr
+  }
+  .benefit {
+    padding:20px
+  }
+  .benefit-number {
+    margin-bottom:12px
+  }
+  .invite-card {
     grid-template-columns:1fr;
-    gap:10px
+    align-items:stretch
   }
   .sample-preview {
     padding:24px

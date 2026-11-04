@@ -125,8 +125,8 @@ function renderOnboardingStep() {
   $('#organizer-details').disabled = basics;
   $('#onboarding-back').hidden = basics;
   $('#onboarding-step').textContent = `Step ${wizardStep} of 2`;
-  $('#onboarding-heading').textContent = basics ? 'Give your weekend a starting point.' : 'Add your preferences.';
-  $('#onboarding-intro').textContent = basics ? 'Choose a destination, dates, and a budget. You can change these later.' : 'Tell the group when you can go and what you enjoy. Add the other travelers next.';
+  $('#onboarding-heading').textContent = basics ? 'Name your trip' : 'Invite your people';
+  $('#onboarding-intro').textContent = basics ? 'Choose a destination, dates, and a budget per person. You can change these later.' : 'Once everyone votes, your agenda builds itself. Add yourself first, then invite everyone from your trip page.';
   $('#onboarding-submit').textContent = basics ? 'Continue' : 'Create trip';
 }
 
@@ -188,9 +188,12 @@ function renderPlanner() {
   const removed = activitiesFor(current.id).filter(activity => activity.status === 'removed');
   const cost = activities.reduce((total, activity) => total + activity.estimated_cost_per_person, 0);
   const days = [...new Set(activities.map(activity => activity.date))];
+  const tripLink = `${location.origin}${location.pathname}#trip/${encodeURIComponent(current.id)}`;
+  const inviteMessage = `I’m planning our weekend! Tap to say if you’re in and vote on what we do: ${tripLink}`;
   $('#planner-view').innerHTML = `<div class="planner-top"><div><p class="eyebrow">Your shared weekend</p><h1>${escapeHtml(current.title)}</h1><p>${escapeHtml(current.destination)} · ${dateRange(current.start_date, current.end_date)}</p></div>
     <label class="trip-selector">Your trips<select id="trip-select">${product.trips.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current.id ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}</select></label></div>
     <div class="planner-toolbar"><span class="status-badge">${escapeHtml(statusName(current.status))}</span><div class="planner-actions"><button class="secondary small" data-action="edit-trip">Edit trip</button><button class="small" data-action="confirm-plan">${current.status === 'confirmed' ? 'Reopen planning' : 'Confirm plan'}</button></div></div>
+    <section class="invite-card" aria-labelledby="invite-heading"><div><p class="eyebrow">Bring everyone in</p><h2 id="invite-heading">Invite your people</h2></div><label class="sr-only" for="invite-message">Invite message</label><textarea id="invite-message" readonly>${escapeHtml(inviteMessage)}</textarea><button class="secondary small" data-action="copy-invite">Copy invite message</button></section>
     <div class="planner-columns"><div class="itinerary"><div class="section-heading"><h2>Shared itinerary</h2><button class="small" data-action="add-activity">Add activity</button></div>
       <div class="itinerary-summary"><strong>${escapeHtml(money(cost))}</strong><span>estimated per person · activities only</span><span>Trip budget: ${escapeHtml(money(current.budget_per_person))}</span></div>
       ${cost > current.budget_per_person ? '<p class="budget-message">The activities exceed the trip budget per person.</p>' : ''}
@@ -333,6 +336,18 @@ document.addEventListener('change', eventObject => {
 async function handleAction(button) {
   const { action, id } = button.dataset;
   const current = trip();
+  if (action === 'copy-invite') {
+    const message = $('#invite-message').value;
+    if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(message);
+    else {
+      const field = $('#invite-message');
+      field.focus();
+      field.select();
+      if (!document.execCommand('copy')) throw new Error('Select and copy the invite message above.');
+    }
+    notice('Invite message copied.');
+    return;
+  }
   if (action === 'edit-trip') return openEditor('trip');
   if (action === 'add-traveler' || action === 'edit-traveler') return openEditor('traveler', id);
   if (action === 'add-activity' || action === 'edit-activity') return openEditor('activity', id);

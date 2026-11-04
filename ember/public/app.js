@@ -179,7 +179,7 @@ function renderHome() {
 
 const brideSteps = [
   ['What is your ideal weekend?', 'Pick up to two.', 'Continue'],
-  ['Anything we should know?', 'Only your bridal party sees this.', 'Keep it between us'],
+  ['Anything we should know?', 'Only your squad sees this.', 'Keep it between us'],
   ['How surprised do you want to be?', 'Slide to set the surprise level.', 'I am in, surprise me']
 ];
 

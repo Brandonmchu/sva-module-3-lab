@@ -61,9 +61,9 @@ The product snapshot does not need rows for virtual simulation actors.
 
 Suggested event names: landing_viewed, onboarding_started, trip_created, traveler_added, activity_proposed, response_submitted, plan_viewed, plan_updated, plan_confirmed.
 Your team can add event names as necessary.
-Fjord adds ideas_requested. See Interest suggestions below.
+FriendGO adds ideas_requested. See Interest suggestions below.
 
-## Interest suggestions (Fjord)
+## Interest suggestions (FriendGO)
 
 Each traveler card shows the top 3 things to do at the trip destination for each of that traveler's interests.
 The local server asks the Gemini API, so the key never reaches the browser.

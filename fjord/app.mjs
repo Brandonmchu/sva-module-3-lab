@@ -108,7 +108,7 @@ async function readJson(request) {
 
 async function generateRoutes(input) {
   const key = process.env.OPENAI_API_KEY;
-  if (!key) throw fail('AI route planning is not configured. Set OPENAI_API_KEY on the server and restart Fjord.', 503);
+  if (!key) throw fail('AI route planning is not configured. Set OPENAI_API_KEY on the server and restart FriendGO.', 503);
   const { destination, start_date, end_date, budget_per_person, currency, brief } = input || {};
   if (typeof destination !== 'string' || !destination.trim() || typeof start_date !== 'string' || typeof end_date !== 'string' || !Number.isFinite(budget_per_person) || budget_per_person < 0 || typeof currency !== 'string') throw fail('Add a destination, dates, budget, and currency first.');
   validateValue(start_date, { type:'string', format:'date' }, 'start_date');
@@ -116,7 +116,7 @@ async function generateRoutes(input) {
   if (end_date < start_date) throw fail('End date must follow start date.');
   const days = Math.round((Date.parse(end_date) - Date.parse(start_date)) / 86400000) + 1;
   if (days > 4) throw fail('Choose a trip of up to four days for route suggestions.');
-  const system = `You are Fjord's careful trip planner. Return ONLY a JSON object with an options array of exactly 3 distinct routes: Best fit, Lower cost, More to explore. Each option has name, summary, estimated_total_per_person (number), and stops (array). Each stop has date (YYYY-MM-DD), time (HH:MM 24-hour), title, place, category, description (2 useful sentences explaining what to do and why it fits), duration_minutes (number), travel_from_previous (realistic mode and approximate time, or "Start of day"), estimated_cost_per_person (number), booking_note (what to check before going). Use real, destination-specific places; group nearby places in sensible order; cover every trip day with a reasonable morning, afternoon and evening plan. Include meal breaks. Avoid impossible travel or invented addresses. Use the request's interests and must-see places. Respect the per-person budget; describe exclusions like lodging and long-distance transport in each summary. Costs and times are estimates, never claim verified opening hours or availability. Keep all text in English. No markdown.`;
+  const system = `You are FriendGO's careful trip planner. Return ONLY a JSON object with an options array of exactly 3 distinct routes: Best fit, Lower cost, More to explore. Each option has name, summary, estimated_total_per_person (number), and stops (array). Each stop has date (YYYY-MM-DD), time (HH:MM 24-hour), title, place, category, description (2 useful sentences explaining what to do and why it fits), duration_minutes (number), travel_from_previous (realistic mode and approximate time, or "Start of day"), estimated_cost_per_person (number), booking_note (what to check before going). Use real, destination-specific places; group nearby places in sensible order; cover every trip day with a reasonable morning, afternoon and evening plan. Include meal breaks. Avoid impossible travel or invented addresses. Use the request's interests and must-see places. Respect the per-person budget; describe exclusions like lodging and long-distance transport in each summary. Costs and times are estimates, never claim verified opening hours or availability. Keep all text in English. No markdown.`;
   const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 60000);
   let result;
   try {

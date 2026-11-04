@@ -1,21 +1,39 @@
-/* A neutral baseline. Change the visual direction for your customers. */
+/* Groupation: airy travel blues, warm red panda accents, and sunny highlights. */
 :root {
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  color:#24322e;
-  background:#f6f7f3;
+  font-family:"Nunito","Avenir Next",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:var(--ink);
+  background:var(--canvas);
   font-synthesis:none;
-  --accent:#32624d;
-  --muted:#64716a;
-  --line:#dce2d9;
-  --paper:#fff;
-  --tint:#e8efe6;
-  --danger:#9a432e
+  color-scheme:light;
+  --ink:#17374b;
+  --canvas:#f3faff;
+  --accent:#007da6;
+  --accent-hover:#006583;
+  --link:#006583;
+  --muted:#4e6674;
+  --line:#c3dce5;
+  --field-line:#7895a5;
+  --paper:#ffffff;
+  --tint:#e0f3fb;
+  --sea-tint:#e3f5f1;
+  --cream:#fff8ed;
+  --panda:#bf5635;
+  --panda-deep:#974025;
+  --sun:#ffe08a;
+  --sun-ink:#735116;
+  --success:#18655b;
+  --success-tint:#e2f5eb;
+  --danger:#a52d47;
+  --danger-tint:#fff0f3;
+  --placeholder:#607582
 }
 * {
   box-sizing:border-box
 }
 body {
-  margin:0
+  margin:0;
+  min-height:100vh;
+  background:radial-gradient(ellipse at 90% 0%,#d8efff 0,transparent 55%),linear-gradient(150deg,var(--canvas) 50%,var(--cream) 100%)
 }
 button,input,select,textarea {
   font:inherit
@@ -44,7 +62,7 @@ button,.button {
   transition:background .15s,transform .15s
 }
 button:hover,.button:hover {
-  background:#264d3c
+  background:var(--accent-hover)
 }
 button:active,.button:active {
   transform:translateY(1px)
@@ -54,8 +72,8 @@ button:disabled {
   cursor:wait
 }
 .secondary {
-  background:white;
-  color:var(--accent);
+  background:var(--paper);
+  color:var(--link);
   border-color:var(--line)
 }
 .secondary:hover {
@@ -67,7 +85,7 @@ button:disabled {
 }
 .text-button {
   background:none;
-  color:var(--accent);
+  color:var(--link);
   border:0;
   padding:7px 0;
   font-size:13px
@@ -80,7 +98,7 @@ button:disabled {
   color:var(--danger)
 }
 :focus-visible {
-  outline:3px solid #83a391;
+  outline:3px solid var(--panda);
   outline-offset:4px
 }
 [hidden] {
@@ -112,7 +130,7 @@ p {
   font-size:11px;
   text-transform:uppercase;
   letter-spacing:.14em;
-  color:var(--muted);
+  color:var(--panda-deep);
   font-weight:700;
   margin-bottom:20px
 }
@@ -130,7 +148,7 @@ p {
 }
 .text-link {
   font-size:14px;
-  color:var(--accent);
+  color:var(--link);
   text-decoration:underline;
   text-underline-offset:4px
 }
@@ -167,7 +185,7 @@ p {
   width:8px;
   height:8px;
   border-radius:50%;
-  background:var(--accent)
+  background:var(--panda)
 }
 nav {
   display:flex;
@@ -204,7 +222,7 @@ main {
   color:var(--muted)
 }
 .sample-preview {
-  background:#eef1e9;
+  background:radial-gradient(circle at 100% 0%,var(--sun),transparent 45%),linear-gradient(145deg,var(--tint),var(--sea-tint));
   border:1px solid var(--line);
   padding:32px;
   border-radius:12px
@@ -220,7 +238,7 @@ main {
   grid-template-columns:1fr 1fr;
   gap:20px;
   padding:22px 0;
-  border-top:1px solid #d1d9cd
+  border-top:1px solid var(--line)
 }
 .sample-meta span {
   display:block;
@@ -234,7 +252,7 @@ main {
 }
 .sample-activity {
   padding:13px 0;
-  border-top:1px solid #d1d9cd;
+  border-top:1px solid var(--line);
   display:flex;
   justify-content:space-between;
   gap:20px;
@@ -276,16 +294,16 @@ label {
 input,select,textarea {
   width:100%;
   padding:11px 12px;
-  border:1px solid #cbd4c9;
+  border:1px solid var(--field-line);
   border-radius:6px;
-  background:white;
-  color:#24322e;
+  background:var(--paper);
+  color:var(--ink);
   font-size:14px;
   line-height:1.35;
   min-height:42px
 }
 input::placeholder,textarea::placeholder {
-  color:#89948a
+  color:var(--placeholder)
 }
 input[type=date] {
   min-width:0
@@ -324,8 +342,8 @@ textarea {
 }
 .notice.error {
   border-color:var(--danger);
-  background:#f7ede7;
-  color:#783820
+  background:var(--danger-tint);
+  color:var(--danger)
 }
 .planner {
   padding-top:32px
@@ -367,14 +385,14 @@ textarea {
   display:inline-flex;
   padding:5px 9px;
   border-radius:5px;
-  background:var(--tint);
-  color:var(--accent);
+  background:var(--success-tint);
+  color:var(--success);
   font-size:11px;
   font-weight:650
 }
 .status-badge.proposed {
-  background:#eef0ec;
-  color:var(--muted)
+  background:var(--sun);
+  color:var(--sun-ink)
 }
 .planner-columns {
   display:grid;
@@ -399,7 +417,7 @@ textarea {
 }
 .itinerary-summary strong {
   font-size:22px;
-  color:#24322e;
+  color:var(--ink);
   font-weight:650
 }
 .budget-message {
@@ -471,7 +489,7 @@ textarea {
 }
 summary {
   cursor:pointer;
-  color:var(--accent);
+  color:var(--link);
   font-size:12px
 }
 .group-response {
@@ -479,7 +497,7 @@ summary {
   line-height:1.5
 }
 .group-response b {
-  color:#24322e;
+  color:var(--ink);
   font-weight:600
 }
 .group-response p {
@@ -529,7 +547,7 @@ summary {
 }
 .empty-state {
   padding:32px 24px;
-  border:1px dashed #b8c5b8;
+  border:1px dashed var(--field-line);
   border-radius:8px;
   margin-bottom:20px
 }
@@ -572,11 +590,11 @@ dialog {
   border:1px solid var(--line);
   border-radius:12px;
   padding:28px;
-  color:#24322e;
-  background:white
+  color:var(--ink);
+  background:var(--paper)
 }
 dialog::backdrop {
-  background:rgb(30 43 35 / .35)
+  background:rgb(23 55 75 / .4)
 }
 .dialog-header {
   justify-content:space-between;
@@ -599,7 +617,7 @@ dialog::backdrop {
   margin-top:20px
 }
 .skeleton {
-  background:#e5eae1;
+  background:var(--line);
   border-radius:5px;
   width:40%;
   height:22px;
@@ -1070,3 +1088,42 @@ body:has(#new-view.gx-onboard:not([hidden])) .wordmark-dot { background:#2f8cff 
 }
 @media(prefers-reduced-motion:reduce) { .gx-progress span,.gx-chip > span { transition:none } }
 .gx-chip > span { gap:.45em; word-spacing:.05em }
+
+/* Jessica's visual pass: one palette and a friendly trip buddy across the product. */
+h1,h2,h3,.wordmark { font-weight:800; letter-spacing:-.025em }
+button,.button { border-radius:999px; min-height:44px }
+input,select,textarea { border-radius:12px; min-height:44px }
+.activity,.form-panel { border-radius:20px; box-shadow:0 8px 28px -18px rgb(23 55 75 / .2) }
+.activity { border-color:var(--line) }
+.status-badge { border-radius:999px; padding:6px 11px }
+#home-view.gx-home { --sky-1:#147baf; --sky-2:#8ed7ed; --sky-3:#e0f3fb; --sun:#ffe08a; --ink:#17374b; --ink-soft:#4e6674 }
+#new-view.gx-onboard { --sky:#007da6; --sky-3:#e0f3fb; --sun:#ffe08a; --ink:#17374b; --ink-soft:#4e6674 }
+.gx-home .gx-kicker,.gx-ticket .eyebrow { color:var(--panda-deep) }
+.gx-home .gx-pill { background:var(--cream); color:var(--panda-deep); border-color:var(--cream) }
+.gx-home .gx-hero h1 { color:var(--ink); text-shadow:none }
+.gx-home .gx-hero h1 span { color:#174e62 }
+.gx-home .gx-fine { color:var(--ink) }
+body:has(#home-view.gx-home:not([hidden])) .wordmark-dot,body:has(#new-view.gx-onboard:not([hidden])) .wordmark-dot { background:var(--panda) }
+.gx-chip input:checked + span { background:var(--sky); border-color:var(--sky) }
+.trip-buddy { display:flex; align-items:center; gap:18px; border:1px solid var(--line); border-radius:22px; padding:12px 18px; background:var(--cream) }
+.panda-art { flex:0 0 132px; width:132px; aspect-ratio:3/2; background-image:url('/assets/mascot/red-panda-concept-v1.png'); background-size:200% 200%; background-position:100% 0; border-radius:16px }
+.panda-art[data-mood="starting"] { background-position:0 0 }
+.panda-art[data-mood="relaxed"] { background-position:0 100% }
+.panda-art[data-mood="vacation"] { background-position:100% 100% }
+.buddy-copy { min-width:0 }
+.buddy-copy > span { display:block; color:var(--panda-deep); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px }
+.buddy-copy strong { display:block; font-size:20px; font-weight:800; line-height:1.2; color:var(--ink) }
+.buddy-copy p { color:var(--muted); font-size:12px; line-height:1.5; margin-top:6px }
+.gx-hero-buddy { position:relative; z-index:3; background:var(--cream); margin-bottom:22px; padding:12px; box-shadow:0 12px 28px -18px rgb(23 55 75 / .3); transform:rotate(-2deg) }
+.gx-hero-buddy .panda-art { flex-basis:150px; width:150px }
+.gx-hero-buddy .buddy-copy strong { font-size:24px }
+.gx-sticker-party { display:none }
+.trip-buddy-setup { margin-top:24px }
+.planner-buddy { margin-bottom:26px; max-width:720px }
+@media(max-width:700px) {
+  .trip-buddy { gap:12px; padding:10px; border-radius:18px }
+  .panda-art,.gx-hero-buddy .panda-art { flex-basis:108px; width:108px }
+  .buddy-copy strong,.gx-hero-buddy .buddy-copy strong { font-size:18px }
+  .buddy-copy > span { font-size:10px; letter-spacing:.04em }
+  .gx-hero-buddy { transform:none }
+}

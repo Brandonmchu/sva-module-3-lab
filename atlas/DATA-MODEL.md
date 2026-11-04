@@ -15,7 +15,7 @@ All prices, places, and people are fictional.
 |---|---|---|
 | trips | id, title, destination, start_date, end_date, budget_per_person, currency, status | One trip has many travelers and activities. |
 | travelers | id, trip_id, name, available_from, available_to, budget, interests | Each traveler belongs to a trip. |
-| activities | id, trip_id, title, date, category, estimated_cost_per_person, status | Each activity belongs to a trip. |
+| activities | id, trip_id, title, date, start_time, end_time, category, estimated_cost_per_person, status | Each activity belongs to a trip. Optional times order events in the agenda. |
 | responses | id, trip_id, traveler_id, activity_id, vote, comment | A traveler responds to an activity in that trip. |
 | expenses | id, trip_id, title, date, category, amount, paid_by_traveler_id, split_mode, splits | Each trip expense records its payer and the travelers' custom amount or percentage shares. |
 | settlements | id, trip_id, from_traveler_id, to_traveler_id, amount, date, note | A recorded repayment reduces the payer's debt and the recipient's credit. |
@@ -28,7 +28,7 @@ Expense amounts use the trip currency. Each split stores both the entered share
 and its allocated amount; percentage allocations round to cents while preserving
 the exact expense total. Balances combine expenses and recorded settlements.
 
-Dates use YYYY-MM-DD. Budgets and activity costs use the trip currency and represent one person's amount.
+Dates use YYYY-MM-DD. Activity start and end times are optional and use 24-hour HH:MM. Budgets and activity costs use the trip currency and represent one person's amount.
 Availability can conflict with the trip dates. Preferences and votes can conflict too.
 Your product decides how to help the group resolve those differences.
 

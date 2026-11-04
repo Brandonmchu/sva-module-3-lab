@@ -3,8 +3,8 @@
   "trips": [
     {
       "id": "trip-001",
-      "title": "A weekend with friends",
-      "destination": "Demo Lake (fictional)",
+      "title": "Bride for life trip",
+      "destination": "Secret location",
       "start_date": "2026-11-06",
       "end_date": "2026-11-08",
       "budget_per_person": 350,

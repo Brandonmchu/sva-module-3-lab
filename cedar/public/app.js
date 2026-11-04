@@ -8,6 +8,7 @@ let busy = false;
 let wizardStep = 1;
 let tripDraft;
 let previousRoute;
+let undoRemoval;
 
 async function api(path, options = {}) {
   const response = await fetch(path, options);
@@ -35,6 +36,13 @@ const statusName = value => ({ draft: 'Draft', planning: 'Planning', confirmed: 
 function notice(message, isError = false) {
   const element = $('#notice');
   element.textContent = message;
+  if (undoRemoval && !isError && trip()?.id === undoRemoval.tripId) {
+    const button = document.createElement('button');
+    button.className = 'text-button';
+    button.dataset.action = 'undo-removal';
+    button.textContent = 'Undo removal';
+    element.append(' ', button);
+  }
   element.classList.toggle('error', isError);
   element.hidden = !message;
 }
@@ -102,8 +110,17 @@ function openEditor(kind, id) {
     $('#traveler-dialog-heading').textContent = id ? 'Edit traveler' : 'Add traveler';
   }
   if (kind === 'activity') {
-    values = product.activities.find(activity => activity.id === id) || { id: '', title: '', date: current.start_date, category: '', estimated_cost_per_person: 0, status: 'proposed' };
+    values = product.activities.find(activity => activity.id === id) || { id: '', title: '', date: current.start_date, category: '', time: '', estimated_cost_per_person: 0, status: 'proposed' };
     $('#activity-dialog-heading').textContent = id ? 'Edit activity' : 'Add an activity';
+    $('#activity-submit').textContent = id ? 'Save changes' : 'Add to itinerary';
+    $('#activity-details').open = Boolean(id && (values.time || values.estimated_cost_per_person || values.status !== 'proposed'));
+    const categories = form.elements.namedItem('category');
+    categories.querySelectorAll('[data-custom-category]').forEach(option => option.remove());
+    if (values.category && !Array.from(categories.options).some(option => option.value === values.category)) {
+      const option = new Option(values.category, values.category);
+      option.dataset.customCategory = 'true';
+      categories.add(option);
+    }
   }
   fillForm(form, values);
   $('#' + kind + '-dialog').showModal();
@@ -149,16 +166,34 @@ function responseFor(activityId, travelerId) {
   return product.responses.filter(response => response.activity_id === activityId && response.traveler_id === travelerId).at(-1);
 }
 
+const initials = name => name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase();
+const categoryIcon = category => {
+  const name = category.toLowerCase();
+  return /food|drink/.test(name) ? '☕' : /outdoor|nature/.test(name) ? '♧' : /music|night/.test(name) ? '♫' : /wellness|relax/.test(name) ? '☀' : /water/.test(name) ? '≈' : /art|culture/.test(name) ? '▧' : /sport|adventure/.test(name) ? '↗' : /game|entertain/.test(name) ? '♟' : /shop|market/.test(name) ? '▱' : /workshop|class/.test(name) ? '✎' : '⌖';
+};
+
+function renderAvatars(people, activityId) {
+  return `<div class="avatar-stack">${people.map(person => {
+    const vote = activityId ? responseFor(activityId, person.id)?.vote : undefined;
+    const label = person.name + (activityId ? ': ' + (vote || 'No response') : '');
+    return `<span class="avatar ${vote || ''}" title="${escapeHtml(label)}" aria-label="${escapeHtml(label)}">${escapeHtml(initials(person.name))}${activityId ? `<span class="vote-mark" aria-hidden="true">${({yes: '✓', no: '×', maybe: '?'})[vote] || '·'}</span>` : ''}</span>`;
+  }).join('')}</div>`;
+}
+
 function renderActivity(activity, current, people) {
   const responses = people.map(person => ({ person, response: responseFor(activity.id, person.id) })).filter(item => item.response);
   const selected = selectedTravelers.get(current.id);
   const person = people.find(item => item.id === selected);
   const mine = responseFor(activity.id, selected);
   const totals = ['yes', 'maybe', 'no'].map(vote => responses.filter(item => item.response.vote === vote).length + ' ' + vote).join(' · ');
+  const waiting = people.length - responses.length;
+  const allYes = people.length > 0 && responses.length === people.length && responses.every(item => item.response.vote === 'yes');
+  const agreement = allYes ? 'Everyone’s in' : waiting ? `Waiting for ${waiting} ${waiting === 1 ? 'person' : 'people'}` : people.length ? 'Everyone responded · review the votes' : 'Add travelers to decide together';
   const outsideDates = activity.date < current.start_date || activity.date > current.end_date;
   return `<article class="activity" data-activity-id="${escapeHtml(activity.id)}">
-    <div class="activity-heading"><h3>${escapeHtml(activity.title)}</h3><span class="activity-cost">${escapeHtml(money(activity.estimated_cost_per_person))}</span></div>
+    <div class="activity-heading"><div class="activity-title"><span class="category-icon" aria-hidden="true">${categoryIcon(activity.category)}</span><div><span class="activity-time">${activity.time ? escapeHtml(activity.time) : 'Time is flexible'}</span><h3>${escapeHtml(activity.title)}</h3></div></div><span class="activity-cost">${escapeHtml(money(activity.estimated_cost_per_person))}<small>per person</small></span></div>
     <div class="activity-meta"><span>${escapeHtml(activity.category)}</span><span class="status-badge ${activity.status === 'proposed' ? 'proposed' : ''}">${escapeHtml(statusName(activity.status))}</span><span class="vote-totals">${totals}</span></div>
+    <div class="agreement ${allYes ? 'unanimous' : ''}">${renderAvatars(people, activity.id)}<span>${agreement}</span></div>
     ${outsideDates ? '<p class="budget-message">This activity is outside the trip dates.</p>' : ''}
     <div class="activity-actions"><button class="text-button" data-action="edit-activity" data-id="${escapeHtml(activity.id)}">Edit activity</button>${activity.status !== 'accepted' ? `<button class="text-button" data-action="accept-activity" data-id="${escapeHtml(activity.id)}">Mark agreed</button>` : ''}<button class="text-button danger" data-action="remove-activity" data-id="${escapeHtml(activity.id)}">Remove</button></div>
     <form class="response-form" data-activity-id="${escapeHtml(activity.id)}"><fieldset ${person ? '' : 'disabled'}><legend>${person ? 'Your response as ' + escapeHtml(person.name) : 'Add a traveler to respond'}</legend>
@@ -171,7 +206,10 @@ function renderActivity(activity, current, people) {
 
 function renderPerson(person, current) {
   const partial = person.available_from > current.start_date || person.available_to < current.end_date;
-  return `<article class="person"><div class="person-heading"><h3>${escapeHtml(person.name)}</h3><span class="quiet">${escapeHtml(money(person.budget))}</span></div>
+  const activities = activitiesFor(current.id).filter(activity => activity.status !== 'removed');
+  const responded = activities.filter(activity => responseFor(activity.id, person.id)).length;
+  return `<article class="person"><div class="person-heading"><h3><span class="avatar" aria-hidden="true">${escapeHtml(initials(person.name))}</span> ${escapeHtml(person.name)}</h3><span class="quiet">${escapeHtml(money(person.budget))}</span></div>
+    <p class="traveler-status">${activities.length ? `${responded} of ${activities.length} activities reviewed` : 'Ready for the first idea'} · ${partial ? 'Check dates' : 'Available for the trip'}</p>
     <p>${dateRange(person.available_from, person.available_to)}</p>${partial ? '<p class="availability-warning">Availability differs from the trip dates.</p>' : ''}
     <p>${escapeHtml(person.interests.join(', ') || 'No interests added yet.')}</p><div class="person-actions"><button class="text-button" data-action="edit-traveler" data-id="${escapeHtml(person.id)}">Edit preferences</button><button class="text-button danger" data-action="remove-traveler" data-id="${escapeHtml(person.id)}">Remove</button></div></article>`;
 }
@@ -184,17 +222,24 @@ function renderPlanner() {
   }
   const people = travelersFor(current.id);
   if (!people.some(person => person.id === selectedTravelers.get(current.id))) selectedTravelers.set(current.id, people[0]?.id || '');
-  const activities = activitiesFor(current.id).filter(activity => activity.status !== 'removed').sort((a, b) => a.date.localeCompare(b.date));
+  const activities = activitiesFor(current.id).filter(activity => activity.status !== 'removed').sort((a, b) => a.date.localeCompare(b.date) || (a.time || '99:99').localeCompare(b.time || '99:99'));
   const removed = activitiesFor(current.id).filter(activity => activity.status === 'removed');
   const cost = activities.reduce((total, activity) => total + activity.estimated_cost_per_person, 0);
   const days = [...new Set(activities.map(activity => activity.date))];
-  $('#planner-view').innerHTML = `<div class="planner-top"><div><p class="eyebrow">Your shared weekend</p><h1>${escapeHtml(current.title)}</h1><p>${escapeHtml(current.destination)} · ${dateRange(current.start_date, current.end_date)}</p></div>
+  const unanimous = activities.filter(activity => people.length && people.every(person => responseFor(activity.id, person.id)?.vote === 'yes')).length;
+  const agreementPercent = activities.length ? Math.round(unanimous / activities.length * 100) : 0;
+  const budgetPercent = current.budget_per_person > 0 ? Math.min(100, cost / current.budget_per_person * 100) : cost > 0 ? 100 : 0;
+  const nextAction = !people.length ? 'Add your people' : !activities.length ? 'Add your first activity' : unanimous < activities.length ? 'Review the group’s responses' : current.status === 'confirmed' ? 'Your plan is ready' : 'Confirm your weekend';
+  $('#planner-view').innerHTML = `<div class="trip-cover"><span>Good company.<br>Great weekends.</span><small>Weekend inspiration</small></div><div class="planner-top"><div><p class="eyebrow">Your shared weekend</p><h1>${escapeHtml(current.title)}</h1><div class="trip-chips"><span>⌖ ${escapeHtml(current.destination)}</span><span>▦ ${dateRange(current.start_date, current.end_date)}</span><span>${people.length} ${people.length === 1 ? 'traveler' : 'travelers'}</span></div></div>
     <label class="trip-selector">Your trips<select id="trip-select">${product.trips.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current.id ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}</select></label></div>
     <div class="planner-toolbar"><span class="status-badge">${escapeHtml(statusName(current.status))}</span><div class="planner-actions"><button class="secondary small" data-action="edit-trip">Edit trip</button><button class="small" data-action="confirm-plan">${current.status === 'confirmed' ? 'Reopen planning' : 'Confirm plan'}</button></div></div>
+    <div class="trip-dashboard"><section class="overview-card"><p class="eyebrow">Group agreement</p><div class="metric"><strong>${agreementPercent}%</strong><span>${unanimous} of ${activities.length} activities have everyone’s yes</span></div><div class="meter" role="progressbar" aria-label="Activities everyone voted yes on" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${agreementPercent}"><span style="width:${agreementPercent}%"></span></div><div class="agreement">${renderAvatars(people)}<span>${people.length ? 'A plan for everyone' : 'Add travelers to start voting'}</span></div></section>
+    <section class="overview-card ${cost > current.budget_per_person ? 'over-budget' : ''}"><p class="eyebrow">Budget per person</p><div class="metric"><strong>${escapeHtml(money(cost))}</strong><span>of ${escapeHtml(money(current.budget_per_person))} planned</span></div><div class="meter" role="progressbar" aria-label="Activity budget used" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(budgetPercent)}" aria-valuetext="${escapeHtml(money(cost))} of ${escapeHtml(money(current.budget_per_person))}"><span style="width:${budgetPercent}%"></span></div><p class="field-help">${escapeHtml(money(Math.abs(current.budget_per_person - cost)))} ${cost > current.budget_per_person ? 'over budget' : 'left to plan'} · Activities only</p></section>
+    <section class="overview-card next-step"><p class="eyebrow">Up next</p><h2>${nextAction}</h2><p>${!activities.length ? 'One idea is all it takes to get going.' : 'Use the itinerary below to keep everyone involved.'}</p><button class="small" data-action="${!people.length ? 'add-traveler' : !activities.length ? 'add-activity' : unanimous === activities.length ? 'confirm-plan' : 'review-responses'}">${!people.length ? 'Add traveler' : !activities.length ? 'Add an activity' : unanimous === activities.length ? current.status === 'confirmed' ? 'Reopen planning' : 'Confirm plan' : 'Review itinerary'} <span aria-hidden="true">↗</span></button></section></div>
     <div class="planner-columns"><div class="itinerary"><div class="section-heading"><h2>Shared itinerary</h2><button class="small" data-action="add-activity">Add activity</button></div>
-      <div class="itinerary-summary"><strong>${escapeHtml(money(cost))}</strong><span>estimated per person · activities only</span><span>Trip budget: ${escapeHtml(money(current.budget_per_person))}</span></div>
+      <p class="itinerary-note">A little adventure. A little downtime. Make room for both.</p>
       ${cost > current.budget_per_person ? '<p class="budget-message">The activities exceed the trip budget per person.</p>' : ''}
-      ${activities.length ? days.map(day => `<h3 class="day-heading">${dateText(day)}</h3>${activities.filter(activity => activity.date === day).map(activity => renderActivity(activity, current, people)).join('')}`).join('') : '<div class="empty-state"><h3>The plan is open.</h3><p>Add an activity, give it a date and cost, then ask the group to respond.</p><button data-action="add-activity">Add the first activity</button></div>'}
+      ${activities.length ? days.map(day => `<section class="itinerary-day" aria-label="${day}"><h3 class="day-heading"><span>${new Intl.DateTimeFormat('en-CA', {weekday: 'long', timeZone: 'UTC'}).format(new Date(day + 'T12:00:00Z'))}</span>${dateText(day)}</h3>${activities.filter(activity => activity.date === day).map(activity => renderActivity(activity, current, people)).join('')}</section>`).join('') : '<div class="empty-state weekend-empty"><span class="empty-icon" aria-hidden="true">☀</span><p class="eyebrow">The best weekends start with an idea</p><h3>What should we do first?</h3><p>Pick a starting point. Your people can help shape the rest.</p><div class="idea-shortcuts"><button class="secondary" data-action="suggest-activity" data-category="Food &amp; drink">☕ Add a meal</button><button class="secondary" data-action="suggest-activity" data-category="Outdoors &amp; nature">♧ Plan something outdoors</button><button class="secondary" data-action="suggest-activity" data-category="Wellness &amp; relaxation">☀ Leave time to relax</button></div></div>'}
       ${removed.length ? `<details class="removed-list"><summary>Removed activities (${removed.length})</summary>${removed.map(activity => `<div class="removed-row"><span>${escapeHtml(activity.title)}</span><button class="text-button" data-action="restore-activity" data-id="${escapeHtml(activity.id)}">Restore</button></div>`).join('')}</details>` : ''}
     </div><aside class="people-panel"><div class="section-heading"><h2>Travelers</h2><button class="text-button" data-action="add-traveler">Add traveler</button></div>
       ${people.length ? `<label class="viewing-as">Viewing as<select id="traveler-select">${people.map(person => `<option value="${escapeHtml(person.id)}" ${person.id === selectedTravelers.get(current.id) ? 'selected' : ''}>${escapeHtml(person.name)}</option>`).join('')}</select><span class="field-help">Take turns as different travelers on this screen.</span></label>${people.map(person => renderPerson(person, current)).join('')}` : '<div class="empty-state"><p>Add the people who are going on this trip.</p><button data-action="add-traveler">Add a traveler</button></div>'}
@@ -290,6 +335,10 @@ $('#traveler-form').addEventListener('submit', eventObject => {
   });
 });
 
+$('#activity-form').addEventListener('invalid', eventObject => {
+  if (eventObject.target.closest('#activity-details')) $('#activity-details').open = true;
+}, true);
+
 $('#activity-form').addEventListener('submit', eventObject => {
   eventObject.preventDefault();
   const form = eventObject.currentTarget;
@@ -333,6 +382,24 @@ document.addEventListener('change', eventObject => {
 async function handleAction(button) {
   const { action, id } = button.dataset;
   const current = trip();
+  if (action === 'review-responses') {
+    const target = $('.response-form select', $('#planner-view'));
+    if (target) { target.scrollIntoView({block: 'center'}); target.focus({preventScroll: true}); }
+    return;
+  }
+  if (action === 'suggest-activity') {
+    openEditor('activity');
+    $('#activity-form').elements.namedItem('category').value = button.dataset.category;
+    $('#activity-form').elements.namedItem('title').focus();
+    return;
+  }
+  if (action === 'undo-removal' && undoRemoval?.tripId === current.id) {
+    const removed = undoRemoval;
+    await saveChange(next => { next.activities.find(activity => activity.id === removed.id).status = removed.status; }, event('plan_updated', {trip_id: current.id, activity_id: removed.id, status: removed.status}));
+    undoRemoval = undefined;
+    notice('Activity restored.');
+    return;
+  }
   if (action === 'edit-trip') return openEditor('trip');
   if (action === 'add-traveler' || action === 'edit-traveler') return openEditor('traveler', id);
   if (action === 'add-activity' || action === 'edit-activity') return openEditor('activity', id);
@@ -344,7 +411,11 @@ async function handleAction(button) {
   }
   if (['accept-activity', 'remove-activity', 'restore-activity'].includes(action)) {
     const status = { 'accept-activity': 'accepted', 'remove-activity': 'removed', 'restore-activity': 'proposed' }[action];
-    return saveChange(next => { next.activities.find(activity => activity.id === id).status = status; }, event('plan_updated', { trip_id: current.id, activity_id: id, status }));
+    const previousStatus = product.activities.find(activity => activity.id === id).status;
+    await saveChange(next => { next.activities.find(activity => activity.id === id).status = status; }, event('plan_updated', { trip_id: current.id, activity_id: id, status }));
+    if (action === 'remove-activity') { undoRemoval = {id, tripId: current.id, status: previousStatus}; notice('Activity removed.'); }
+    if (action === 'restore-activity' && undoRemoval?.id === id) { undoRemoval = undefined; notice('Activity restored.'); }
+    return;
   }
   if (action === 'confirm-plan') {
     const status = current.status === 'confirmed' ? 'planning' : 'confirmed';

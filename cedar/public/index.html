@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Plan a weekend away with friends. Keep dates, budgets, ideas, and responses together.">
-  <title>Group trip</title>
+  <title>TripPact · Plan together</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/styles.css">
   <script src="/app.js" type="module"></script>
 </head>
 <body>
   <header class="site-header">
-    <a class="wordmark" href="#home">Group trip<span class="wordmark-dot" aria-hidden="true"></span></a>
+    <a class="wordmark" href="#home">TripPact<span class="wordmark-dot" aria-hidden="true"></span></a>
     <nav aria-label="Main navigation">
       <a href="#home">Home</a>
       <a id="planner-link" href="#home" hidden>Open planner</a>
@@ -85,9 +85,23 @@
   <dialog id="activity-dialog" aria-labelledby="activity-dialog-heading">
     <form id="activity-form"><div class="dialog-header"><h2 id="activity-dialog-heading">Add an activity</h2><button type="button" class="text-button" data-close="activity-dialog">Close</button></div>
       <input name="id" type="hidden"><label>Activity name<input name="title" required maxlength="120"></label>
-      <div class="form-grid"><label>Date<input name="date" type="date" required></label><label>Category<input name="category" required placeholder="Food, outdoors, music"></label></div>
-      <div class="form-grid"><label>Estimated cost per person<input name="estimated_cost_per_person" type="number" min="0" step="0.01" required></label><label>Plan status<select name="status"><option value="proposed">Proposed</option><option value="accepted">Agreed</option><option value="removed">Removed</option></select></label></div>
-      <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save activity</button></div>
+      <div class="form-grid"><label>Date<input name="date" type="date" required></label><label>Category<select name="category" required>
+        <option value="">Choose a category</option>
+        <option value="Food & drink">Food &amp; drink</option>
+        <option value="Outdoors & nature">Outdoors &amp; nature</option>
+        <option value="Sightseeing">Sightseeing</option>
+        <option value="Arts & culture">Arts &amp; culture</option>
+        <option value="Music & nightlife">Music &amp; nightlife</option>
+        <option value="Sports & adventure">Sports &amp; adventure</option>
+        <option value="Water activities">Water activities</option>
+        <option value="Wellness & relaxation">Wellness &amp; relaxation</option>
+        <option value="Shopping & markets">Shopping &amp; markets</option>
+        <option value="Games & entertainment">Games &amp; entertainment</option>
+        <option value="Workshops & classes">Workshops &amp; classes</option>
+        <option value="Other">Other</option>
+      </select></label></div>
+      <details id="activity-details" class="activity-details"><summary>More details <span class="quiet">· time, cost & status</span></summary><label>Time (optional)<input name="time" type="time"></label><div class="form-grid"><label>Estimated cost per person<input name="estimated_cost_per_person" type="number" min="0" step="0.01" required></label><label>Plan status<select name="status"><option value="proposed">Proposed</option><option value="accepted">Agreed</option><option value="removed">Removed</option></select></label></div>
+      </details><p class="field-help">No cost added? We’ll count this as free for now.</p><p class="form-error" role="alert"></p><div class="form-actions"><button id="activity-submit" type="submit">Add to itinerary</button></div>
     </form>
   </dialog>
 </body>

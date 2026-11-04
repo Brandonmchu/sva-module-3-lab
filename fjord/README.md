@@ -2,6 +2,9 @@
 
 This folder is your whole project. It has no dependency on another team folder.
 
+Fjord's product brand is **FriendGO**. The `fjord/` folder, the `team/fjord` branch, and the package name stay as the lab set them.
+The logo is an inline SVG mark in the header of public/index.html, with matching favicon. Its styles are in the FriendGO brand section of public/styles.css.
+
 ## Your company
 
 Your company helps groups of friends plan a weekend away that everyone wants to join.

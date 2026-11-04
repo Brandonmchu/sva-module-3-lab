@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Find the dates, budget, and ideas that fit your whole crew. Fjord brings every weekend plan together.">
-  <title>Fjord Weekends — Get away, together</title>
-  <link rel="icon" href="data:,">
+  <meta name="description" content="Find the dates, budget, and ideas that fit your whole crew. FriendGO brings every weekend plan together.">
+  <title>FriendGO — Get away, together</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/styles.css">
   <script src="/app.js" type="module"></script>
 </head>
 <body>
   <header class="site-header">
-    <a class="wordmark" href="#home">Fjord <span class="wordmark-small">WEEKENDS</span><span class="wordmark-dot" aria-hidden="true"></span></a>
+    <a class="wordmark" href="#home" aria-label="FriendGO home"><svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="16" fill="#e8b67c"/><g fill="#315746"><circle cx="9.5" cy="21.5" r="4"/><circle cx="30.5" cy="21.5" r="4"/><path d="M1.5 36a8 8 0 0 1 16 0z"/><path d="M22.5 36a8 8 0 0 1 16 0z"/></g><g fill="#a83e36"><circle cx="20" cy="19" r="5"/><path d="M10.5 36a9.5 9.5 0 0 1 19 0z"/></g></svg><span class="brand-name">Friend<span class="brand-go">GO</span></span></a>
     <nav aria-label="Main navigation">
       <a href="#home">The idea</a>
       <a id="planner-link" href="#home" hidden>My trip</a>
@@ -44,7 +44,7 @@
       <p id="onboarding-intro" class="intro">Set a destination, dates, and a comfortable budget. Your group can fine-tune the plan together.</p>
       <form id="new-trip-form" class="form-panel">
         <fieldset id="trip-basics"><legend class="sr-only">Trip details</legend>
-          <div class="voice-brief"><label for="trip-brief">Tell Fjord what your group is imagining<textarea id="trip-brief" placeholder="A long weekend in Quebec City this fall, about $500 each. We love good food, history, and walkable neighborhoods."></textarea></label><div class="voice-row"><button id="voice-button" class="secondary small" type="button">Use voice</button><span id="voice-status" class="field-help">Speak or type naturally. Review the details before continuing.</span></div></div>
+          <div class="voice-brief"><label for="trip-brief">Tell FriendGO what your group is imagining<textarea id="trip-brief" placeholder="A long weekend in Quebec City this fall, about $500 each. We love good food, history, and walkable neighborhoods."></textarea></label><div class="voice-row"><button id="voice-button" class="secondary small" type="button">Use voice</button><span id="voice-status" class="field-help">Speak or type naturally. Review the details before continuing.</span></div></div>
           <label>Trip name<input name="title" required maxlength="100" placeholder="A weekend with friends"></label>
           <label>Destination<input name="destination" required maxlength="150" placeholder="Where would you like to go?"></label>
           <div class="form-grid"><label>Start date<input name="start_date" type="date" lang="en-US" required></label><label>End date<input name="end_date" type="date" lang="en-US" required></label></div>

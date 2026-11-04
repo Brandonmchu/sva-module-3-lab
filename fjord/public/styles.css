@@ -776,7 +776,7 @@ dialog::backdrop {
   }
 }
 
-/* Fjord visual direction: warm travel-poster paper, ink, rust, and pine. */
+/* FriendGO visual direction: warm travel-poster paper, ink, rust, and pine. */
 :root {
   color:#3e2f26;
   background:#f3ead3;
@@ -947,4 +947,49 @@ dialog::backdrop { background:rgb(42 35 27 / .55); }
 .ideas-actions [aria-disabled="true"] {
   color:var(--muted);
   cursor:progress
+}
+/* FriendGO brand: logo lockup (Sunset Huddle mark + Friend/GO wordmark) */
+.wordmark {
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  color:#3e2f26;
+  text-decoration:none;
+  letter-spacing:normal;
+  line-height:1;
+  white-space:nowrap
+}
+.brand-mark {
+  display:block;
+  flex:0 0 auto;
+  width:36px;
+  height:36px
+}
+.brand-name {
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:26px;
+  font-weight:700;
+  color:#3e2f26
+}
+.brand-go {
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:.96em;
+  font-weight:700;
+  font-style:italic;
+  letter-spacing:.04em;
+  color:#a83e36;
+  margin-left:.05em;
+  padding-right:.04em
+}
+@media(max-width:700px) {
+  .wordmark {
+    gap:8px
+  }
+  .brand-mark {
+    width:28px;
+    height:28px
+  }
+  .brand-name {
+    font-size:21px
+  }
 }

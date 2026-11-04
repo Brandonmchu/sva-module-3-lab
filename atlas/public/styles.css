@@ -1,14 +1,14 @@
 /* A neutral baseline. Change the visual direction for your customers. */
 :root {
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  color:#24322e;
-  background:#f6f7f3;
+  color:#332b27;
+  background:#fbf7f2;
   font-synthesis:none;
-  --accent:#32624d;
-  --muted:#64716a;
-  --line:#dce2d9;
+  --accent:#c56b48;
+  --muted:#796c64;
+  --line:#e9ddd2;
   --paper:#fff;
-  --tint:#e8efe6;
+  --tint:#fff0e7;
   --danger:#9a432e
 }
 * {
@@ -44,7 +44,7 @@ button,.button {
   transition:background .15s,transform .15s
 }
 button:hover,.button:hover {
-  background:#264d3c
+  background:#a95335
 }
 button:active,.button:active {
   transform:translateY(1px)
@@ -80,7 +80,7 @@ button:disabled {
   color:var(--danger)
 }
 :focus-visible {
-  outline:3px solid #83a391;
+  outline:3px solid #e3a78d;
   outline-offset:4px
 }
 [hidden] {
@@ -182,41 +182,154 @@ main {
 }
 .landing {
   display:grid;
-  grid-template-columns:1.2fr 1fr;
-  column-gap:80px;
-  row-gap:48px;
+  grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr);
+  column-gap:72px;
+  row-gap:54px;
   align-items:center;
-  padding-top:80px
+  padding-top:96px
 }
 .landing-copy {
-  padding:30px 0
+  padding:42px 0;
+  align-self:stretch;
+  display:flex;
+  flex-direction:column;
+  justify-content:center
 }
 .landing-copy h1 {
-  max-width:12ch
+  max-width:11ch;
+  font-size:clamp(48px,6.2vw,76px);
+  font-weight:760;
+  line-height:1.02;
+  letter-spacing:-.055em
+}
+.landing-copy .eyebrow {
+  color:var(--accent);
+  margin-bottom:24px
+}
+.landing-copy .intro {
+  font-size:19px;
+  max-width:43ch;
+  margin-top:26px
+}
+.hero-cta {
+  min-height:58px;
+  padding:17px 27px;
+  border-radius:10px;
+  font-size:17px;
+  box-shadow:0 9px 20px #9f583326
+}
+.hero-cta:hover {
+  box-shadow:0 11px 24px #9f583333
+}
+.calendar-teaser {
+  max-width:470px;
+  margin-top:34px;
+  padding:19px 21px;
+  background:#fffdfb;
+  border:1px solid #ead9ca;
+  border-radius:14px;
+  box-shadow:0 14px 34px #55351b12
+}
+.calendar-teaser-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding-bottom:14px;
+  border-bottom:1px solid #f0e6dd
+}
+.calendar-teaser-heading>div {
+  display:grid;
+  gap:4px
+}
+.calendar-kicker {
+  color:var(--muted);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase
+}
+.calendar-teaser-heading b {
+  font-size:15px
+}
+.calendar-weather {
+  display:grid;
+  place-items:center;
+  width:35px;
+  height:35px;
+  background:#fff0d5;
+  border-radius:50%;
+  color:#d28b36;
+  font-size:20px
+}
+.calendar-event {
+  display:grid;
+  grid-template-columns:42px 10px 1fr;
+  align-items:center;
+  gap:11px;
+  min-height:52px;
+  border-bottom:1px solid #f5ede6
+}
+.calendar-event:last-child {
+  border-bottom:0
+}
+.calendar-event time {
+  color:var(--muted);
+  font-size:11px;
+  font-variant-numeric:tabular-nums
+}
+.calendar-event>div {
+  display:grid;
+  gap:2px
+}
+.calendar-event b {
+  font-size:12px
+}
+.calendar-event small {
+  color:var(--muted);
+  font-size:10px
+}
+.event-marker {
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#c56b48
+}
+.event-marker.outdoors {
+  background:#77a77b
+}
+.event-marker.dinner {
+  background:#dfaa55
 }
 .benefit-grid {
   grid-column:1/-1;
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:18px
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:20px
 }
 .benefit {
   background:var(--paper);
   border:1px solid var(--line);
-  border-radius:10px;
-  padding:24px
+  border-radius:14px;
+  padding:28px;
+  box-shadow:0 12px 28px #57351b0d
 }
-.benefit-number {
-  display:block;
-  color:var(--accent);
-  font-size:11px;
-  font-weight:750;
-  letter-spacing:.12em;
-  margin-bottom:22px
+.benefit-icon {
+  display:grid;
+  place-items:center;
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  color:#b85d3d;
+  background:#fff0e7;
+  margin-bottom:25px
+}
+.benefit-icon svg {
+  width:25px;
+  height:25px
 }
 .benefit h2 {
-  font-size:19px;
-  margin-bottom:10px
+  font-size:18px;
+  margin-bottom:11px
 }
 .benefit p {
   color:var(--muted);
@@ -230,10 +343,11 @@ main {
   font-size:14px
 }
 .sample-preview {
-  background:#eef1e9;
+  background:#fff3eb;
   border:1px solid var(--line);
   padding:32px;
-  border-radius:12px
+  border-radius:14px;
+  box-shadow:0 14px 34px #55351b12
 }
 .sample-preview h2 {
   margin-bottom:8px
@@ -272,7 +386,14 @@ main {
 }
 .narrow {
   max-width:720px;
-  margin:40px auto
+  margin:58px auto
+}
+.narrow>h1 {
+  font-size:clamp(42px,5vw,56px);
+  letter-spacing:-.045em
+}
+.narrow>.intro {
+  margin-top:18px
 }
 .back-link {
   display:inline-block;
@@ -281,9 +402,10 @@ main {
 .form-panel {
   background:var(--paper);
   border:1px solid var(--line);
-  border-radius:10px;
-  padding:28px;
-  margin-top:30px
+  border-radius:14px;
+  padding:34px;
+  margin-top:34px;
+  box-shadow:0 16px 36px #57351b10
 }
 fieldset {
   border:0;
@@ -658,8 +780,18 @@ dialog::backdrop {
 }
 @media(max-width:950px) {
   .landing {
+    grid-template-columns:minmax(0,1fr) minmax(300px,.85fr);
     gap:40px;
-    padding-top:40px
+    padding-top:56px
+  }
+  .landing-copy h1 {
+    font-size:clamp(46px,6.2vw,64px)
+  }
+  .benefit-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr))
+  }
+  .benefit {
+    padding:24px
   }
   .planner-columns {
     grid-template-columns:minmax(0,1fr) 260px;
@@ -695,11 +827,32 @@ dialog::backdrop {
   }
   .landing {
     grid-template-columns:1fr;
-    gap:28px;
-    padding-top:22px
+    gap:30px;
+    padding-top:26px
   }
   .landing-copy {
-    padding:20px 0
+    padding:20px 0 0
+  }
+  .landing-copy h1 {
+    max-width:12ch;
+    font-size:clamp(44px,12vw,60px)
+  }
+  .landing-copy .intro {
+    font-size:17px
+  }
+  .actions {
+    align-items:flex-start;
+    flex-direction:column;
+    gap:16px
+  }
+  .hero-cta {
+    width:100%;
+    min-height:56px
+  }
+  .calendar-teaser {
+    max-width:none;
+    margin-top:26px;
+    padding:17px
   }
   .landing-note {
     grid-template-columns:1fr
@@ -708,10 +861,10 @@ dialog::backdrop {
     grid-template-columns:1fr
   }
   .benefit {
-    padding:20px
+    padding:23px
   }
-  .benefit-number {
-    margin-bottom:12px
+  .benefit-icon {
+    margin-bottom:18px
   }
   .invite-card {
     grid-template-columns:1fr;
@@ -768,6 +921,9 @@ dialog::backdrop {
   }
   .narrow {
     margin-top:25px
+  }
+  .narrow>h1 {
+    font-size:clamp(40px,11vw,52px)
   }
   .intro {
     font-size:16px

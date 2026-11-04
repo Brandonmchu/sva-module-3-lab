@@ -126,7 +126,7 @@ function renderOnboardingStep() {
   $('#onboarding-back').hidden = basics;
   $('#onboarding-step').textContent = `Step ${wizardStep} of 2`;
   $('#onboarding-heading').textContent = basics ? 'Name your trip' : 'Invite your people';
-  $('#onboarding-intro').textContent = basics ? 'Choose a destination, dates, and a budget per person. You can change these later.' : 'Once everyone votes, your agenda builds itself. Add yourself first, then invite everyone from your trip page.';
+  $('#onboarding-intro').textContent = basics ? 'Choose a destination, dates, and a budget per person. You can change these later.' : 'Once everyone votes, your agenda and expenses build themselves. Add yourself first, then invite everyone from your trip page.';
   $('#onboarding-submit').textContent = basics ? 'Continue' : 'Create trip';
 }
 

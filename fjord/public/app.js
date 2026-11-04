@@ -15,7 +15,7 @@ const openIdeas = new Set();
 async function api(path, options = {}) {
   const response = await fetch(path, options);
   const body = await response.json();
-  if (!response.ok) throw new Error(body.error || 'The request failed. Please try again.');
+  if (!response.ok) throw Object.assign(new Error(body.error || 'The request failed. Please try again.'), { status: response.status });
   return body;
 }
 
@@ -179,42 +179,56 @@ function renderActivity(activity, current, people) {
 function renderIdeas(person, current) {
   const items = person.interests.filter(interestKey);
   if (!items.length) return '';
-  const found = items.map(interest => ({ interest, lookup: suggestions.find(item => item.trip_id === current.id && item.destination === current.destination && item.interest === interestKey(interest)) })).filter(item => item.lookup);
+  const found = items.map(interest => ({ interest, lookup: suggestions.find(item => item.trip_id === current.id && item.destination === current.destination && item.currency === current.currency && item.interest === interestKey(interest)) })).filter(item => item.lookup);
   const loading = lookingUp.has(current.id);
   const label = loading ? 'Looking up things to do…' : found.length ? 'Find ideas for the new interests' : 'Find the top 3 things to do';
   const button = found.length < items.length ? `<div class="ideas-actions"><button class="text-button" data-action="find-ideas" data-id="${escapeHtml(person.id)}" ${loading ? 'aria-disabled="true"' : ''}>${label}</button></div>` : '';
   const list = found.length ? `<details class="group-responses ideas" data-traveler-id="${escapeHtml(person.id)}" ${openIdeas.has(person.id) ? 'open' : ''}><summary>Top 3 things to do in ${escapeHtml(current.destination)}</summary>
-    ${found.map(({ interest, lookup }) => `<div class="idea-group"><b>${escapeHtml(interestLabel(interest))}</b><ol>${lookup.ideas.map(idea => `<li><span class="idea-title">${escapeHtml(idea.title)}</span> <span class="idea-cost">· ${idea.estimated_cost_per_person ? 'about ' + escapeHtml(money(idea.estimated_cost_per_person)) + ' per person' : 'free'}</span>${idea.description ? `<p>${escapeHtml(idea.description)}</p>` : ''}</li>`).join('')}</ol></div>`).join('')}</details>` : '';
+    ${found.map(({ interest, lookup }) => `<div class="idea-group"><b>${escapeHtml(interestLabel(interest))}</b><ol>${lookup.ideas.map(idea => `<li><span class="idea-title">${escapeHtml(idea.title)}</span> <span class="idea-cost">· ${idea.estimated_cost_per_person ? 'about ' + escapeHtml(money(idea.estimated_cost_per_person, lookup.currency)) + ' per person' : 'free'}</span>${idea.description ? `<p>${escapeHtml(idea.description)}</p>` : ''}</li>`).join('')}</ol></div>`).join('')}</details>` : '';
   return list + button;
+}
+
+// Redraw only the ideas area of each traveler card, so a lookup that finishes later
+// never wipes a vote or comment someone is typing elsewhere in the planner.
+function refreshIdeas(tripId) {
+  const current = trip();
+  if (route().view !== 'trip' || current?.id !== tripId) return;
+  for (const person of travelersFor(tripId)) {
+    const slot = document.querySelector(`.ideas-slot[data-traveler-id="${CSS.escape(person.id)}"]`);
+    if (slot) slot.innerHTML = renderIdeas(person, current);
+  }
+  setBusy(busy);
 }
 
 async function findIdeas(current, travelerId) {
   if (lookingUp.has(current.id)) return;
+  const actorId = actor();
   lookingUp.add(current.id);
   openIdeas.add(travelerId);
-  render();
+  refreshIdeas(current.id);
   let properties = { trip_id: current.id, traveler_id: travelerId };
   try {
     const result = await api('/api/suggestions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ trip_id: current.id }) });
     suggestions = result.lookups;
-    properties = { ...properties, outcome: 'found', new_lookups: result.added, failed_lookups: result.failed.length };
+    properties = { ...properties, outcome: 'found', new_lookups: result.added, failed_lookups: result.failed.length, remaining_lookups: result.remaining };
     if (result.failed.length) notice('These interests could not be looked up: ' + result.failed.join(', ') + '. Please try again.', true);
+    else if (result.remaining) notice('There are more interests to look up. Select the button again to continue.');
     else notice('');
   } catch (error) {
-    properties = { ...properties, outcome: 'failed', reason: error.message };
+    properties = { ...properties, outcome: 'failed', reason: error.status === 503 ? 'not_configured' : error.status === 502 ? 'gemini_error' : 'request_failed' };
     notice(error.message, true);
   } finally {
     lookingUp.delete(current.id);
-    render();
+    refreshIdeas(current.id);
   }
-  track(event('ideas_requested', properties)).catch(error => console.warn('Usage log:', error.message));
+  track(event('ideas_requested', properties, actorId)).catch(error => console.warn('Usage log:', error.message));
 }
 
 function renderPerson(person, current) {
   const partial = person.available_from > current.start_date || person.available_to < current.end_date;
   return `<article class="person"><div class="person-heading"><h3>${escapeHtml(person.name)}</h3><span class="quiet">${escapeHtml(money(person.budget))}</span></div>
     <p>${dateRange(person.available_from, person.available_to)}</p>${partial ? '<p class="availability-warning">Availability differs from the trip dates.</p>' : ''}
-    <p>${escapeHtml(person.interests.map(interestLabel).join(', ') || 'No interests added yet.')}</p>${renderIdeas(person, current)}<div class="person-actions"><button class="text-button" data-action="edit-traveler" data-id="${escapeHtml(person.id)}">Edit preferences</button><button class="text-button danger" data-action="remove-traveler" data-id="${escapeHtml(person.id)}">Remove</button></div></article>`;
+    <p>${escapeHtml(person.interests.map(interestLabel).join(', ') || 'No interests added yet.')}</p><div class="ideas-slot" data-traveler-id="${escapeHtml(person.id)}">${renderIdeas(person, current)}</div><div class="person-actions"><button class="text-button" data-action="edit-traveler" data-id="${escapeHtml(person.id)}">Edit preferences</button><button class="text-button danger" data-action="remove-traveler" data-id="${escapeHtml(person.id)}">Remove</button></div></article>`;
 }
 
 function renderPlanner() {

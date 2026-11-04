@@ -3,6 +3,7 @@ import { readFileSync, appendFileSync, writeFileSync, renameSync } from 'node:fs
 import { dirname, resolve, sep, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
+import { parseEnv } from 'node:util';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const publicRoot = resolve(root, 'public');
@@ -14,9 +15,17 @@ const config = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
 const suggestionsFile = resolve(root, 'data/suggestions.json');
 const fail = (message, status = 400) => Object.assign(new Error(message), { status });
 
-// Optional local secrets, such as GEMINI_API_KEY. The file is git-ignored.
-try { process.loadEnvFile(resolve(root, '.env')); }
-catch (error) { if (error.code !== 'ENOENT') console.warn('.env could not be read: ' + error.message); }
+// Optional settings such as GEMINI_API_KEY. Real environment variables win over .env.
+// Accept UTF-8 with or without a BOM, and UTF-16LE, which Windows PowerShell often writes.
+function loadEnv(file) {
+  let bytes;
+  try { bytes = readFileSync(file); }
+  catch (error) { if (error.code !== 'ENOENT') console.warn('.env could not be read: ' + error.message); return; }
+  const text = (bytes[0] === 0xff && bytes[1] === 0xfe ? bytes.toString('utf16le') : bytes.toString('utf8')).replace(/^﻿/, '');
+  for (const [key, value] of Object.entries(parseEnv(text))) if (process.env[key] === undefined) process.env[key] = value.trim();
+  if (!process.env.GEMINI_API_KEY) console.warn('.env has no GEMINI_API_KEY line, so interest suggestions are off. Save .env as plain text with GEMINI_API_KEY=your-key.');
+}
+loadEnv(resolve(root, '.env'));
 const geminiModel = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 const geminiFallbackModel = process.env.GEMINI_FALLBACK_MODEL || 'gemini-3.5-flash-lite';
 
@@ -226,23 +235,25 @@ async function findSuggestions(input) {
   const trip = product.trips.find(item => item.id === input?.trip_id);
   if (!trip) throw fail('Choose an existing trip.', 404);
   const data = readSuggestions();
-  const cached = interest => data.lookups.some(lookup => lookup.trip_id === trip.id && lookup.destination === trip.destination && lookup.interest === interest);
+  const cached = interest => data.lookups.some(lookup => lookup.trip_id === trip.id && lookup.destination === trip.destination && lookup.currency === trip.currency && lookup.interest === interest);
   const wanted = [...new Set(product.travelers.filter(person => person.trip_id === trip.id).flatMap(person => person.interests).map(interestKey).filter(Boolean))];
-  const missing = wanted.filter(interest => !cached(interest)).slice(0, 12);
+  // Look up at most 12 interests per request. The response reports how many are left.
+  const uncached = wanted.filter(interest => !cached(interest));
+  const missing = uncached.slice(0, 12);
   if (missing.length && !process.env.GEMINI_API_KEY) throw fail('Suggestions are not set up on this computer. Add GEMINI_API_KEY to the .env file in this folder, then restart the app.', 503);
   const results = await Promise.allSettled(missing.map(interest => askGemini(trip, interest)));
   const fresh = readSuggestions();
   results.forEach((result, index) => {
     if (result.status !== 'fulfilled') return;
     fresh.lookups = fresh.lookups.filter(lookup => lookup.trip_id !== trip.id || lookup.interest !== missing[index]);
-    fresh.lookups.push({ id: 'suggestion-' + randomUUID(), trip_id: trip.id, destination: trip.destination, interest: missing[index], model: result.value.model, created_at: new Date().toISOString(), ideas: result.value.ideas });
+    fresh.lookups.push({ id: 'suggestion-' + randomUUID(), trip_id: trip.id, destination: trip.destination, currency: trip.currency, interest: missing[index], model: result.value.model, created_at: new Date().toISOString(), ideas: result.value.ideas });
   });
   const added = results.filter(result => result.status === 'fulfilled').length;
   if (added) saveSuggestions(fresh);
   const failed = results.flatMap((result, index) => result.status === 'rejected' ? [missing[index]] : []);
   results.forEach((result, index) => { if (result.status === 'rejected') console.warn('Suggestion lookup failed for "' + missing[index] + '": ' + result.reason.message); });
   if (failed.length && !added) throw results.find(result => result.status === 'rejected').reason;
-  return { lookups: fresh.lookups, added, failed };
+  return { lookups: fresh.lookups, added, failed, remaining: uncached.length - missing.length };
 }
 
 function json(response, status, value) {

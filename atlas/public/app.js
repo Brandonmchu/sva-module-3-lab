@@ -8,6 +8,16 @@ let busy = false;
 let wizardStep = 1;
 let tripDraft;
 let previousRoute;
+let calendarView = 'month';
+let calendarDate = todayDate();
+let calendarTripId = '';
+let expenseTripId = '';
+let settlementTripId = '';
+
+function todayDate() {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
 
 async function api(path, options = {}) {
   const response = await fetch(path, options);
@@ -29,6 +39,10 @@ const event = (name, properties, actorId = actor()) => ({ event: name, actor_id:
 const interests = value => [...new Set(value.split(',').map(item => item.trim()).filter(Boolean))];
 const dateText = value => new Intl.DateTimeFormat('en-CA', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(value + 'T12:00:00Z'));
 const dateRange = (start, end) => dateText(start) + ' – ' + dateText(end);
+const utcDate = value => new Date(value + 'T00:00:00Z');
+const dateKey = value => value.toISOString().slice(0, 10);
+const addDays = (value, amount) => { const date = utcDate(value); date.setUTCDate(date.getUTCDate() + amount); return dateKey(date); };
+const startOfWeek = value => addDays(value, -utcDate(value).getUTCDay());
 const money = (value, currency = trip()?.currency || 'CAD') => new Intl.NumberFormat('en-CA', { style: 'currency', currency, maximumFractionDigits: 2 }).format(value);
 const statusName = value => ({ draft: 'Draft', planning: 'Planning', confirmed: 'Ready', cancelled: 'Cancelled', proposed: 'Proposed', accepted: 'Agreed', removed: 'Removed' })[value] || value;
 
@@ -89,6 +103,148 @@ function fillForm(form, values) {
     const input = form.elements.namedItem(name);
     if (input) input.value = Array.isArray(value) ? value.join(', ') : value;
   }
+}
+
+function equalSplitValues(people, amount, mode) {
+  const total = mode === 'amount' ? Math.max(0, cents(amount)) : 10000;
+  const base = Math.floor(total / people.length);
+  let remainder = total - base * people.length;
+  return new Map(people.map(person => {
+    const share = base + (remainder-- > 0 ? 1 : 0);
+    return [person.id, mode === 'amount' ? fromCents(share).toFixed(2) : (share / 100).toFixed(2)];
+  }));
+}
+
+function renderExpenseSplitInputs(tripId, mode, amount, expense, overrides) {
+  const people = travelersFor(tripId);
+  let values = overrides;
+  if (!values && expense) {
+    const included = expense.splits.map(split => ({ traveler_id: split.traveler_id, share: split.share }));
+    if (expense.split_mode === mode) values = new Map(included.map(split => [split.traveler_id, split.share.toFixed(2)]));
+    else if (mode === 'amount') {
+      const allocations = percentageAllocations(cents(amount), included);
+      values = new Map(included.map(split => [split.traveler_id, fromCents(allocations.get(split.traveler_id) || 0).toFixed(2)]));
+    } else {
+      const total = included.reduce((sum, split) => sum + cents(split.amount), 0);
+      if (total > 0) {
+        let pointsLeft = 10000;
+        values = new Map(included.map((split, index) => {
+          const points = index === included.length - 1 ? pointsLeft : Math.round(cents(split.amount) / total * 10000);
+          pointsLeft -= points;
+          return [split.traveler_id, (points / 100).toFixed(2)];
+        }));
+      } else values = equalSplitValues(included.map(split => ({ id: split.traveler_id })), amount, 'percentage');
+    }
+  }
+  if (!values) values = equalSplitValues(people, amount, mode);
+  const selectedIds = new Set(values.keys());
+  $('#expense-split-fields').innerHTML = people.map(person => `<div class="expense-split-row">
+    <label class="split-person"><input type="checkbox" data-split-included ${selectedIds.has(person.id) ? 'checked' : ''}><span>${escapeHtml(person.name)}</span></label>
+    <label class="split-value"><span class="sr-only">${mode === 'percentage' ? 'Share percentage' : 'Share amount'} for ${escapeHtml(person.name)}</span><input type="number" min="0" step="0.01" value="${escapeHtml(values.get(person.id) ?? '0.00')}" data-split-value data-traveler-id="${escapeHtml(person.id)}" aria-label="${mode === 'percentage' ? 'Percent owed by ' + escapeHtml(person.name) : 'Amount owed by ' + escapeHtml(person.name)}"></label>
+  </div>`).join('');
+  $('#expense-split-mode').dataset.mode = mode;
+  $('#split-unit').textContent = mode === 'percentage' ? 'Percent of total' : 'Amount';
+}
+
+function convertSplitMode(form, nextMode) {
+  const fieldset = $('#expense-split-mode');
+  const previousMode = fieldset.dataset.mode;
+  const amount = Number(form.elements.namedItem('amount').value) || 0;
+  const rows = [...$('#expense-split-fields').querySelectorAll('.expense-split-row')];
+  const selected = rows.filter(row => $('[data-split-included]', row).checked).map(row => ({
+    traveler_id: $('[data-split-value]', row).dataset.travelerId,
+    share: Number($('[data-split-value]', row).value) || 0
+  }));
+  let values;
+  if (nextMode === 'amount') {
+    const allocations = previousMode === 'percentage' ? percentageAllocations(cents(amount), selected) : new Map(selected.map(item => [item.traveler_id, cents(item.share)]));
+    values = new Map(selected.map(item => [item.traveler_id, fromCents(allocations.get(item.traveler_id) || 0).toFixed(2)]));
+  } else {
+    const amounts = previousMode === 'percentage' ? percentageAllocations(cents(amount), selected) : new Map(selected.map(item => [item.traveler_id, cents(item.share)]));
+    const total = [...amounts.values()].reduce((sum, value) => sum + value, 0);
+    let pointsLeft = 10000;
+    values = new Map(selected.map((item, index) => {
+      const points = index === selected.length - 1 ? pointsLeft : total ? Math.round((amounts.get(item.traveler_id) || 0) / total * 10000) : Math.floor(10000 / selected.length);
+      pointsLeft -= points;
+      return [item.traveler_id, (points / 100).toFixed(2)];
+    }));
+  }
+  renderExpenseSplitInputs(expenseTripId, nextMode, amount, null, values);
+}
+
+function readExpenseForm(form, current, expenseId) {
+  const values = Object.fromEntries(new FormData(form));
+  const amountCents = cents(values.amount);
+  if (!Number.isFinite(amountCents) || amountCents <= 0) throw new Error('Enter an expense amount greater than zero.');
+  const mode = values.split_mode;
+  const rows = [...$('#expense-split-fields').querySelectorAll('.expense-split-row')];
+  const entries = rows.filter(row => $('[data-split-included]', row).checked).map(row => {
+    const input = $('[data-split-value]', row);
+    const raw = input.value;
+    const share = Number(raw);
+    if (raw === '' || !Number.isFinite(share) || share < 0) throw new Error('Enter a valid non-negative share for each selected traveler.');
+    return { traveler_id: input.dataset.travelerId, share };
+  });
+  if (!entries.length) throw new Error('Select at least one traveler to share this expense.');
+  let splits;
+  if (mode === 'percentage') {
+    const totalPoints = entries.reduce((sum, item) => sum + Math.round(item.share * 100), 0);
+    if (totalPoints !== 10000) throw new Error('Percentage shares must add up to exactly 100%.');
+    const allocations = percentageAllocations(amountCents, entries);
+    splits = entries.map(item => ({ traveler_id: item.traveler_id, share: Math.round(item.share * 100) / 100, amount: fromCents(allocations.get(item.traveler_id) || 0) }));
+  } else {
+    const total = entries.reduce((sum, item) => sum + cents(item.share), 0);
+    if (total !== amountCents) throw new Error('Amount shares must add up to the full expense total.');
+    splits = entries.map(item => {
+      const shareCents = cents(item.share);
+      return { traveler_id: item.traveler_id, share: fromCents(shareCents), amount: fromCents(shareCents) };
+    });
+  }
+  const payer = travelersFor(current.id).find(person => person.id === values.paid_by_traveler_id);
+  if (!payer) throw new Error('Choose a payer from this trip.');
+  return {
+    id: expenseId || 'expense-' + crypto.randomUUID(),
+    trip_id: current.id,
+    title: values.title.trim(),
+    date: values.date,
+    category: values.category.trim(),
+    amount: fromCents(amountCents),
+    paid_by_traveler_id: payer.id,
+    split_mode: mode,
+    splits
+  };
+}
+
+function openExpenseEditor(id) {
+  const current = trip();
+  if (!current) return;
+  expenseTripId = current.id;
+  const expense = product.expenses.find(item => item.id === id);
+  const form = $('#expense-form');
+  fillForm(form, expense || {
+    id: '',
+    title: '',
+    date: todayDate(),
+    category: 'Other',
+    amount: '',
+    paid_by_traveler_id: travelersFor(current.id)[0]?.id || '',
+    split_mode: 'percentage'
+  });
+  $('#expense-dialog-heading').textContent = expense ? 'Edit expense' : 'Add an expense';
+  $('#expense-payer').innerHTML = travelersFor(current.id).map(person => `<option value="${escapeHtml(person.id)}" ${person.id === (expense?.paid_by_traveler_id || travelersFor(current.id)[0]?.id) ? 'selected' : ''}>${escapeHtml(person.name)}</option>`).join('');
+  renderExpenseSplitInputs(current.id, expense?.split_mode || 'percentage', expense?.amount || 0, expense);
+  $('#expense-dialog').showModal();
+}
+
+function openSettlementEditor(fromId, toId, amount) {
+  const current = trip();
+  if (!current) return;
+  settlementTripId = current.id;
+  const people = travelersFor(current.id);
+  fillForm($('#settlement-form'), { date: todayDate(), amount: fromCents(amount), note: '' });
+  $('#settlement-from').innerHTML = people.map(person => `<option value="${escapeHtml(person.id)}" ${person.id === fromId ? 'selected' : ''}>${escapeHtml(person.name)}</option>`).join('');
+  $('#settlement-to').innerHTML = people.map(person => `<option value="${escapeHtml(person.id)}" ${person.id === toId ? 'selected' : ''}>${escapeHtml(person.name)}</option>`).join('');
+  $('#settlement-dialog').showModal();
 }
 
 function openEditor(kind, id) {
@@ -176,6 +332,78 @@ function renderPerson(person, current) {
     <p>${escapeHtml(person.interests.join(', ') || 'No interests added yet.')}</p><div class="person-actions"><button class="text-button" data-action="edit-traveler" data-id="${escapeHtml(person.id)}">Edit preferences</button><button class="text-button danger" data-action="remove-traveler" data-id="${escapeHtml(person.id)}">Remove</button></div></article>`;
 }
 
+const cents = value => Math.round(Number(value) * 100);
+const fromCents = value => value / 100;
+
+function percentageAllocations(totalCents, entries) {
+  const totalPoints = entries.reduce((sum, entry) => sum + Math.max(0, Math.round(Number(entry.share) * 100)), 0);
+  const allocations = entries.map(entry => {
+    const points = totalPoints ? Math.max(0, Math.round(Number(entry.share) * 100)) / totalPoints : 1 / entries.length;
+    const raw = totalCents * points;
+    return { id: entry.traveler_id, amount: Math.floor(raw), remainder: raw % 1 };
+  });
+  let centsLeft = totalCents - allocations.reduce((sum, item) => sum + item.amount, 0);
+  [...allocations].sort((a, b) => b.remainder - a.remainder).slice(0, centsLeft).forEach(item => { item.amount += 1; });
+  return new Map(allocations.map(item => [item.id, item.amount]));
+}
+
+function expenseBalances(tripId) {
+  const balances = new Map(travelersFor(tripId).map(person => [person.id, 0]));
+  for (const expense of product.expenses.filter(item => item.trip_id === tripId)) {
+    balances.set(expense.paid_by_traveler_id, (balances.get(expense.paid_by_traveler_id) || 0) + cents(expense.amount));
+    for (const split of expense.splits) balances.set(split.traveler_id, (balances.get(split.traveler_id) || 0) - cents(split.amount));
+  }
+  for (const settlement of product.settlements.filter(item => item.trip_id === tripId)) {
+    balances.set(settlement.from_traveler_id, (balances.get(settlement.from_traveler_id) || 0) - cents(settlement.amount));
+    balances.set(settlement.to_traveler_id, (balances.get(settlement.to_traveler_id) || 0) + cents(settlement.amount));
+  }
+  return balances;
+}
+
+function paymentSuggestions(tripId, people) {
+  const balances = expenseBalances(tripId);
+  const debtors = people.map(person => ({ person, amount: -(balances.get(person.id) || 0) })).filter(item => item.amount > 0).sort((a, b) => b.amount - a.amount);
+  const creditors = people.map(person => ({ person, amount: balances.get(person.id) || 0 })).filter(item => item.amount > 0).sort((a, b) => b.amount - a.amount);
+  const suggestions = [];
+  let debtorIndex = 0;
+  let creditorIndex = 0;
+  while (debtorIndex < debtors.length && creditorIndex < creditors.length) {
+    const debtor = debtors[debtorIndex];
+    const creditor = creditors[creditorIndex];
+    const amount = Math.min(debtor.amount, creditor.amount);
+    suggestions.push({ from: debtor.person, to: creditor.person, amount });
+    debtor.amount -= amount;
+    creditor.amount -= amount;
+    if (!debtor.amount) debtorIndex += 1;
+    if (!creditor.amount) creditorIndex += 1;
+  }
+  return { balances, suggestions };
+}
+
+function renderExpenseSection(current, people) {
+  const expenses = product.expenses.filter(item => item.trip_id === current.id).sort((a, b) => b.date.localeCompare(a.date));
+  const settlements = product.settlements.filter(item => item.trip_id === current.id).sort((a, b) => b.date.localeCompare(a.date));
+  const total = expenses.reduce((sum, item) => sum + cents(item.amount), 0);
+  const { balances, suggestions } = paymentSuggestions(current.id, people);
+  const personName = id => people.find(person => person.id === id)?.name || 'Unknown traveler';
+  return `<section class="expense-section" aria-labelledby="expense-heading"><div class="section-heading expense-section-heading"><div><p class="eyebrow">Keep the costs fair</p><h2 id="expense-heading">Expenses &amp; balances</h2></div>
+      ${people.length ? '<button class="small" data-action="add-expense">Add expense</button>' : ''}</div>
+    ${people.length ? `<div class="expense-overview"><div><span>Total recorded</span><strong>${escapeHtml(money(fromCents(total), current.currency))}</strong></div><div><span>Expenses</span><strong>${expenses.length}</strong></div><div><span>Payments recorded</span><strong>${settlements.length}</strong></div></div>
+      <div class="expense-columns"><section class="expense-balances"><div class="section-heading"><h3>Who owes what</h3></div>
+        <div class="balance-list">${people.map(person => {
+          const balance = balances.get(person.id) || 0;
+          return `<div class="balance-row"><span>${escapeHtml(person.name)}</span><strong class="${balance < 0 ? 'owes' : balance > 0 ? 'owed' : ''}">${balance < 0 ? 'Owes ' : balance > 0 ? 'Is owed ' : 'Settled'}${balance ? escapeHtml(money(fromCents(Math.abs(balance)), current.currency)) : ''}</strong></div>`;
+        }).join('')}</div>
+        ${suggestions.length ? `<div class="suggested-payments"><h4>Suggested payments</h4>${suggestions.map(item => `<div class="suggestion-row"><span><b>${escapeHtml(item.from.name)}</b> pays <b>${escapeHtml(item.to.name)}</b></span><strong>${escapeHtml(money(fromCents(item.amount), current.currency))}</strong><button class="text-button" data-action="record-payment" data-from="${escapeHtml(item.from.id)}" data-to="${escapeHtml(item.to.id)}" data-amount="${fromCents(item.amount)}">Record payment</button></div>`).join('')}</div>` : '<p class="all-settled">Everyone is settled up.</p>'}
+      </section><section class="expense-list"><div class="section-heading"><h3>Expense history</h3></div>
+        ${expenses.length ? expenses.map(expense => `<article class="expense-card"><div class="expense-card-top"><div><h4>${escapeHtml(expense.title)}</h4><p>${dateText(expense.date)} · ${escapeHtml(expense.category)} · paid by ${escapeHtml(personName(expense.paid_by_traveler_id))}</p></div><strong>${escapeHtml(money(expense.amount, current.currency))}</strong></div>
+          <div class="expense-shares">${expense.splits.map(split => `<span>${escapeHtml(personName(split.traveler_id))}: ${escapeHtml(money(split.amount, current.currency))}</span>`).join('')}</div>
+          <div class="expense-actions"><span class="quiet">Split ${expense.split_mode === 'percentage' ? 'by percentage' : 'by amount'}</span><button class="text-button" data-action="edit-expense" data-id="${escapeHtml(expense.id)}">Edit</button><button class="text-button danger" data-action="remove-expense" data-id="${escapeHtml(expense.id)}">Remove</button></div></article>`).join('') : '<p class="expense-empty">Add a shared cost to start tracking who paid and each person’s share.</p>'}
+        ${settlements.length ? `<div class="settlement-history"><h4>Payments recorded</h4>${settlements.map(item => `<div class="settlement-row"><span><b>${escapeHtml(personName(item.from_traveler_id))}</b> paid <b>${escapeHtml(personName(item.to_traveler_id))}</b>${item.note ? ` · ${escapeHtml(item.note)}` : ''}<small>${dateText(item.date)}</small></span><strong>${escapeHtml(money(item.amount, current.currency))}</strong><button class="text-button danger" data-action="remove-settlement" data-id="${escapeHtml(item.id)}" aria-label="Remove payment record">Remove</button></div>`).join('')}</div>` : ''}
+      </section></div>` : '<div class="empty-state"><p>Add travelers before recording shared expenses.</p><button class="secondary" data-action="add-traveler">Add a traveler</button></div>'}
+  </section>`;
+}
+
 function renderPlanner() {
   const current = trip();
   if (!current) {
@@ -198,21 +426,86 @@ function renderPlanner() {
       ${removed.length ? `<details class="removed-list"><summary>Removed activities (${removed.length})</summary>${removed.map(activity => `<div class="removed-row"><span>${escapeHtml(activity.title)}</span><button class="text-button" data-action="restore-activity" data-id="${escapeHtml(activity.id)}">Restore</button></div>`).join('')}</details>` : ''}
     </div><aside class="people-panel"><div class="section-heading"><h2>Travelers</h2><button class="text-button" data-action="add-traveler">Add traveler</button></div>
       ${people.length ? `<label class="viewing-as">Viewing as<select id="traveler-select">${people.map(person => `<option value="${escapeHtml(person.id)}" ${person.id === selectedTravelers.get(current.id) ? 'selected' : ''}>${escapeHtml(person.name)}</option>`).join('')}</select><span class="field-help">Take turns as different travelers on this screen.</span></label>${people.map(person => renderPerson(person, current)).join('')}` : '<div class="empty-state"><p>Add the people who are going on this trip.</p><button data-action="add-traveler">Add a traveler</button></div>'}
-    </aside></div>`;
+    </aside></div>${renderExpenseSection(current, people)}`;
+}
+
+function calendarHeading() {
+  const date = utcDate(calendarDate);
+  if (calendarView === 'day') return new Intl.DateTimeFormat('en-CA', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(date);
+  if (calendarView === 'week') {
+    const start = startOfWeek(calendarDate);
+    const end = addDays(start, 6);
+    return `${dateRange(start, end)}${start.slice(0, 4) === end.slice(0, 4) ? `, ${start.slice(0, 4)}` : `, ${start.slice(0, 4)} – ${end.slice(0, 4)}`}`;
+  }
+  return new Intl.DateTimeFormat('en-CA', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(date);
+}
+
+function calendarActivities(start, end) {
+  return product.activities
+    .filter(activity => activity.status !== 'removed' && activity.date >= start && activity.date <= end)
+    .filter(activity => !calendarTripId || activity.trip_id === calendarTripId)
+    .map(activity => ({ activity, trip: product.trips.find(item => item.id === activity.trip_id) }))
+    .filter(item => item.trip)
+    .sort((a, b) => a.activity.date.localeCompare(b.activity.date) || a.trip.title.localeCompare(b.trip.title) || a.activity.title.localeCompare(b.activity.title));
+}
+
+function renderCalendarEvent({ activity, trip: current }) {
+  return `<a class="calendar-event" href="#trip/${encodeURIComponent(current.id)}" title="${escapeHtml(current.title)}: ${escapeHtml(activity.title)}">
+    <span class="calendar-event-title">${escapeHtml(activity.title)}</span><span class="calendar-event-trip">${escapeHtml(current.title)}</span>
+    <span class="calendar-event-cost">${escapeHtml(money(activity.estimated_cost_per_person, current.currency))} per person</span></a>`;
+}
+
+function renderCalendarList(start, end) {
+  const entries = calendarActivities(start, end);
+  if (!entries.length) return `<div class="empty-state calendar-empty"><h2>No activities in this view</h2><p>Try another date or trip, or add ideas to a trip itinerary.</p>${product.trips[0] ? `<a class="button small" href="#trip/${encodeURIComponent(calendarTripId || product.trips[0].id)}">Open a trip</a>` : '<a class="button small" href="#new">Start a trip</a>'}</div>`;
+  const dates = [...new Set(entries.map(({ activity }) => activity.date))];
+  return dates.map(day => `<section class="calendar-day-group"><h2>${new Intl.DateTimeFormat('en-CA', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(utcDate(day))}</h2>
+    <div class="calendar-day-events">${entries.filter(({ activity }) => activity.date === day).map(renderCalendarEvent).join('')}</div></section>`).join('');
+}
+
+function renderCalendarMonth() {
+  const monthStart = calendarDate.slice(0, 7) + '-01';
+  const gridStart = startOfWeek(monthStart);
+  const cells = Array.from({ length: 42 }, (_, index) => {
+    const day = addDays(gridStart, index);
+    const entries = calendarActivities(day, day);
+    const outsideMonth = day.slice(0, 7) !== monthStart.slice(0, 7);
+    return `<div class="calendar-cell${outsideMonth ? ' outside-month' : ''}${day === todayDate() ? ' today' : ''}">
+      <button class="calendar-date" type="button" data-calendar-date="${day}" aria-label="Show ${new Intl.DateTimeFormat('en-CA', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(utcDate(day))}">${Number(day.slice(-2))}</button>
+      <div class="calendar-cell-events">${entries.slice(0, 3).map(renderCalendarEvent).join('')}${entries.length > 3 ? `<button class="calendar-more" type="button" data-calendar-date="${day}">+${entries.length - 3} more</button>` : ''}</div>
+    </div>`;
+  });
+  return `<div class="calendar-grid-shell"><div class="calendar-weekdays" aria-hidden="true">${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => `<span>${day}</span>`).join('')}</div><div class="calendar-grid">${cells.join('')}</div></div>`;
+}
+
+function renderCalendar() {
+  if (!product.trips.some(item => item.id === calendarTripId)) calendarTripId = '';
+  const heading = calendarHeading();
+  const tripOptions = product.trips.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === calendarTripId ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('');
+  const start = calendarView === 'day' ? calendarDate : calendarView === 'week' ? startOfWeek(calendarDate) : startOfWeek(calendarDate.slice(0, 7) + '-01');
+  const end = calendarView === 'day' ? calendarDate : calendarView === 'week' ? addDays(start, 6) : addDays(start, 41);
+  $('#calendar-view').innerHTML = `<div class="calendar-header"><div><p class="eyebrow">Plan together</p><h1>Trip calendar</h1><p class="calendar-intro">See what’s on across your group trips.</p></div>
+    <label class="calendar-trip-filter">Trip name<select id="calendar-trip-filter"><option value="">All trips</option>${tripOptions}</select></label></div>
+    <div class="calendar-toolbar"><div class="calendar-view-switch" role="group" aria-label="Calendar view">${['day', 'week', 'month'].map(view => `<button type="button" class="calendar-view-button${calendarView === view ? ' active' : ''}" data-calendar-view="${view}" aria-pressed="${calendarView === view}">${view[0].toUpperCase() + view.slice(1)}</button>`).join('')}</div>
+      <div class="calendar-date-nav"><button type="button" class="secondary small" data-calendar-shift="-1" aria-label="Previous ${calendarView}">‹</button><button type="button" class="secondary small" data-calendar-today>Today</button><button type="button" class="secondary small" data-calendar-shift="1" aria-label="Next ${calendarView}">›</button><h2>${escapeHtml(heading)}</h2></div></div>
+    ${calendarView === 'month' ? renderCalendarMonth() : `<div class="calendar-list">${renderCalendarList(start, end)}</div>`}`;
 }
 
 function render() {
   if (!product) return;
   const currentRoute = route();
-  const known = ['home', 'new', 'trip'].includes(currentRoute.view) ? currentRoute.view : 'home';
+  const known = ['home', 'new', 'trip', 'calendar'].includes(currentRoute.view) ? currentRoute.view : 'home';
   $('#home-view').hidden = known !== 'home';
   $('#new-view').hidden = known !== 'new';
   $('#planner-view').hidden = known !== 'trip';
+  $('#calendar-view').hidden = known !== 'calendar';
   const first = product.trips[0];
   $('#planner-link').hidden = !first;
+  $('#calendar-link').hidden = !first;
   if (first) $('#planner-link').href = '#trip/' + encodeURIComponent(trip()?.id || first.id);
   if (known === 'home') renderHome();
   if (known === 'trip') renderPlanner();
+  if (known === 'calendar') renderCalendar();
   setBusy(busy);
 }
 
@@ -226,6 +519,7 @@ function handleRoute() {
   let record;
   if (route().view === 'new') record = event('onboarding_started', {}, visitorId);
   else if (route().view === 'trip' && trip()) record = event('plan_viewed', { trip_id: trip().id });
+  else if (route().view === 'calendar') record = event('calendar_viewed', calendarTripId ? { trip_id: calendarTripId } : {});
   else record = event('landing_viewed', {}, visitorId);
   track(record).catch(error => console.warn('Usage log:', error.message));
 }
@@ -270,6 +564,9 @@ $('#trip-form').addEventListener('submit', eventObject => {
   submitForm(form, async () => {
     const current = trip();
     const values = readTripForm(form);
+    if (values.currency !== current.currency && (product.expenses.some(item => item.trip_id === current.id) || product.settlements.some(item => item.trip_id === current.id))) {
+      throw new Error('Remove this trip’s expenses and payments before changing its currency.');
+    }
     await saveChange(next => Object.assign(next.trips.find(item => item.id === current.id), values), event('trip_updated', { trip_id: current.id }));
     $('#trip-dialog').close();
   });
@@ -305,6 +602,51 @@ $('#activity-form').addEventListener('submit', eventObject => {
   });
 });
 
+$('#expense-form').addEventListener('submit', eventObject => {
+  eventObject.preventDefault();
+  const form = eventObject.currentTarget;
+  submitForm(form, async () => {
+    const current = product.trips.find(item => item.id === expenseTripId);
+    if (!current) throw new Error('This trip is no longer available.');
+    const oldId = form.elements.namedItem('id').value;
+    const expense = readExpenseForm(form, current, oldId);
+    await saveChange(next => {
+      const old = next.expenses.find(item => item.id === expense.id);
+      if (old) Object.assign(old, expense); else next.expenses.push(expense);
+    }, event(oldId ? 'expense_updated' : 'expense_added', { trip_id: current.id, expense_id: expense.id, amount: expense.amount, split_mode: expense.split_mode }, expense.paid_by_traveler_id));
+    $('#expense-dialog').close();
+  });
+});
+
+$('#settlement-form').addEventListener('submit', eventObject => {
+  eventObject.preventDefault();
+  const form = eventObject.currentTarget;
+  submitForm(form, async () => {
+    const current = product.trips.find(item => item.id === settlementTripId);
+    if (!current) throw new Error('This trip is no longer available.');
+    const values = Object.fromEntries(new FormData(form));
+    const amountCents = cents(values.amount);
+    if (!Number.isFinite(amountCents) || amountCents <= 0) throw new Error('Enter a payment amount greater than zero.');
+    if (values.from_traveler_id === values.to_traveler_id) throw new Error('Choose two different travelers.');
+    const balances = expenseBalances(current.id);
+    const debt = -(balances.get(values.from_traveler_id) || 0);
+    const credit = balances.get(values.to_traveler_id) || 0;
+    if (debt <= 0 || credit <= 0) throw new Error('Choose someone who owes money and someone who is owed money.');
+    if (amountCents > Math.min(debt, credit)) throw new Error('The payment cannot exceed the current amount owed.');
+    const settlement = {
+      id: 'settlement-' + crypto.randomUUID(),
+      trip_id: current.id,
+      from_traveler_id: values.from_traveler_id,
+      to_traveler_id: values.to_traveler_id,
+      amount: fromCents(amountCents),
+      date: values.date,
+      note: values.note.trim()
+    };
+    await saveChange(next => next.settlements.push(settlement), event('settlement_recorded', { trip_id: current.id, settlement_id: settlement.id, amount: settlement.amount, to_traveler_id: settlement.to_traveler_id }, settlement.from_traveler_id));
+    $('#settlement-dialog').close();
+  });
+});
+
 // Delegated handlers keep the planner small and work after its lists are re-rendered.
 document.addEventListener('submit', eventObject => {
   const form = eventObject.target;
@@ -328,6 +670,8 @@ document.addEventListener('submit', eventObject => {
 document.addEventListener('change', eventObject => {
   if (eventObject.target.id === 'trip-select') location.hash = '#trip/' + encodeURIComponent(eventObject.target.value);
   if (eventObject.target.id === 'traveler-select') { selectedTravelers.set(trip().id, eventObject.target.value); renderPlanner(); setBusy(busy); }
+  if (eventObject.target.id === 'calendar-trip-filter') { calendarTripId = eventObject.target.value; renderCalendar(); }
+  if (eventObject.target.id === 'expense-split-mode') convertSplitMode($('#expense-form'), eventObject.target.value);
 });
 
 async function handleAction(button) {
@@ -336,11 +680,22 @@ async function handleAction(button) {
   if (action === 'edit-trip') return openEditor('trip');
   if (action === 'add-traveler' || action === 'edit-traveler') return openEditor('traveler', id);
   if (action === 'add-activity' || action === 'edit-activity') return openEditor('activity', id);
+  if (action === 'add-expense' || action === 'edit-expense') return openExpenseEditor(id);
+  if (action === 'record-payment') return openSettlementEditor(button.dataset.from, button.dataset.to, cents(button.dataset.amount));
   if (action === 'remove-traveler') {
+    if (product.expenses.some(expense => expense.trip_id === current.id && (expense.paid_by_traveler_id === id || expense.splits.some(split => split.traveler_id === id))) || product.settlements.some(item => item.trip_id === current.id && (item.from_traveler_id === id || item.to_traveler_id === id))) {
+      throw new Error('Remove this traveler’s expenses and payments before removing them from the trip.');
+    }
     return saveChange(next => {
       next.travelers = next.travelers.filter(person => person.id !== id);
       next.responses = next.responses.filter(response => response.traveler_id !== id);
     }, event('traveler_removed', { trip_id: current.id, traveler_id: id }));
+  }
+  if (action === 'remove-expense') {
+    return saveChange(next => { next.expenses = next.expenses.filter(expense => expense.id !== id); }, event('expense_removed', { trip_id: current.id, expense_id: id }));
+  }
+  if (action === 'remove-settlement') {
+    return saveChange(next => { next.settlements = next.settlements.filter(item => item.id !== id); }, event('settlement_removed', { trip_id: current.id, settlement_id: id }));
   }
   if (['accept-activity', 'remove-activity', 'restore-activity'].includes(action)) {
     const status = { 'accept-activity': 'accepted', 'remove-activity': 'removed', 'restore-activity': 'proposed' }[action];
@@ -353,6 +708,31 @@ async function handleAction(button) {
 }
 
 document.addEventListener('click', eventObject => {
+  const calendarDateButton = eventObject.target.closest('[data-calendar-date]');
+  if (calendarDateButton) {
+    calendarDate = calendarDateButton.dataset.calendarDate;
+    calendarView = 'day';
+    renderCalendar();
+    return;
+  }
+  const calendarViewButton = eventObject.target.closest('[data-calendar-view]');
+  if (calendarViewButton) {
+    calendarView = calendarViewButton.dataset.calendarView;
+    renderCalendar();
+    return;
+  }
+  const calendarShiftButton = eventObject.target.closest('[data-calendar-shift]');
+  if (calendarShiftButton) {
+    const amount = Number(calendarShiftButton.dataset.calendarShift);
+    calendarDate = calendarView === 'month' ? dateKey(new Date(Date.UTC(utcDate(calendarDate).getUTCFullYear(), utcDate(calendarDate).getUTCMonth() + amount, 1))) : addDays(calendarDate, amount * (calendarView === 'week' ? 7 : 1));
+    renderCalendar();
+    return;
+  }
+  if (eventObject.target.closest('[data-calendar-today]')) {
+    calendarDate = todayDate();
+    renderCalendar();
+    return;
+  }
   const close = eventObject.target.closest('[data-close]');
   if (close) $('#' + close.dataset.close).close();
   const button = eventObject.target.closest('[data-action]');

@@ -96,5 +96,7 @@
       "vote": "maybe",
       "comment": "Can we find a cheaper option?"
     }
-  ]
+  ],
+  "expenses": [],
+  "settlements": []
 }

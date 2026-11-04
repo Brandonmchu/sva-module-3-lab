@@ -15,6 +15,8 @@ Run npm start and open your team URL. The app already provides:
 - Create a trip with a destination, dates, and a budget per person.
 - Add each traveler's availability, budget, and interests.
 - Make a shared itinerary with activities and estimated costs.
+- Browse trip activities in a day, week, or month calendar and filter by trip name.
+- Track shared expenses, set custom amount or percentage splits, and record repayments.
 - Respond to the plan and revise it.
 
 A basic landing page and two-step first-trip onboarding are also included.

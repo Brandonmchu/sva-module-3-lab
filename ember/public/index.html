@@ -71,7 +71,8 @@
     <form id="trip-form"><div class="dialog-header"><h2 id="trip-dialog-heading">Edit trip</h2><button type="button" class="text-button" data-close="trip-dialog">Close</button></div>
       <label>Trip name<input name="title" required maxlength="100"></label><label>Destination<input name="destination" required maxlength="150"></label>
       <div class="form-grid"><label>Start date<input name="start_date" type="date" required></label><label>End date<input name="end_date" type="date" required></label></div>
-      <div class="form-grid"><label>Budget per person<input name="budget_per_person" type="number" min="0" step="0.01" required></label><label>Currency<input name="currency" required pattern="[A-Za-z]{3}" maxlength="3"></label></div>
+      <div class="form-grid"><label class="price-field">Budget per person<input name="budget_per_person" type="number" min="0" step="0.01" required></label><label class="price-field">Currency<input name="currency" required pattern="[A-Za-z]{3}" maxlength="3"></label></div>
+      <label id="treat-row" class="check-row"><input name="bachelorette_treated" type="checkbox"><span>Treat the bachelorette<span id="treat-help" class="field-help">Hide prices from her and split her share across the rest of the squad.</span></span></label>
       <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save trip</button></div>
     </form>
   </dialog>
@@ -80,7 +81,7 @@
     <form id="traveler-form"><div class="dialog-header"><h2 id="traveler-dialog-heading">Add to the squad</h2><button type="button" class="text-button" data-close="traveler-dialog">Close</button></div>
       <input name="id" type="hidden"><label>Name<input name="name" required maxlength="80"></label>
       <div class="form-grid"><label>Available from<input name="available_from" type="date" required></label><label>Available until<input name="available_to" type="date" required></label></div>
-      <label>Budget<input name="budget" type="number" min="0" step="0.01" required></label><label>Interests<input name="interests" placeholder="Spa, dancing, brunch"><span class="field-help">Separate interests with commas.</span></label>
+      <label class="price-field">Budget<input name="budget" type="number" min="0" step="0.01" required></label><label>Interests<input name="interests" placeholder="Spa, dancing, brunch"><span class="field-help">Separate interests with commas.</span></label>
       <label id="bride-row" class="check-row"><input name="is_bachelorette" type="checkbox"><span>This is the bachelorette<span class="field-help">Only one per trip. Surprise activities are hidden from her.</span></span></label>
       <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save</button></div>
     </form>
@@ -90,7 +91,7 @@
     <form id="activity-form"><div class="dialog-header"><h2 id="activity-dialog-heading">Add an activity</h2><button type="button" class="text-button" data-close="activity-dialog">Close</button></div>
       <input name="id" type="hidden"><label>Activity name<input name="title" required maxlength="120"></label>
       <div class="form-grid"><label>Date<input name="date" type="date" required></label><label>Category<input name="category" required placeholder="Spa, nightlife, brunch"></label></div>
-      <div class="form-grid"><label>Estimated cost per person<input name="estimated_cost_per_person" type="number" min="0" step="0.01" required></label><label>Plan status<select name="status"><option value="proposed">Proposed</option><option value="accepted">Agreed</option><option value="removed">Removed</option></select></label></div>
+      <div class="form-grid"><label class="price-field">Estimated cost per person<input name="estimated_cost_per_person" type="number" min="0" step="0.01" required></label><label>Plan status<select name="status"><option value="proposed">Proposed</option><option value="accepted">Agreed</option><option value="removed">Removed</option></select></label></div>
       <label id="surprise-row" class="check-row"><input name="hidden_from_bachelorette" type="checkbox"><span>Surprise: hide from the bachelorette<span id="surprise-help" class="field-help">She won't see this activity, its cost, or the squad's votes.</span></span></label>
       <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save activity</button></div>
     </form>

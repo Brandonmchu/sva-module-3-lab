@@ -733,7 +733,7 @@ dialog::backdrop {
   }
 }
 
-/* ===== Groupation home page (marketing · Ronak). Scoped to #home-view so the planner and onboarding are untouched. ===== */
+/* ===== GroupAtion home page (marketing · Ronak). Scoped to #home-view so the planner and onboarding are untouched. ===== */
 #home-view.gx-home {
   --sky-1:#2f8cff;
   --sky-2:#7cc4ff;
@@ -1011,7 +1011,7 @@ body:has(#home-view.gx-home:not([hidden])) .site-header { border-bottom-color:tr
 body:has(#home-view.gx-home:not([hidden])) .site-header .button { background:#0f2a4a; border-color:#0f2a4a; border-radius:999px }
 body:has(#home-view.gx-home:not([hidden])) .wordmark-dot { background:#2f8cff }
 
-/* ===== Groupation onboarding (marketing · Ronak). Scoped to #new-view.gx-onboard. ===== */
+/* ===== GroupAtion onboarding (marketing · Ronak). Scoped to #new-view.gx-onboard. ===== */
 body:has(#new-view.gx-onboard:not([hidden])) { background:linear-gradient(180deg,#eef7ff 0%,#f7fbff 100%) }
 body:has(#new-view.gx-onboard:not([hidden])) .site-header { border-bottom-color:transparent }
 body:has(#new-view.gx-onboard:not([hidden])) .site-header .button { background:#0f2a4a; border-color:#0f2a4a; border-radius:999px }

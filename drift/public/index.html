@@ -10,9 +10,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/design-prototype.css">
+  <link rel="stylesheet" href="/mobile-preview.css">
   <script src="/app.js" type="module"></script>
+  <script src="/mobile-preview.js" type="module"></script>
 </head>
 <body>
+  <div class="app-preview-controls" role="group" aria-label="Display preview"><span>GroupAtion preview</span><button id="app-mobile-toggle" class="secondary small" type="button" aria-pressed="false" aria-controls="app-shell">Mobile view</button><span id="app-preview-status" class="app-preview-status" role="status"></span></div>
+  <div id="app-shell">
   <header class="site-header">
     <a class="wordmark" href="#home"><img class="wordmark-logo" src="/groupation-logo.png" alt="" width="40" height="40">GroupAtion</a>
     <nav aria-label="Main navigation">
@@ -196,5 +201,6 @@
       <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save activity</button></div>
     </form>
   </dialog>
+  </div>
 </body>
 </html>

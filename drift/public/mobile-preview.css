@@ -1,0 +1,202 @@
+/* Preview controls preserve the live app DOM, route, and form state. */
+.app-preview-controls{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 24px;background:#fff;border-bottom:1px solid var(--line);color:var(--muted);font-size:13px}
+.app-preview-controls button{min-height:44px;white-space:nowrap}
+.app-preview-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+#app-shell{container-name:app-preview;container-type:inline-size;min-width:0}
+body.is-mobile-preview #app-shell{width:390px;max-width:calc(100% - 24px);margin:20px auto 40px;border:8px solid #17374b;border-radius:30px;height:844px;max-height:calc(100dvh - 110px);overflow:auto;overscroll-behavior:contain;background:var(--canvas);box-shadow:0 16px 45px #17374b22}
+body.is-mobile-preview dialog{width:calc(100% - 32px);max-width:374px}
+/* Reuse Jessica and Ronak's responsive rules at the preview container width. */
+
+@container app-preview (max-width:950px){
+  .landing {
+    gap:40px;
+    padding-top:40px
+  }
+  .planner-columns {
+    grid-template-columns:minmax(0,1fr) 260px;
+    gap:24px
+  }
+  .people-panel {
+    padding-left:18px
+  }
+  .response-fields {
+    grid-template-columns:100px 1fr
+  }
+  .response-fields button {
+    grid-column:1/-1;
+    justify-self:start
+  }
+  .vote-totals {
+    margin-left:0
+  }
+}
+
+@container app-preview (max-width:700px){
+  .site-header {
+    padding:20px;
+    gap:16px
+  }
+  nav {
+    gap:12px
+  }
+  nav>a[href="#home"] {
+    display:none
+  }
+  main {
+    padding:0 20px 50px
+  }
+  .landing {
+    grid-template-columns:1fr;
+    gap:28px;
+    padding-top:22px
+  }
+  .landing-copy {
+    padding:20px 0
+  }
+  .landing-note {
+    grid-template-columns:1fr;
+    gap:10px
+  }
+  .sample-preview {
+    padding:24px
+  }
+  .planner-top {
+    align-items:start;
+    flex-direction:column
+  }
+  .trip-selector {
+    width:100%
+  }
+  .planner-columns {
+    grid-template-columns:1fr
+  }
+  .people-panel {
+    border-left:0;
+    border-top:1px solid var(--line);
+    padding:26px 0 0;
+    margin-top:8px
+  }
+  .planner-toolbar {
+    align-items:start;
+    gap:14px
+  }
+  .planner-actions {
+    flex-wrap:wrap;
+    justify-content:flex-end
+  }
+  .activity {
+    padding:18px
+  }
+  .activity-heading h3 {
+    max-width:65%
+  }
+  .response-fields {
+    grid-template-columns:1fr
+  }
+  .response-fields button {
+    grid-column:auto
+  }
+  .form-grid {
+    grid-template-columns:1fr;
+    gap:0
+  }
+  .form-panel {
+    padding:22px
+  }
+  .notice {
+    margin:14px 20px 0
+  }
+  .narrow {
+    margin-top:25px
+  }
+  .intro {
+    font-size:16px
+  }
+  dialog {
+    padding:22px
+  }
+  .actions {
+    gap:20px;
+    flex-wrap:wrap
+  }
+  .loading-state,.load-error {
+    padding:0 20px
+  }
+  .planner-top h1 {
+    font-size:29px
+  }
+}
+
+@container app-preview (max-width:950px){
+  .gx-hero { grid-template-columns:1fr; padding:48px 36px; gap:24px }
+  .gx-trips { grid-template-columns:repeat(2,minmax(0,1fr)) }
+  .gx-steps { grid-template-columns:1fr }
+}
+
+@container app-preview (max-width:700px){
+  #home-view.gx-home { padding-top:12px; gap:18px }
+  .gx-hero { padding:36px 22px; border-radius:26px }
+  .gx-lede { font-size:16px }
+  .gx-actions { flex-direction:column; align-items:stretch }
+  .gx-home .button.gx-cta,.gx-ghost { justify-content:center; width:100% }
+  .gx-hero-art { padding:18px 4px }
+  .gx-home .sample-preview.gx-ticket { transform:none; padding:22px }
+  .gx-sticker { font-size:34px }
+  .gx-section { padding:32px 22px; border-radius:24px }
+  .gx-trips,.gx-features { grid-template-columns:1fr }
+  .gx-final { padding:44px 22px; border-radius:26px }
+}
+
+@container app-preview (max-width:700px){
+  .gx-onboard .form-panel { padding:22px 18px; border-radius:22px }
+  .gx-onboard .form-actions { flex-direction:column-reverse; align-items:stretch }
+  .gx-onboard #onboarding-submit,.gx-onboard #onboarding-back { width:100%; justify-content:center }
+}
+
+@container app-preview (max-width:700px){
+  .wordmark-logo { width:34px; height:34px }
+  .gx-badge { width:92px; height:92px; top:-26px; left:-10px }
+}
+
+@container app-preview (max-width:700px){
+  .gx-badge { top:-30px; right:-6px; left:auto }
+  .gx-ticket h2 { padding-right:64px }
+}
+
+@container app-preview (max-width:700px){
+  .trip-buddy { gap:12px; padding:10px; border-radius:18px }
+  .panda-art,.gx-hero-buddy .panda-art { flex-basis:108px; width:108px }
+  .buddy-copy strong,.gx-hero-buddy .buddy-copy strong { font-size:18px }
+  .buddy-copy > span { font-size:10px; letter-spacing:.04em }
+  .gx-hero-buddy { transform:none }
+}
+
+/* Compact imagery and typography for both real phones and the phone preview. */
+@media(max-width:700px){
+.site-header{padding:14px 16px;gap:12px}.wordmark{font-size:18px;gap:7px}.wordmark-logo{width:28px;height:28px}.site-header nav{gap:9px;font-size:12px}.site-header .button.small{font-size:12px;padding:10px 12px}
+main{padding:0 14px 32px}#home-view.gx-home{padding-top:10px;gap:16px}
+.gx-hero{padding:26px 18px;border-radius:22px;gap:20px;box-shadow:0 12px 30px -25px #17374b66}
+.gx-home .gx-hero h1{font-size:32px;line-height:1.09;letter-spacing:-.035em}.gx-lede{font-size:15px;line-height:1.6;margin-top:16px}.gx-pill{font-size:11px;line-height:1.5;padding:6px 10px;margin-bottom:16px}.gx-actions{margin-top:20px;gap:10px}.gx-home .button.gx-cta,.gx-ghost{font-size:14px;min-height:46px;padding:12px 16px}.gx-fine{font-size:12px;margin-top:14px}
+.gx-hero-art{padding:0}.gx-hero-art>.gx-badge,.gx-sticker{display:none}.gx-hero-buddy{margin-bottom:14px;padding:10px;gap:10px;transform:none;box-shadow:none;border-radius:16px}.panda-art,.gx-hero-buddy .panda-art{width:72px;flex-basis:72px;border-radius:12px}.trip-buddy-setup .panda-art{width:64px;flex-basis:64px}.buddy-copy strong,.gx-hero-buddy .buddy-copy strong{font-size:16px;line-height:1.25}.buddy-copy>span{font-size:9px;letter-spacing:.05em;margin-bottom:4px}.buddy-copy p{font-size:11px;margin-top:4px}.trip-buddy{gap:10px;padding:10px;border-radius:16px}.planner-buddy{margin-bottom:20px}
+.gx-home .sample-preview.gx-ticket{padding:17px;border-radius:18px;transform:none;box-shadow:0 8px 24px -20px #17374b66}.gx-ticket h2{font-size:21px;padding-right:0}.gx-ticket .quiet{font-size:12px}.sample-meta{gap:12px;padding:14px 0}.sample-meta b{font-size:14px}.sample-activity{padding:10px 0;font-size:12px;gap:12px}
+.gx-section{padding:25px 18px;border-radius:22px}.gx-section h2{font-size:24px;line-height:1.18}.gx-section-lede{font-size:15px}.gx-kicker{font-size:11px;margin-bottom:8px}.gx-bubbles{gap:9px;margin-top:18px}.gx-bubble{font-size:13px;padding:10px 13px}.gx-trips,.gx-features,.gx-steps{margin-top:20px;gap:12px}.gx-trip,.gx-steps li{padding:18px;border-radius:18px}.gx-trip-icon{width:42px;height:42px;font-size:24px;border-radius:13px}.gx-feature{grid-template-columns:38px minmax(0,1fr);gap:11px;padding:17px;border-radius:18px}.gx-feature span{width:36px;height:36px;font-size:21px;border-radius:11px}.gx-feature h3{font-size:16px}.gx-feature p{font-size:13px}.gx-final{padding:32px 18px;border-radius:22px}.gx-final h2{font-size:26px}.gx-final p{font-size:15px}
+.gx-onboard h1{font-size:28px}.gx-onboard .intro{font-size:15px}.gx-onboard .form-panel{padding:20px 16px}.gx-occasions{gap:7px}.gx-chip>span{font-size:12px}.planner-top h1{font-size:26px}.planner-toolbar{gap:10px}.activity-heading h3{font-size:16px}.activity{padding:16px}.trip-selector{min-width:0}
+}
+@container app-preview (max-width:700px){
+.site-header{padding:14px 16px;gap:12px}.wordmark{font-size:18px;gap:7px}.wordmark-logo{width:28px;height:28px}.site-header nav{gap:9px;font-size:12px}.site-header .button.small{font-size:12px;padding:10px 12px}
+main{padding:0 14px 32px}#home-view.gx-home{padding-top:10px;gap:16px}
+.gx-hero{padding:26px 18px;border-radius:22px;gap:20px;box-shadow:0 12px 30px -25px #17374b66}
+.gx-home .gx-hero h1{font-size:32px;line-height:1.09;letter-spacing:-.035em}.gx-lede{font-size:15px;line-height:1.6;margin-top:16px}.gx-pill{font-size:11px;line-height:1.5;padding:6px 10px;margin-bottom:16px}.gx-actions{margin-top:20px;gap:10px}.gx-home .button.gx-cta,.gx-ghost{font-size:14px;min-height:46px;padding:12px 16px}.gx-fine{font-size:12px;margin-top:14px}
+.gx-hero-art{padding:0}.gx-hero-art>.gx-badge,.gx-sticker{display:none}.gx-hero-buddy{margin-bottom:14px;padding:10px;gap:10px;transform:none;box-shadow:none;border-radius:16px}.panda-art,.gx-hero-buddy .panda-art{width:72px;flex-basis:72px;border-radius:12px}.trip-buddy-setup .panda-art{width:64px;flex-basis:64px}.buddy-copy strong,.gx-hero-buddy .buddy-copy strong{font-size:16px;line-height:1.25}.buddy-copy>span{font-size:9px;letter-spacing:.05em;margin-bottom:4px}.buddy-copy p{font-size:11px;margin-top:4px}.trip-buddy{gap:10px;padding:10px;border-radius:16px}.planner-buddy{margin-bottom:20px}
+.gx-home .sample-preview.gx-ticket{padding:17px;border-radius:18px;transform:none;box-shadow:0 8px 24px -20px #17374b66}.gx-ticket h2{font-size:21px;padding-right:0}.gx-ticket .quiet{font-size:12px}.sample-meta{gap:12px;padding:14px 0}.sample-meta b{font-size:14px}.sample-activity{padding:10px 0;font-size:12px;gap:12px}
+.gx-section{padding:25px 18px;border-radius:22px}.gx-section h2{font-size:24px;line-height:1.18}.gx-section-lede{font-size:15px}.gx-kicker{font-size:11px;margin-bottom:8px}.gx-bubbles{gap:9px;margin-top:18px}.gx-bubble{font-size:13px;padding:10px 13px}.gx-trips,.gx-features,.gx-steps{margin-top:20px;gap:12px}.gx-trip,.gx-steps li{padding:18px;border-radius:18px}.gx-trip-icon{width:42px;height:42px;font-size:24px;border-radius:13px}.gx-feature{grid-template-columns:38px minmax(0,1fr);gap:11px;padding:17px;border-radius:18px}.gx-feature span{width:36px;height:36px;font-size:21px;border-radius:11px}.gx-feature h3{font-size:16px}.gx-feature p{font-size:13px}.gx-final{padding:32px 18px;border-radius:22px}.gx-final h2{font-size:26px}.gx-final p{font-size:15px}
+.gx-onboard h1{font-size:28px}.gx-onboard .intro{font-size:15px}.gx-onboard .form-panel{padding:20px 16px}.gx-occasions{gap:7px}.gx-chip>span{font-size:12px}.planner-top h1{font-size:26px}.planner-toolbar{gap:10px}.activity-heading h3{font-size:16px}.activity{padding:16px}.trip-selector{min-width:0}
+}
+
+/* Main app now uses Jessica’s planner design. */
+.design-prototype .wordmark::after{display:none}
+
+@container app-preview (max-width:800px){ .design-prototype main { padding:0 18px 50px }.design-prototype .site-header { padding:18px }.design-prototype .wordmark::after { display:none }.escape-hero { padding:28px; min-height:530px; align-items:flex-start }.escape-copy { max-width:100% }.escape-hero h1 { font-size:38px; max-width:17ch }.escape-sub { font-size:14px }.escape-buddy { width:210px; right:25px; bottom:27px }.escape-buddy .panda-art { width:210px; height:140px }.escape-sun { width:200px; height:200px; top:auto; bottom:25px; right:25px }.crew-line { margin-top:17px }.postcard-stamp { display:none }.skyline { width:100%; height:140px }.music-note { top:auto; bottom:90px; left:30px }.music-note.second { display:none }.trip-ribbon { flex-wrap:wrap; padding:17px 3px }.trip-ribbon > span { font-size:11px }.trip-ribbon .trip-selector { width:100% }.design-prototype .planner-columns { grid-template-columns:1fr }.design-prototype .activity { padding:19px }.design-prototype .activity-heading h3 { font-size:19px }.buddy-sticker { font-size:11px }.escape-details { font-size:11px } }
+
+@media(max-width:700px){.escape-hero{min-height:360px;padding:24px 18px}.escape-hero h1{font-size:29px;max-width:100%;line-height:1.08}.escape-buddy{width:135px;right:16px;bottom:20px}.escape-buddy .panda-art{width:135px;height:90px}.escape-sun{width:140px;height:140px;right:16px;bottom:20px}.escape-sub{font-size:13px;margin-top:12px}.escape-details{gap:7px;margin-top:12px;font-size:10px}.escape-details span{padding:6px 9px}.crew-line{gap:8px;margin-top:12px;font-size:11px}.crew-avatars span{width:30px;height:30px}.buddy-sticker{font-size:10px;padding:7px 9px}.music-note{font-size:32px}.design-prototype .wordmark{font-size:18px}.design-prototype .site-header{padding:14px 16px}.design-prototype main{padding:0 14px 32px}.design-prototype .activity{padding:16px}.design-prototype .activity-heading h3{font-size:17px}.design-prototype .activity-cost{font-size:13px;padding:6px 9px}.design-prototype .section-heading h2{font-size:22px}}
+@container app-preview (max-width:700px){.escape-hero{min-height:360px;padding:24px 18px}.escape-hero h1{font-size:29px;max-width:100%;line-height:1.08}.escape-buddy{width:135px;right:16px;bottom:20px}.escape-buddy .panda-art{width:135px;height:90px}.escape-sun{width:140px;height:140px;right:16px;bottom:20px}.escape-sub{font-size:13px;margin-top:12px}.escape-details{gap:7px;margin-top:12px;font-size:10px}.escape-details span{padding:6px 9px}.crew-line{gap:8px;margin-top:12px;font-size:11px}.crew-avatars span{width:30px;height:30px}.buddy-sticker{font-size:10px;padding:7px 9px}.music-note{font-size:32px}.design-prototype .wordmark{font-size:18px}.design-prototype .site-header{padding:14px 16px}.design-prototype main{padding:0 14px 32px}.design-prototype .activity{padding:16px}.design-prototype .activity-heading h3{font-size:17px}.design-prototype .activity-cost{font-size:13px;padding:6px 9px}.design-prototype .section-heading h2{font-size:22px}}

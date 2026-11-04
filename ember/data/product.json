@@ -3,13 +3,14 @@
   "trips": [
     {
       "id": "trip-001",
-      "title": "A weekend with friends",
-      "destination": "Demo Lake (fictional)",
+      "title": "Bride for life trip",
+      "destination": "Secret location",
       "start_date": "2026-11-06",
       "end_date": "2026-11-08",
       "budget_per_person": 350,
       "currency": "CAD",
-      "status": "planning"
+      "status": "planning",
+      "bachelorette_id": "traveler-002"
     }
   ],
   "travelers": [
@@ -76,7 +77,8 @@
       "date": "2026-11-07",
       "category": "outdoors",
       "estimated_cost_per_person": 80,
-      "status": "proposed"
+      "status": "proposed",
+      "hidden_from_bachelorette": true
     }
   ],
   "responses": [

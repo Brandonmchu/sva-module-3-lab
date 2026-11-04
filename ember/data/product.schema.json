@@ -92,6 +92,11 @@
             "confirmed",
             "cancelled"
           ]
+        },
+        "bachelorette_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional. The traveler on this trip who is the bachelorette."
         }
       },
       "additionalProperties": true
@@ -188,6 +193,10 @@
             "accepted",
             "removed"
           ]
+        },
+        "hidden_from_bachelorette": {
+          "type": "boolean",
+          "description": "Optional. When true, the bachelorette does not see this activity."
         }
       },
       "additionalProperties": true

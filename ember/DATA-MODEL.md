@@ -27,6 +27,18 @@ Your product decides how to help the group resolve those differences.
 The base trip statuses are draft, planning, confirmed, and cancelled.
 Activity statuses are proposed, accepted, and removed. Votes are yes, no, and maybe.
 
+## Ember additions: bachelorette trips
+
+| Field | On | Meaning |
+|---|---|---|
+| bachelorette_id | trips (optional) | The traveler on this trip who is the bachelorette. The server rejects an ID that is not a traveler on the same trip. |
+| hidden_from_bachelorette | activities (optional, boolean) | A surprise. When "Viewing as" is the bachelorette, the activity, its cost, and its responses are left out of the plan. |
+
+Removing the bachelorette's traveler record clears bachelorette_id.
+Hiding is a screen-level view rule, not access control: GET /api/product still returns every activity.
+
+Ember events: bachelorette_assigned, bachelorette_unassigned, activity_hidden_from_bachelorette, activity_shown_to_bachelorette.
+
 ## Read and save
 
 GET /api/product returns the current product object.

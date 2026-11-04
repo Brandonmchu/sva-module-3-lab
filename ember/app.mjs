@@ -58,6 +58,11 @@ function validateProduct(product) {
   for (const traveler of product.travelers) {
     if (traveler.available_from > traveler.available_to) throw fail('Traveler available_to must follow available_from.');
   }
+  for (const trip of product.trips) {
+    if (trip.bachelorette_id !== undefined && records.travelers.get(trip.bachelorette_id)?.trip_id !== trip.id) {
+      throw fail('Trip bachelorette_id must be a traveler on that trip.');
+    }
+  }
   for (const response of product.responses) {
     if (records.travelers.get(response.traveler_id)?.trip_id !== response.trip_id) throw fail('Response traveler_id must belong to its trip.');
     if (records.activities.get(response.activity_id)?.trip_id !== response.trip_id) throw fail('Response activity_id must belong to its trip.');

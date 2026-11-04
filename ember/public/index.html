@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Plan a weekend away with friends. Keep dates, budgets, ideas, and responses together.">
+  <meta name="description" content="Plan a bachelorette trip with the whole squad. Dates, budgets, activities and votes in one place, with surprises the bride never sees.">
   <title>Lorette</title>
   <link rel="icon" href="data:,">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,8 +17,8 @@
     <a class="wordmark" href="#home">Lorette<span class="wordmark-dot" aria-hidden="true"></span></a>
     <nav aria-label="Main navigation">
       <a href="#home">Home</a>
-      <a id="planner-link" href="#home" hidden>Open planner</a>
-      <a class="button small" href="#new">Start a trip</a>
+      <a id="planner-link" href="#home" hidden>Open your trip</a>
+      <a class="button small" href="#new">Plan a trip</a>
     </nav>
   </header>
 
@@ -30,25 +30,25 @@
     <!-- Product marketers: start with the promise, calls to action, and onboarding in this file. -->
     <section id="home-view" class="view landing" hidden>
       <div class="landing-copy">
-        <p class="eyebrow">A weekend with your people</p>
-        <h1>Make a plan<br>everyone can join.</h1>
-        <p class="intro">Keep the dates, budget, and ideas in one place. Build a weekend plan your group can agree on.</p>
-        <div class="actions"><a class="button" href="#new">Plan a weekend</a><a id="sample-link" class="text-link" href="#home" hidden>Try the sample trip</a></div>
-        <p class="quiet">Start a trip. Add your people. Decide together.</p>
+        <p class="eyebrow">Bachelorette trips, planned together</p>
+        <h1>The bachelorette trip<br>the squad says yes to.</h1>
+        <p class="intro">Dates, budget and activity ideas in one place. The squad votes, the bride gets her surprises, and nobody digs through the group chat.</p>
+        <div class="actions"><a class="button" href="#new">Plan a trip</a><a id="sample-link" class="text-link" href="#home" hidden>Try the sample trip</a></div>
+        <p class="quiet">Start a trip. Add the squad. Name the bachelorette. Decide together.</p>
       </div>
       <div id="sample-preview" class="sample-preview"></div>
-      <div class="landing-note"><b>One shared plan.</b><p>Everyone can add their preferences, propose activities, and respond to the ideas.</p></div>
+      <div class="landing-note"><b>One plan for the whole squad.</b><p>Everyone adds their dates, budget and must-dos, votes on activities, and keeps the surprises secret from the bride.</p></div>
     </section>
 
     <section id="new-view" class="view narrow" hidden>
       <a class="text-link back-link" href="#home">Back to home</a>
       <p id="onboarding-step" class="eyebrow">Step 1 of 2</p>
-      <h1 id="onboarding-heading">Give your weekend a starting point.</h1>
-      <p id="onboarding-intro" class="intro">Choose a destination, dates, and a budget. You can change these later.</p>
+      <h1 id="onboarding-heading">Let's start the bachelorette trip.</h1>
+      <p id="onboarding-intro" class="intro">Pick a destination, dates and a budget per person. You can change these later.</p>
       <form id="new-trip-form" class="form-panel">
         <fieldset id="trip-basics"><legend class="sr-only">Trip details</legend>
-          <label>Trip name<input name="title" required maxlength="100" placeholder="A weekend with friends"></label>
-          <label>Destination<input name="destination" required maxlength="150" placeholder="Where would you like to go?"></label>
+          <label>Trip name<input name="title" required maxlength="100" placeholder="Jess's bachelorette"></label>
+          <label>Destination<input name="destination" required maxlength="150" placeholder="Where is the party headed?"></label>
           <div class="form-grid"><label>Start date<input name="start_date" type="date" required></label><label>End date<input name="end_date" type="date" required></label></div>
           <div class="form-grid"><label>Budget per person<input name="budget_per_person" type="number" min="0" step="0.01" required placeholder="350"></label><label>Currency<input name="currency" value="CAD" pattern="[A-Za-z]{3}" maxlength="3" required aria-describedby="currency-help"><span id="currency-help" class="field-help">Three-letter code, such as CAD.</span></label></div>
         </fieldset>
@@ -56,7 +56,7 @@
           <label>Your name<input name="name" required maxlength="80" autocomplete="given-name"></label>
           <div class="form-grid"><label>Available from<input name="available_from" type="date" required></label><label>Available until<input name="available_to" type="date" required></label></div>
           <label>Your budget<input name="budget" type="number" min="0" step="0.01" required></label>
-          <label>Your interests<input name="interests" placeholder="Food, outdoors, art"><span class="field-help">Separate interests with commas.</span></label>
+          <label>Your interests<input name="interests" placeholder="Spa, dancing, brunch"><span class="field-help">Separate interests with commas.</span></label>
         </fieldset>
         <p class="form-error" role="alert"></p>
         <div class="form-actions"><button id="onboarding-back" class="secondary" type="button" hidden>Back</button><button id="onboarding-submit" type="submit">Continue</button></div>
@@ -77,19 +77,21 @@
   </dialog>
 
   <dialog id="traveler-dialog" aria-labelledby="traveler-dialog-heading">
-    <form id="traveler-form"><div class="dialog-header"><h2 id="traveler-dialog-heading">Add traveler</h2><button type="button" class="text-button" data-close="traveler-dialog">Close</button></div>
+    <form id="traveler-form"><div class="dialog-header"><h2 id="traveler-dialog-heading">Add to the squad</h2><button type="button" class="text-button" data-close="traveler-dialog">Close</button></div>
       <input name="id" type="hidden"><label>Name<input name="name" required maxlength="80"></label>
       <div class="form-grid"><label>Available from<input name="available_from" type="date" required></label><label>Available until<input name="available_to" type="date" required></label></div>
-      <label>Budget per person<input name="budget" type="number" min="0" step="0.01" required></label><label>Interests<input name="interests" placeholder="Food, outdoors, art"><span class="field-help">Separate interests with commas.</span></label>
-      <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save traveler</button></div>
+      <label>Budget<input name="budget" type="number" min="0" step="0.01" required></label><label>Interests<input name="interests" placeholder="Spa, dancing, brunch"><span class="field-help">Separate interests with commas.</span></label>
+      <label id="bride-row" class="check-row"><input name="is_bachelorette" type="checkbox"><span>This is the bachelorette<span class="field-help">Only one per trip. Surprise activities are hidden from her.</span></span></label>
+      <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save</button></div>
     </form>
   </dialog>
 
   <dialog id="activity-dialog" aria-labelledby="activity-dialog-heading">
     <form id="activity-form"><div class="dialog-header"><h2 id="activity-dialog-heading">Add an activity</h2><button type="button" class="text-button" data-close="activity-dialog">Close</button></div>
       <input name="id" type="hidden"><label>Activity name<input name="title" required maxlength="120"></label>
-      <div class="form-grid"><label>Date<input name="date" type="date" required></label><label>Category<input name="category" required placeholder="Food, outdoors, music"></label></div>
+      <div class="form-grid"><label>Date<input name="date" type="date" required></label><label>Category<input name="category" required placeholder="Spa, nightlife, brunch"></label></div>
       <div class="form-grid"><label>Estimated cost per person<input name="estimated_cost_per_person" type="number" min="0" step="0.01" required></label><label>Plan status<select name="status"><option value="proposed">Proposed</option><option value="accepted">Agreed</option><option value="removed">Removed</option></select></label></div>
+      <label id="surprise-row" class="check-row"><input name="hidden_from_bachelorette" type="checkbox"><span>Surprise: hide from the bachelorette<span id="surprise-help" class="field-help">She won't see this activity, its cost, or the squad's votes.</span></span></label>
       <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save activity</button></div>
     </form>
   </dialog>

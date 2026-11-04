@@ -8,6 +8,9 @@ let busy = false;
 let wizardStep = 1;
 let tripDraft;
 let previousRoute;
+let brideStep = 0;
+const surpriseLabels = ['Tell me everything', 'A few hints', 'Mostly a surprise', 'Surprise me', 'Total surprise'];
+const brideTrip = () => product?.trips.find(item => item.bride_code && item.bride_code === route().id);
 
 async function api(path, options = {}) {
   const response = await fetch(path, options);
@@ -163,6 +166,49 @@ function renderHome() {
   if (sample) $('#sample-link').href = '#trip/' + encodeURIComponent(sample.id);
 }
 
+const brideSteps = [
+  ['What is your ideal weekend?', 'Pick up to two.', 'Continue'],
+  ['Anything we should know?', 'Only your squad sees this.', 'Keep it between us'],
+  ['How surprised do you want to be?', 'Slide to set the surprise level.', 'I am in, surprise me']
+];
+
+function renderBride() {
+  const found = brideTrip();
+  $('#bride-invalid').hidden = Boolean(found);
+  $('#bride-intro').hidden = !found || brideStep !== 0;
+  $('#bride-form').hidden = !found || brideStep < 1 || brideStep > 3;
+  $('#bride-done').hidden = !found || brideStep !== 4;
+  if (!found) return;
+  if (found.bride_brief && brideStep === 0) { $('#bride-intro').hidden = true; $('#bride-done').hidden = false; }
+  $('#bride-hello').textContent = (brideFor(found)?.name ? brideFor(found).name + ', your' : 'Your') + ' squad is planning something for you.';
+  if (brideStep >= 1 && brideStep <= 3) {
+    const [heading, sub, button] = brideSteps[brideStep - 1];
+    $('#bride-step').textContent = `Step ${brideStep} of 3`;
+    $('#bride-heading').textContent = heading;
+    $('#bride-sub').textContent = sub;
+    $('#bride-next').textContent = button;
+    $('#bride-back').hidden = brideStep === 1;
+    document.querySelectorAll('#bride-form fieldset').forEach(set => { const on = Number(set.dataset.step) === brideStep; set.hidden = !on; set.disabled = !on; });
+  }
+}
+
+$('#bride-start').addEventListener('click', () => { brideStep = 1; renderBride(); });
+$('#bride-back').addEventListener('click', () => { brideStep -= 1; renderBride(); });
+$('#bride-form').addEventListener('submit', eventObject => {
+  eventObject.preventDefault();
+  const form = eventObject.currentTarget;
+  submitForm(form, async () => {
+    if (brideStep === 1 && form.querySelectorAll('input[name="vibe"]:checked').length > 2) throw new Error('Pick up to two.');
+    if (brideStep < 3) { brideStep += 1; renderBride(); return; }
+    const found = brideTrip();
+    const values = Object.fromEntries(new FormData(form));
+    const brief = { vibe: new FormData(form).getAll('vibe'), unavailable: (values.unavailable || '').trim(), needs: (values.needs || '').trim(), hard_nos: (values.hard_nos || '').trim(), surprise: Number(values.surprise), note: (values.note || '').trim() };
+    await saveChange(next => { next.trips.find(item => item.id === found.id).bride_brief = brief; }, event('bride_brief_submitted', { trip_id: found.id, surprise: brief.surprise }, 'bride-' + found.id));
+    brideStep = 4;
+    renderBride();
+  });
+});
+
 function responseFor(activityId, travelerId) {
   return product.responses.filter(response => response.activity_id === activityId && response.traveler_id === travelerId).at(-1);
 }
@@ -234,6 +280,8 @@ function renderPlanner() {
   $('#planner-view').innerHTML = `<div class="planner-top"><div><p class="eyebrow">Your bachelorette trip</p><h1>${escapeHtml(current.title)}</h1><p>${escapeHtml(current.destination)} · ${dateRange(current.start_date, current.end_date)}</p></div>
     <label class="trip-selector">Your trips<select id="trip-select">${product.trips.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current.id ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}</select></label></div>
     <div class="planner-toolbar"><span class="status-badge">${escapeHtml(statusName(current.status))}</span><div class="planner-actions"><button class="secondary small" data-action="edit-trip">Edit trip</button><button class="small" data-action="confirm-plan">${current.status === 'confirmed' ? 'Reopen planning' : 'Lock it in'}</button></div></div>
+    ${current.bride_code ? `<div class="landing-note"><b>${escapeHtml(brideFor(current)?.name || 'The bride')}'s private link</b><p>Send this to ${escapeHtml(brideFor(current)?.name || 'her')}. She sees only her own questions, never the budget or itinerary.</p><p class="quiet">${escapeHtml(location.origin + '/#bride/' + current.bride_code)}</p><button class="secondary small" data-action="copy-bride-link">Copy link</button></div>` : ''}
+    ${current.bride_brief ? `<div class="landing-note"><b>${escapeHtml(brideFor(current)?.name || 'The bride')}'s brief</b><p>Vibe: ${escapeHtml(current.bride_brief.vibe.join(', ') || 'No preference')}</p><p>Can't do: ${escapeHtml(current.bride_brief.unavailable || 'Nothing listed')}</p><p>Needs: ${escapeHtml(current.bride_brief.needs || 'Nothing listed')}</p><p>Hard no's: ${escapeHtml(current.bride_brief.hard_nos || 'Nothing listed')}</p><p>Surprise level: ${escapeHtml(surpriseLabels[current.bride_brief.surprise] || '')}</p>${current.bride_brief.note ? `<p>Note: ${escapeHtml(current.bride_brief.note)}</p>` : ''}</div>` : ''}
     <div class="planner-columns"><div class="itinerary"><div class="section-heading"><h2>The itinerary</h2><button class="small" data-action="add-activity">Add activity</button></div>
       ${summary}
       ${surpriseNote}
@@ -247,15 +295,18 @@ function renderPlanner() {
 function render() {
   if (!product) return;
   const currentRoute = route();
-  const known = ['home', 'new', 'trip'].includes(currentRoute.view) ? currentRoute.view : 'home';
+  const known = ['home', 'new', 'trip', 'bride'].includes(currentRoute.view) ? currentRoute.view : 'home';
   $('#home-view').hidden = known !== 'home';
   $('#new-view').hidden = known !== 'new';
   $('#planner-view').hidden = known !== 'trip';
+  $('#bride-view').hidden = known !== 'bride';
+  $('.site-header').hidden = known === 'bride';
   const first = product.trips[0];
   $('#planner-link').hidden = !first;
   if (first) $('#planner-link').href = '#trip/' + encodeURIComponent(trip()?.id || first.id);
   if (known === 'home') renderHome();
   if (known === 'trip') renderPlanner();
+  if (known === 'bride') renderBride();
   setBusy(busy);
 }
 
@@ -264,10 +315,12 @@ function handleRoute() {
   if (current === previousRoute) { render(); return; }
   previousRoute = current;
   if (route().view === 'new') resetOnboarding();
+  if (route().view === 'bride') brideStep = 0;
   render();
   if (!product) return;
   let record;
-  if (route().view === 'new') record = event('onboarding_started', {}, visitorId);
+  if (route().view === 'bride') record = event('bride_link_opened', { valid: Boolean(brideTrip()), trip_id: brideTrip()?.id }, visitorId);
+  else if (route().view === 'new') record = event('onboarding_started', {}, visitorId);
   else if (route().view === 'trip' && trip()) record = event('plan_viewed', { trip_id: trip().id });
   else record = event('landing_viewed', {}, visitorId);
   track(record).catch(error => console.warn('Usage log:', error.message));
@@ -298,7 +351,7 @@ $('#new-trip-form').addEventListener('submit', eventObject => {
     const tripId = 'trip-' + crypto.randomUUID();
     person.trip_id = tripId;
     await saveChange(next => {
-      next.trips.push({ ...tripDraft, id: tripId, status: 'planning' });
+      next.trips.push({ ...tripDraft, id: tripId, status: 'planning', bride_code: crypto.randomUUID().slice(0, 8) });
       next.travelers.push(person);
     }, [event('trip_created', { trip_id: tripId }, person.id), event('traveler_added', { trip_id: tripId, traveler_id: person.id }, person.id), event('onboarding_completed', { trip_id: tripId }, person.id)]);
     selectedTravelers.set(tripId, person.id);
@@ -393,6 +446,7 @@ document.addEventListener('change', eventObject => {
 
 async function handleAction(button) {
   const { action, id } = button.dataset;
+  if (action === 'copy-bride-link') { await navigator.clipboard.writeText(location.origin + '/#bride/' + trip().bride_code); notice('Link copied. Send it to the bride.'); return; }
   const current = trip();
   if (action === 'edit-trip') return openEditor('trip');
   if (action === 'add-traveler' || action === 'edit-traveler') return openEditor('traveler', id);

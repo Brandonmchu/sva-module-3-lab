@@ -30,14 +30,14 @@
     <!-- Product marketers: start with the promise, calls to action, and onboarding in this file. -->
     <section id="home-view" class="view landing" hidden>
       <div class="landing-copy">
-        <p class="eyebrow">Bachelorette trips, planned together</p>
-        <h1>The bachelorette trip<br>the squad says yes to.</h1>
-        <p class="intro">Dates, budget and activity ideas in one place. The squad votes, the bride gets her surprises, and nobody digs through the group chat.</p>
-        <div class="actions"><a class="button" href="#new">Plan a trip</a><a id="sample-link" class="text-link" href="#home" hidden>Try the sample trip</a></div>
-        <p class="quiet">Start a trip. Add the squad. Name the bachelorette. Decide together.</p>
+        <p class="eyebrow">For the maid of honor and the squad</p>
+        <h1>Plan her weekend.<br>Keep her out of the group chat.</h1>
+        <p class="intro">Pull dates, budgets and ideas from the whole squad in one place. Give the bride what she needs to say yes, and nothing that spoils the surprise.</p>
+        <div class="actions"><a class="button" href="#new">Plan the bachelorette</a><a id="sample-link" class="text-link" href="#home" hidden>See a sample trip</a></div>
+        <p class="quiet">Set the dates. Agree the budget. Invite the bride when you are ready.</p>
       </div>
       <figure class="landing-photo"><img src="/images/squad-celebrating.jpg" width="900" height="700" alt="Five friends in matching blush dresses raise champagne glasses in front of rose-gold BRIDE balloons."><figcaption class="photo-badge">Create a great trip together!</figcaption></figure>
-      <div class="landing-note"><b>One plan for the whole squad.</b><p>Everyone adds their dates, budget and must-dos, votes on activities, and keeps the surprises secret from the bride.</p></div>
+      <div class="landing-note"><b>Two views, one weekend.</b><p>The squad sees the whole plan. The bride sees only what you choose to share: her vibe, her dates, and the surprises you reveal.</p></div>
     </section>
 
     <section id="new-view" class="view narrow" hidden>
@@ -61,6 +61,42 @@
         <p class="form-error" role="alert"></p>
         <div class="form-actions"><button id="onboarding-back" class="secondary" type="button" hidden>Back</button><button id="onboarding-submit" type="submit">Continue</button></div>
       </form>
+    </section>
+
+    <section id="bride-view" class="view narrow" hidden>
+      <div id="bride-invalid" hidden><h1>This link isn't working.</h1><p class="intro">Ask your maid of honor to send it again.</p></div>
+      <div id="bride-intro" hidden>
+        <p class="eyebrow">You're the guest of honor</p>
+        <h1 id="bride-hello">Your squad is planning something for you.</h1>
+        <p class="intro">You don't have to plan a thing. Tell us what you love and what you don't, and the rest is a surprise.</p>
+        <div class="actions"><button id="bride-start" type="button">Tell us about you</button></div>
+        <p class="quiet">Takes 2 minutes. Only your squad sees your answers.</p>
+        <div class="landing-note"><b>No spoilers.</b><p>You won't see the budget, the itinerary, or the guest list unless your squad decides to reveal it.</p></div>
+      </div>
+      <form id="bride-form" class="form-panel" hidden>
+        <p id="bride-step" class="eyebrow"></p><h1 id="bride-heading"></h1><p id="bride-sub" class="intro"></p>
+        <fieldset data-step="1"><legend class="sr-only">Your ideal weekend</legend>
+          <label class="check-row"><input type="checkbox" name="vibe" value="Spa and slow"><span>Spa and slow</span></label>
+          <label class="check-row"><input type="checkbox" name="vibe" value="Big night out"><span>Big night out</span></label>
+          <label class="check-row"><input type="checkbox" name="vibe" value="Outdoors and active"><span>Outdoors and active</span></label>
+          <label class="check-row"><input type="checkbox" name="vibe" value="Food and wine"><span>Food and wine</span></label>
+          <label class="check-row"><input type="checkbox" name="vibe" value="Beach"><span>Beach</span></label>
+          <label class="check-row"><input type="checkbox" name="vibe" value="A mix of everything"><span>A mix of everything</span></label>
+          <span class="field-help">Pick up to two.</span>
+        </fieldset>
+        <fieldset data-step="2"><legend class="sr-only">Things to know</legend>
+          <label>Dates you can't do<input name="unavailable" maxlength="200" placeholder="e.g. June 7–9"></label>
+          <label>Dietary needs and accessibility<input name="needs" maxlength="300"></label>
+          <label>Hard no's<textarea name="hard_nos" maxlength="500" rows="3" placeholder="e.g. no strip clubs, no surprise performances"></textarea></label>
+        </fieldset>
+        <fieldset data-step="3"><legend class="sr-only">Surprise level</legend>
+          <label>Surprise level<input name="surprise" type="range" min="0" max="4" value="3"><span class="field-help">From "Tell me everything" to "Total surprise".</span></label>
+          <label>A note to the squad (optional)<textarea name="note" maxlength="500" rows="3"></textarea></label>
+        </fieldset>
+        <p class="form-error" role="alert"></p>
+        <div class="form-actions"><button id="bride-back" class="secondary" type="button" hidden>Back</button><button id="bride-next" type="submit">Continue</button></div>
+      </form>
+      <div id="bride-done" hidden><h1>You're all set.</h1><p class="intro">Your squad has your answers. Now sit back. Everything else is a surprise.</p></div>
     </section>
 
     <!-- Product managers: planner views and interactions are in app.js. Designers: shared styles are in styles.css. -->

@@ -38,3 +38,16 @@ Agree on new persisted data fields with Ben. Keep the starter IDs and relationsh
 - Commit only your intended Drift changes.
 - Coordinate one team publisher at a time. Merge ready work through the `team/drift` publish worktree and push only `team/drift`, following `AGENTS.md`.
 - Keep session branches local. Do not push to `main` or another team's branch, discard another session's work, or force-push.
+
+
+## Latest PM refinement: calmer main screen
+
+Use a collapsible left sidebar in the desktop web view for trip sections, general chat, people/status details, and the mascot controls. Keep the main screen focused on the trip title, its primary action, and the selected plans. Hide secondary metrics and demo mood controls under expandable sidebar sections. Open contextual discussions on demand in a side drawer instead of displaying a chat panel permanently. On mobile, use a Trip menu button to reveal the sidebar and keep it closed while browsing plans. The PM wireframe now demonstrates this behaviour.
+
+
+## Dedicated partner discounts section
+
+Add a visible **Partner discounts** navigation entry, separate from the itinerary. Cover hotel partners, car rentals/vans, local guides, tours/activities, and other travel partners. Each offer must show the provider/source link, eligible dates, expiry, group-size requirements, original price, discount type and amount, currency, fees/exclusions, cancellation terms, and verification status. Keep the final payable total clear. Offer cards can have contextual group questions and a responsible person to check the deal. The wireframe now includes fictional hotel, car rental, and guide offers. These are examples, not existing partnerships, live quotes, negotiated deals, or guaranteed savings. Do not count unverified offers as confirmed trip bookings or mascot readiness.
+
+
+Ronak has now published redesigned GroupAtion onboarding at `/#new`; preserve that working, persisted flow. The PM planner preview remains separately available at `/groupation-wireframe.html`. Integrate the agreed design into the working product in coordination with the team; do not replace real trip creation with the in-memory preview.

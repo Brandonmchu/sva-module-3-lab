@@ -176,6 +176,50 @@ function renderPerson(person, current) {
     <p>${escapeHtml(person.interests.join(', ') || 'No interests added yet.')}</p><div class="person-actions"><button class="text-button" data-action="edit-traveler" data-id="${escapeHtml(person.id)}">Edit preferences</button><button class="text-button danger" data-action="remove-traveler" data-id="${escapeHtml(person.id)}">Remove</button></div></article>`;
 }
 
+// Best-dates finder: turn everyone's availability into a date the whole group can say yes to.
+const addDays = (value, days) => new Date(Date.parse(value + 'T00:00:00Z') + days * 86400000).toISOString().slice(0, 10);
+const dayCount = (start, end) => Math.round((Date.parse(end + 'T00:00:00Z') - Date.parse(start + 'T00:00:00Z')) / 86400000) + 1;
+const canMake = (person, start, end) => person.available_from <= start && person.available_to >= end;
+const names = list => list.map(person => person.name).join(', ');
+
+function findDates(current, people) {
+  const length = dayCount(current.start_date, current.end_date);
+  const goingNow = people.filter(person => canMake(person, current.start_date, current.end_date));
+  const from = people.map(person => person.available_from).sort().at(-1);
+  const to = people.map(person => person.available_to).sort()[0];
+  const shared = from <= to ? { start: from, end: dayCount(from, to) >= length ? addDays(from, length - 1) : to } : null;
+  // Same-length windows that start when someone becomes free. Keep the current dates on a tie.
+  let best = { start: current.start_date, end: current.end_date, going: goingNow };
+  for (const start of [...new Set(people.map(person => person.available_from))].sort()) {
+    const end = addDays(start, length - 1);
+    const going = people.filter(person => canMake(person, start, end));
+    if (going.length > best.going.length) best = { start, end, going };
+  }
+  return { length, goingNow, shared, best };
+}
+
+function renderDateFinder(current, people) {
+  if (!people.length) return '';
+  const { length, goingNow, shared, best } = findDates(current, people);
+  if (goingNow.length === people.length) {
+    return `<section class="date-finder good" aria-label="Best dates"><b>Everyone can make ${dateRange(current.start_date, current.end_date)}.</b><span>All ${people.length} travelers are free on the trip dates.</span></section>`;
+  }
+  const missingNow = people.filter(person => !goingNow.includes(person));
+  const useButton = (start, end, going) => `<button class="small" data-action="apply-dates" data-start="${start}" data-end="${end}" data-going="${going}">Use these dates</button>`;
+  const options = [];
+  if (shared) {
+    const days = dayCount(shared.start, shared.end);
+    options.push(`<li><span><b>${dateRange(shared.start, shared.end)}</b> · everyone can come${days < length ? ` (${days} ${days === 1 ? 'day' : 'days'} instead of ${length})` : ''}</span>${useButton(shared.start, shared.end, people.length)}</li>`);
+  }
+  if (best.going.length > goingNow.length && !(shared && best.going.length === people.length)) {
+    const missing = people.filter(person => !best.going.includes(person));
+    options.push(`<li><span><b>${dateRange(best.start, best.end)}</b> · ${best.going.length} of ${people.length} can come${missing.length ? ` (not ${escapeHtml(names(missing))})` : ''}</span>${useButton(best.start, best.end, best.going.length)}</li>`);
+  }
+  return `<section class="date-finder" aria-label="Best dates"><b>${goingNow.length} of ${people.length} can make the current dates.</b><span>Not available: ${escapeHtml(names(missingNow))}.</span>
+    ${options.length ? `<ul>${options.join('')}</ul>` : ''}
+    ${shared ? '' : `<p class="quiet">No dates work for everyone. Ask ${escapeHtml(names(missingNow))} to widen their availability.</p>`}</section>`;
+}
+
 function renderPlanner() {
   const current = trip();
   if (!current) {
@@ -191,6 +235,7 @@ function renderPlanner() {
   $('#planner-view').innerHTML = `<div class="planner-top"><div><p class="eyebrow">Your shared weekend</p><h1>${escapeHtml(current.title)}</h1><p>${escapeHtml(current.destination)} · ${dateRange(current.start_date, current.end_date)}</p></div>
     <label class="trip-selector">Your trips<select id="trip-select">${product.trips.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current.id ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}</select></label></div>
     <div class="planner-toolbar"><span class="status-badge">${escapeHtml(statusName(current.status))}</span><div class="planner-actions"><button class="secondary small" data-action="edit-trip">Edit trip</button><button class="small" data-action="confirm-plan">${current.status === 'confirmed' ? 'Reopen planning' : 'Confirm plan'}</button></div></div>
+    ${renderDateFinder(current, people)}
     <div class="planner-columns"><div class="itinerary"><div class="section-heading"><h2>Shared itinerary</h2><button class="small" data-action="add-activity">Add activity</button></div>
       <div class="itinerary-summary"><strong>${escapeHtml(money(cost))}</strong><span>estimated per person · activities only</span><span>Trip budget: ${escapeHtml(money(current.budget_per_person))}</span></div>
       ${cost > current.budget_per_person ? '<p class="budget-message">The activities exceed the trip budget per person.</p>' : ''}
@@ -345,6 +390,11 @@ async function handleAction(button) {
   if (['accept-activity', 'remove-activity', 'restore-activity'].includes(action)) {
     const status = { 'accept-activity': 'accepted', 'remove-activity': 'removed', 'restore-activity': 'proposed' }[action];
     return saveChange(next => { next.activities.find(activity => activity.id === id).status = status; }, event('plan_updated', { trip_id: current.id, activity_id: id, status }));
+  }
+  if (action === 'apply-dates') {
+    const { start, end, going } = button.dataset;
+    return saveChange(next => Object.assign(next.trips.find(item => item.id === current.id), { start_date: start, end_date: end }),
+      event('dates_applied', { trip_id: current.id, start_date: start, end_date: end, travelers_available: Number(going), travelers_total: travelersFor(current.id).length }));
   }
   if (action === 'confirm-plan') {
     const status = current.status === 'confirmed' ? 'planning' : 'confirmed';

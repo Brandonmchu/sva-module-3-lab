@@ -10,6 +10,16 @@
       "budget_per_person": 350,
       "currency": "CAD",
       "status": "planning"
+    },
+    {
+      "title": "Weekend with Friends",
+      "destination": "Germany",
+      "start_date": "2026-11-25",
+      "end_date": "2026-12-29",
+      "budget_per_person": 1000,
+      "currency": "CAD",
+      "id": "trip-602230dc-c536-4161-8493-88493d61b1fc",
+      "status": "planning"
     }
   ],
   "travelers": [
@@ -48,6 +58,15 @@
         "outdoors",
         "music"
       ]
+    },
+    {
+      "name": "Jake",
+      "available_from": "2026-11-25",
+      "available_to": "2026-12-29",
+      "budget": 1000,
+      "interests": [],
+      "id": "traveler-e159080c-accd-4bf3-8a77-1c6c82982972",
+      "trip_id": "trip-602230dc-c536-4161-8493-88493d61b1fc"
     }
   ],
   "activities": [

@@ -7,7 +7,9 @@
     "trips",
     "travelers",
     "activities",
-    "responses"
+    "responses",
+    "expenses",
+    "settlements"
   ],
   "properties": {
     "version": {
@@ -36,6 +38,18 @@
       "type": "array",
       "items": {
         "$ref": "#/$defs/response"
+      }
+    },
+    "expenses": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/expense"
+      }
+    },
+    "settlements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/settlement"
       }
     }
   },
@@ -230,6 +244,67 @@
         "comment": {
           "type": "string"
         }
+      },
+      "additionalProperties": true
+    },
+    "expense": {
+      "type": "object",
+      "required": [
+        "id",
+        "trip_id",
+        "title",
+        "date",
+        "category",
+        "amount",
+        "paid_by_traveler_id",
+        "split_mode",
+        "splits"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "trip_id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "format": "date" },
+        "category": { "type": "string", "minLength": 1 },
+        "amount": { "type": "number", "minimum": 0 },
+        "paid_by_traveler_id": { "type": "string", "minLength": 1 },
+        "split_mode": { "type": "string", "enum": ["amount", "percentage"] },
+        "splits": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/expenseSplit" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "expenseSplit": {
+      "type": "object",
+      "required": ["traveler_id", "share", "amount"],
+      "properties": {
+        "traveler_id": { "type": "string", "minLength": 1 },
+        "share": { "type": "number", "minimum": 0 },
+        "amount": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": true
+    },
+    "settlement": {
+      "type": "object",
+      "required": [
+        "id",
+        "trip_id",
+        "from_traveler_id",
+        "to_traveler_id",
+        "amount",
+        "date",
+        "note"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "trip_id": { "type": "string", "minLength": 1 },
+        "from_traveler_id": { "type": "string", "minLength": 1 },
+        "to_traveler_id": { "type": "string", "minLength": 1 },
+        "amount": { "type": "number", "minimum": 0 },
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "format": "date" },
+        "note": { "type": "string" }
       },
       "additionalProperties": true
     }

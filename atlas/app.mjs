@@ -44,7 +44,7 @@ function validateValue(value, rule, label) {
 function validateProduct(product) {
   validateValue(product, productSchema, 'product');
   const records = {};
-  for (const table of ['trips', 'travelers', 'activities', 'responses']) {
+  for (const table of ['trips', 'travelers', 'activities', 'responses', 'expenses', 'settlements']) {
     records[table] = new Map();
     for (const row of product[table]) {
       if (records[table].has(row.id)) throw fail('Duplicate ' + table + ' id: ' + row.id);
@@ -52,7 +52,7 @@ function validateProduct(product) {
     }
   }
   for (const trip of product.trips) if (trip.start_date > trip.end_date) throw fail('Trip end_date must follow start_date.');
-  for (const table of ['travelers', 'activities', 'responses']) {
+  for (const table of ['travelers', 'activities', 'responses', 'expenses', 'settlements']) {
     for (const row of product[table]) if (!records.trips.has(row.trip_id)) throw fail(table + ' references an unknown trip_id: ' + row.trip_id);
   }
   for (const traveler of product.travelers) {
@@ -61,6 +61,30 @@ function validateProduct(product) {
   for (const response of product.responses) {
     if (records.travelers.get(response.traveler_id)?.trip_id !== response.trip_id) throw fail('Response traveler_id must belong to its trip.');
     if (records.activities.get(response.activity_id)?.trip_id !== response.trip_id) throw fail('Response activity_id must belong to its trip.');
+  }
+  for (const expense of product.expenses) {
+    if (expense.amount <= 0) throw fail('Expense amount must be greater than zero.');
+    if (records.travelers.get(expense.paid_by_traveler_id)?.trip_id !== expense.trip_id) throw fail('Expense payer must belong to its trip.');
+    if (!expense.splits.length) throw fail('Each expense must be split among at least one traveler.');
+    const splitTravelers = new Set();
+    let shareTotal = 0;
+    let amountTotal = 0;
+    for (const split of expense.splits) {
+      if (records.travelers.get(split.traveler_id)?.trip_id !== expense.trip_id) throw fail('Expense split traveler must belong to its trip.');
+      if (splitTravelers.has(split.traveler_id)) throw fail('An expense cannot include the same traveler more than once.');
+      splitTravelers.add(split.traveler_id);
+      shareTotal += Math.round(split.share * 100);
+      amountTotal += Math.round(split.amount * 100);
+    }
+    if (expense.split_mode === 'percentage' && shareTotal !== 10000) throw fail('Expense percentage shares must total 100%.');
+    if (expense.split_mode === 'amount' && shareTotal !== Math.round(expense.amount * 100)) throw fail('Expense amount shares must equal the expense total.');
+    if (amountTotal !== Math.round(expense.amount * 100)) throw fail('Expense allocated amounts must equal the expense total.');
+  }
+  for (const settlement of product.settlements) {
+    if (settlement.amount <= 0) throw fail('Settlement amount must be greater than zero.');
+    if (settlement.from_traveler_id === settlement.to_traveler_id) throw fail('A settlement must be between two different travelers.');
+    if (records.travelers.get(settlement.from_traveler_id)?.trip_id !== settlement.trip_id) throw fail('Settlement payer must belong to its trip.');
+    if (records.travelers.get(settlement.to_traveler_id)?.trip_id !== settlement.trip_id) throw fail('Settlement recipient must belong to its trip.');
   }
 }
 

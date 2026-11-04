@@ -15,6 +15,7 @@
     <nav aria-label="Main navigation">
       <a href="#home">Home</a>
       <a id="planner-link" href="#home" hidden>Open planner</a>
+      <a id="calendar-link" href="#calendar" hidden>Calendar</a>
       <a class="button small" href="#new">Start a trip</a>
     </nav>
   </header>
@@ -62,6 +63,7 @@
 
     <!-- Product managers: planner views and interactions are in app.js. Designers: shared styles are in styles.css. -->
     <section id="planner-view" class="view planner" hidden></section>
+    <section id="calendar-view" class="view calendar" hidden></section>
   </main>
 
   <dialog id="trip-dialog" aria-labelledby="trip-dialog-heading">
@@ -88,6 +90,29 @@
       <div class="form-grid"><label>Date<input name="date" type="date" required></label><label>Category<input name="category" required placeholder="Food, outdoors, music"></label></div>
       <div class="form-grid"><label>Estimated cost per person<input name="estimated_cost_per_person" type="number" min="0" step="0.01" required></label><label>Plan status<select name="status"><option value="proposed">Proposed</option><option value="accepted">Agreed</option><option value="removed">Removed</option></select></label></div>
       <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save activity</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="expense-dialog" class="expense-dialog" aria-labelledby="expense-dialog-heading">
+    <form id="expense-form"><div class="dialog-header"><h2 id="expense-dialog-heading">Add an expense</h2><button type="button" class="text-button" data-close="expense-dialog">Close</button></div>
+      <input name="id" type="hidden">
+      <label>What was the expense?<input name="title" required maxlength="120" placeholder="Groceries, cabin, fuel"></label>
+      <div class="form-grid"><label>Date<input name="date" type="date" required></label><label>Category<input name="category" required maxlength="60" placeholder="Lodging, food, travel"></label></div>
+      <div class="form-grid"><label>Total amount<input name="amount" type="number" min="0.01" step="0.01" required></label><label>Paid by<select id="expense-payer" name="paid_by_traveler_id" required></select></label></div>
+      <label>Split by<select name="split_mode" id="expense-split-mode"><option value="percentage">Custom percentages</option><option value="amount">Custom amounts</option></select></label>
+      <fieldset class="expense-split-editor"><legend>Who shares this expense?</legend><p id="split-unit" class="field-help">Percent of total</p><div id="expense-split-fields"></div></fieldset>
+      <p class="split-help">Percentage splits must total 100%. Amount splits must match the full expense total.</p>
+      <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save expense</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="settlement-dialog" aria-labelledby="settlement-dialog-heading">
+    <form id="settlement-form"><div class="dialog-header"><h2 id="settlement-dialog-heading">Record a payment</h2><button type="button" class="text-button" data-close="settlement-dialog">Close</button></div>
+      <div class="form-grid"><label>From<select id="settlement-from" name="from_traveler_id" required></select></label><label>To<select id="settlement-to" name="to_traveler_id" required></select></label></div>
+      <div class="form-grid"><label>Amount<input name="amount" type="number" min="0.01" step="0.01" required></label><label>Date<input name="date" type="date" required></label></div>
+      <label>Note<input name="note" maxlength="160" placeholder="Optional payment note"></label>
+      <p class="field-help">Payments can only be recorded between travelers who currently owe one another.</p>
+      <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save payment</button></div>
     </form>
   </dialog>
 </body>

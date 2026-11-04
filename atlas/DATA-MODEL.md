@@ -8,6 +8,7 @@ The working app uses this model. Your team chooses how to change the product exp
 `data/product.json` holds the current product state.
 `data/product.schema.json` defines the base fields and types.
 The sample has one trip, three travelers, three activities, and two responses.
+It also starts with empty expenses and settlements.
 All prices, places, and people are fictional.
 
 | Collection | Main fields | Relationship |
@@ -16,9 +17,16 @@ All prices, places, and people are fictional.
 | travelers | id, trip_id, name, available_from, available_to, budget, interests | Each traveler belongs to a trip. |
 | activities | id, trip_id, title, date, category, estimated_cost_per_person, status | Each activity belongs to a trip. |
 | responses | id, trip_id, traveler_id, activity_id, vote, comment | A traveler responds to an activity in that trip. |
+| expenses | id, trip_id, title, date, category, amount, paid_by_traveler_id, split_mode, splits | Each trip expense records its payer and the travelers' custom amount or percentage shares. |
+| settlements | id, trip_id, from_traveler_id, to_traveler_id, amount, date, note | A recorded repayment reduces the payer's debt and the recipient's credit. |
 
 Trips → travelers and activities → responses.
 The response links one traveler to one activity through their IDs.
+Expenses and settlements also reference travelers in their trip.
+
+Expense amounts use the trip currency. Each split stores both the entered share
+and its allocated amount; percentage allocations round to cents while preserving
+the exact expense total. Balances combine expenses and recorded settlements.
 
 Dates use YYYY-MM-DD. Budgets and activity costs use the trip currency and represent one person's amount.
 Availability can conflict with the trip dates. Preferences and votes can conflict too.
@@ -59,7 +67,7 @@ Use a traveler ID as actor_id when it is known. Before that, a fictional visitor
 Put trip_id and activity_id in properties when the event concerns those records.
 The product snapshot does not need rows for virtual simulation actors.
 
-Suggested event names: landing_viewed, onboarding_started, trip_created, traveler_added, activity_proposed, response_submitted, plan_viewed, plan_updated, plan_confirmed.
+Suggested event names: landing_viewed, onboarding_started, trip_created, traveler_added, activity_proposed, response_submitted, plan_viewed, plan_updated, plan_confirmed, calendar_viewed, expense_added, expense_updated, expense_removed, settlement_recorded, settlement_removed.
 Your team can add event names as necessary.
 
 ## Extend the model

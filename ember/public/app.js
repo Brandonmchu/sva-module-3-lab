@@ -25,6 +25,11 @@ const trip = () => product?.trips.find(item => item.id === route().id);
 const travelersFor = tripId => product.travelers.filter(person => person.trip_id === tripId);
 const activitiesFor = tripId => product.activities.filter(activity => activity.trip_id === tripId);
 const actor = () => selectedTravelers.get(trip()?.id) || visitorId;
+// Bachelorette: one traveler per trip. Surprise activities are hidden whenever she is the viewer.
+const brideFor =tripRecord => product.travelers.find(person => person.id === tripRecord?.bachelorette_id && person.trip_id === tripRecord.id);
+const viewerIsBride = tripRecord => Boolean(tripRecord?.bachelorette_id) && selectedTravelers.get(tripRecord.id) === tripRecord.bachelorette_id;
+const isSurprise = activity => activity.hidden_from_bachelorette === true;
+const visibleTo = (tripRecord, activity) => !(viewerIsBride(tripRecord) && isSurprise(activity));
 const event = (name, properties, actorId = actor()) => ({ event: name, actor_id: actorId, source: 'product', properties: { visitor_id: visitorId, ...properties } });
 const interests = value => [...new Set(value.split(',').map(item => item.trim()).filter(Boolean))];
 const dateText = value => new Intl.DateTimeFormat('en-CA', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(value + 'T12:00:00Z'));
@@ -87,7 +92,8 @@ function fillForm(form, values) {
   $('.form-error', form).textContent = '';
   for (const [name, value] of Object.entries(values)) {
     const input = form.elements.namedItem(name);
-    if (input) input.value = Array.isArray(value) ? value.join(', ') : value;
+    if (input?.type === 'checkbox') input.checked = value === true;
+    else if (input) input.value = Array.isArray(value) ? value.join(', ') : value;
   }
 }
 
@@ -98,12 +104,18 @@ function openEditor(kind, id) {
   let values;
   if (kind === 'trip') values = current;
   if (kind === 'traveler') {
-    values = product.travelers.find(person => person.id === id) || { id: '', name: '', available_from: current.start_date, available_to: current.end_date, budget: current.budget_per_person, interests: [] };
+    const existing = product.travelers.find(person => person.id === id) || { id: '', name: '', available_from: current.start_date, available_to: current.end_date, budget: current.budget_per_person, interests: [] };
+    values = { ...existing, is_bachelorette: Boolean(id) && current.bachelorette_id === id };
     $('#traveler-dialog-heading').textContent = id ? 'Edit traveler' : 'Add traveler';
+    $('#bride-row').hidden = viewerIsBride(current);
   }
   if (kind === 'activity') {
-    values = product.activities.find(activity => activity.id === id) || { id: '', title: '', date: current.start_date, category: '', estimated_cost_per_person: 0, status: 'proposed' };
+    values = product.activities.find(activity => activity.id === id) || { id: '', title: '', date: current.start_date, category: '', estimated_cost_per_person: 0, status: 'proposed', hidden_from_bachelorette: false };
     $('#activity-dialog-heading').textContent = id ? 'Edit activity' : 'Add an activity';
+    // The bachelorette never sees the surprise control, so the feature itself stays a secret.
+    const bride = brideFor(current);
+    $('#surprise-row').hidden = !bride || viewerIsBride(current);
+    if (bride) $('#surprise-help').textContent = `${bride.name} won't see this activity, its cost, or the group's responses.`;
   }
   fillForm(form, values);
   $('#' + kind + '-dialog').showModal();
@@ -137,7 +149,8 @@ function renderHome() {
     $('#sample-preview').innerHTML = '<h2>Your next weekend starts here.</h2><p class="intro">Create a trip and invite your group into the plan.</p>';
     return;
   }
-  const ideas = activitiesFor(sample.id).filter(activity => activity.status !== 'removed');
+  // The landing page is shared, so it never previews surprise activities.
+  const ideas = activitiesFor(sample.id).filter(activity => activity.status !== 'removed' && !isSurprise(activity));
   $('#sample-link').href = '#trip/' + encodeURIComponent(sample.id);
   $('#sample-preview').innerHTML = `<p class="eyebrow">A sample to try</p><h2>${escapeHtml(sample.title)}</h2><p class="quiet">${escapeHtml(sample.destination)} · ${dateRange(sample.start_date, sample.end_date)}</p>
     <div class="sample-meta"><div><span>Travelers</span><b>${travelersFor(sample.id).length} people</b></div><div><span>Budget per person</span><b>${escapeHtml(money(sample.budget_per_person, sample.currency))}</b></div></div>
@@ -156,11 +169,15 @@ function renderActivity(activity, current, people) {
   const mine = responseFor(activity.id, selected);
   const totals = ['yes', 'maybe', 'no'].map(vote => responses.filter(item => item.response.vote === vote).length + ' ' + vote).join(' · ');
   const outsideDates = activity.date < current.start_date || activity.date > current.end_date;
-  return `<article class="activity" data-activity-id="${escapeHtml(activity.id)}">
+  const bride = brideFor(current);
+  const surprise = isSurprise(activity);
+  const showSurpriseControls = bride && !viewerIsBride(current);
+  const surpriseToggle = showSurpriseControls ? `<button class="text-button" data-action="toggle-surprise" data-id="${escapeHtml(activity.id)}">${surprise ? 'Show to ' + escapeHtml(bride.name) : 'Hide from ' + escapeHtml(bride.name)}</button>` : '';
+  return `<article class="activity ${surprise && showSurpriseControls ? 'surprise' : ''}" data-activity-id="${escapeHtml(activity.id)}">
     <div class="activity-heading"><h3>${escapeHtml(activity.title)}</h3><span class="activity-cost">${escapeHtml(money(activity.estimated_cost_per_person))}</span></div>
-    <div class="activity-meta"><span>${escapeHtml(activity.category)}</span><span class="status-badge ${activity.status === 'proposed' ? 'proposed' : ''}">${escapeHtml(statusName(activity.status))}</span><span class="vote-totals">${totals}</span></div>
+    <div class="activity-meta"><span>${escapeHtml(activity.category)}</span><span class="status-badge ${activity.status === 'proposed' ? 'proposed' : ''}">${escapeHtml(statusName(activity.status))}</span>${surprise && showSurpriseControls ? `<span class="status-badge surprise">Surprise · hidden from ${escapeHtml(bride.name)}</span>` : ''}<span class="vote-totals">${totals}</span></div>
     ${outsideDates ? '<p class="budget-message">This activity is outside the trip dates.</p>' : ''}
-    <div class="activity-actions"><button class="text-button" data-action="edit-activity" data-id="${escapeHtml(activity.id)}">Edit activity</button>${activity.status !== 'accepted' ? `<button class="text-button" data-action="accept-activity" data-id="${escapeHtml(activity.id)}">Mark agreed</button>` : ''}<button class="text-button danger" data-action="remove-activity" data-id="${escapeHtml(activity.id)}">Remove</button></div>
+    <div class="activity-actions"><button class="text-button" data-action="edit-activity" data-id="${escapeHtml(activity.id)}">Edit activity</button>${surpriseToggle}${activity.status !== 'accepted' ? `<button class="text-button" data-action="accept-activity" data-id="${escapeHtml(activity.id)}">Mark agreed</button>` : ''}<button class="text-button danger" data-action="remove-activity" data-id="${escapeHtml(activity.id)}">Remove</button></div>
     <form class="response-form" data-activity-id="${escapeHtml(activity.id)}"><fieldset ${person ? '' : 'disabled'}><legend>${person ? 'Your response as ' + escapeHtml(person.name) : 'Add a traveler to respond'}</legend>
       <div class="response-fields"><label>Vote<select name="vote" required><option value="" disabled ${mine ? '' : 'selected'}>Choose</option>${['yes', 'maybe', 'no'].map(vote => `<option value="${vote}" ${mine?.vote === vote ? 'selected' : ''}>${vote[0].toUpperCase() + vote.slice(1)}</option>`).join('')}</select></label>
       <label>Comment<input name="comment" value="${escapeHtml(mine?.comment || '')}" placeholder="An optional note" maxlength="500"></label><button class="secondary small" type="submit">Save response</button></div>
@@ -171,9 +188,15 @@ function renderActivity(activity, current, people) {
 
 function renderPerson(person, current) {
   const partial = person.available_from > current.start_date || person.available_to < current.end_date;
+  const isBride = current.bachelorette_id === person.id;
+  // Once a bachelorette is set, only she can be unassigned; this avoids accidental swaps.
+  const brideButton = viewerIsBride(current) ? '' : isBride
+    ?`<button class="text-button" data-action="unset-bachelorette" data-id="${escapeHtml(person.id)}">Unassign</button>`
+    : (!current.bachelorette_id ? `<button class="text-button" data-action="set-bachelorette" data-id="${escapeHtml(person.id)}">Make bachelorette</button>` : '');
   return `<article class="person"><div class="person-heading"><h3>${escapeHtml(person.name)}</h3><span class="quiet">${escapeHtml(money(person.budget))}</span></div>
+    ${isBride ? '<span class="status-badge bride">Bachelorette</span>' : ''}
     <p>${dateRange(person.available_from, person.available_to)}</p>${partial ? '<p class="availability-warning">Availability differs from the trip dates.</p>' : ''}
-    <p>${escapeHtml(person.interests.join(', ') || 'No interests added yet.')}</p><div class="person-actions"><button class="text-button" data-action="edit-traveler" data-id="${escapeHtml(person.id)}">Edit preferences</button><button class="text-button danger" data-action="remove-traveler" data-id="${escapeHtml(person.id)}">Remove</button></div></article>`;
+    <p>${escapeHtml(person.interests.join(', ') || 'No interests added yet.')}</p><div class="person-actions">${brideButton}<button class="text-button" data-action="edit-traveler" data-id="${escapeHtml(person.id)}">Edit preferences</button><button class="text-button danger" data-action="remove-traveler" data-id="${escapeHtml(person.id)}">Remove</button></div></article>`;
 }
 
 function renderPlanner() {
@@ -184,8 +207,14 @@ function renderPlanner() {
   }
   const people = travelersFor(current.id);
   if (!people.some(person => person.id === selectedTravelers.get(current.id))) selectedTravelers.set(current.id, people[0]?.id || '');
-  const activities = activitiesFor(current.id).filter(activity => activity.status !== 'removed').sort((a, b) => a.date.localeCompare(b.date));
-  const removed = activitiesFor(current.id).filter(activity => activity.status === 'removed');
+  const visible = activitiesFor(current.id).filter(activity => visibleTo(current, activity));
+  const activities = visible.filter(activity => activity.status !== 'removed').sort((a, b) => a.date.localeCompare(b.date));
+  const removed = visible.filter(activity => activity.status === 'removed');
+  const bride = brideFor(current);
+  const surpriseCount = activities.filter(isSurprise).length;
+  const surpriseNote = bride && !viewerIsBride(current)
+    ? `<p class="surprise-note">${surpriseCount ? `${surpriseCount} surprise ${surpriseCount === 1 ? 'activity is' : 'activities are'} hidden from ${escapeHtml(bride.name)}. Switch “Viewing as” to ${escapeHtml(bride.name)} to see her version of the plan.` : `Use “Hide from ${escapeHtml(bride.name)}” on any activity to keep it a surprise.`}</p>`
+    : '';
   const cost = activities.reduce((total, activity) => total + activity.estimated_cost_per_person, 0);
   const days = [...new Set(activities.map(activity => activity.date))];
   $('#planner-view').innerHTML = `<div class="planner-top"><div><p class="eyebrow">Your shared weekend</p><h1>${escapeHtml(current.title)}</h1><p>${escapeHtml(current.destination)} · ${dateRange(current.start_date, current.end_date)}</p></div>
@@ -194,10 +223,11 @@ function renderPlanner() {
     <div class="planner-columns"><div class="itinerary"><div class="section-heading"><h2>Shared itinerary</h2><button class="small" data-action="add-activity">Add activity</button></div>
       <div class="itinerary-summary"><strong>${escapeHtml(money(cost))}</strong><span>estimated per person · activities only</span><span>Trip budget: ${escapeHtml(money(current.budget_per_person))}</span></div>
       ${cost > current.budget_per_person ? '<p class="budget-message">The activities exceed the trip budget per person.</p>' : ''}
+      ${surpriseNote}
       ${activities.length ? days.map(day => `<h3 class="day-heading">${dateText(day)}</h3>${activities.filter(activity => activity.date === day).map(activity => renderActivity(activity, current, people)).join('')}`).join('') : '<div class="empty-state"><h3>The plan is open.</h3><p>Add an activity, give it a date and cost, then ask the group to respond.</p><button data-action="add-activity">Add the first activity</button></div>'}
       ${removed.length ? `<details class="removed-list"><summary>Removed activities (${removed.length})</summary>${removed.map(activity => `<div class="removed-row"><span>${escapeHtml(activity.title)}</span><button class="text-button" data-action="restore-activity" data-id="${escapeHtml(activity.id)}">Restore</button></div>`).join('')}</details>` : ''}
     </div><aside class="people-panel"><div class="section-heading"><h2>Travelers</h2><button class="text-button" data-action="add-traveler">Add traveler</button></div>
-      ${people.length ? `<label class="viewing-as">Viewing as<select id="traveler-select">${people.map(person => `<option value="${escapeHtml(person.id)}" ${person.id === selectedTravelers.get(current.id) ? 'selected' : ''}>${escapeHtml(person.name)}</option>`).join('')}</select><span class="field-help">Take turns as different travelers on this screen.</span></label>${people.map(person => renderPerson(person, current)).join('')}` : '<div class="empty-state"><p>Add the people who are going on this trip.</p><button data-action="add-traveler">Add a traveler</button></div>'}
+      ${people.length ? `<label class="viewing-as">Viewing as<select id="traveler-select">${people.map(person => `<option value="${escapeHtml(person.id)}" ${person.id === selectedTravelers.get(current.id) ? 'selected' : ''}>${escapeHtml(person.name)}${person.id === current.bachelorette_id ? ' (bachelorette)' : ''}</option>`).join('')}</select><span class="field-help">Take turns as different travelers on this screen.</span></label>${people.map(person => renderPerson(person, current)).join('')}` : '<div class="empty-state"><p>Add the people who are going on this trip.</p><button data-action="add-traveler">Add a traveler</button></div>'}
     </aside></div>`;
 }
 
@@ -282,10 +312,19 @@ $('#traveler-form').addEventListener('submit', eventObject => {
     const current = trip();
     const oldId = form.elements.namedItem('id').value;
     const person = { ...readTravelerForm(form), id: oldId || 'traveler-' + crypto.randomUUID(), trip_id: current.id };
+    // When the bachelorette edits her own preferences the checkbox is hidden, so keep the current assignment.
+    const wantsBride = viewerIsBride(current) ? current.bachelorette_id === person.id : form.elements.namedItem('is_bachelorette').checked;
+    const wasBride = current.bachelorette_id === person.id;
+    const records = [event(oldId ? 'traveler_updated' : 'traveler_added', { trip_id: current.id, traveler_id: person.id })];
+    if (wantsBride && !wasBride) records.push(event('bachelorette_assigned', { trip_id: current.id, traveler_id: person.id }));
+    if (!wantsBride && wasBride) records.push(event('bachelorette_unassigned', { trip_id: current.id, traveler_id: person.id }));
     await saveChange(next => {
       const old = next.travelers.find(item => item.id === person.id);
       if (old) Object.assign(old, person); else next.travelers.push(person);
-    }, event(oldId ? 'traveler_updated' : 'traveler_added', { trip_id: current.id, traveler_id: person.id }));
+      const nextTrip = next.trips.find(item => item.id === current.id);
+      if (wantsBride) nextTrip.bachelorette_id = person.id;
+      else if (wasBride) delete nextTrip.bachelorette_id;
+    }, records);
     $('#traveler-dialog').close();
   });
 });
@@ -296,11 +335,14 @@ $('#activity-form').addEventListener('submit', eventObject => {
   submitForm(form, async () => {
     const values = Object.fromEntries(new FormData(form));
     const current = trip();
-    const activity = { ...values, id: values.id || 'activity-' + crypto.randomUUID(), trip_id: current.id, title: values.title.trim(), category: values.category.trim(), estimated_cost_per_person: Number(values.estimated_cost_per_person) };
+    const existing = product.activities.find(item => item.id === values.id);
+    // Only someone other than the bachelorette can change surprise status; her edits keep the current value.
+    const hidden = brideFor(current) && !viewerIsBride(current) ? form.elements.namedItem('hidden_from_bachelorette').checked : existing?.hidden_from_bachelorette === true;
+    const activity = { ...values, id: values.id || 'activity-' + crypto.randomUUID(), trip_id: current.id, title: values.title.trim(), category: values.category.trim(), estimated_cost_per_person: Number(values.estimated_cost_per_person), hidden_from_bachelorette: hidden };
     await saveChange(next => {
       const old = next.activities.find(item => item.id === activity.id);
       if (old) Object.assign(old, activity); else next.activities.push(activity);
-    }, event(values.id ? 'plan_updated' : 'activity_proposed', { trip_id: current.id, activity_id: activity.id }));
+    }, event(values.id ? 'plan_updated' : 'activity_proposed', { trip_id: current.id, activity_id: activity.id, hidden_from_bachelorette: hidden }));
     $('#activity-dialog').close();
   });
 });
@@ -340,7 +382,21 @@ async function handleAction(button) {
     return saveChange(next => {
       next.travelers = next.travelers.filter(person => person.id !== id);
       next.responses = next.responses.filter(response => response.traveler_id !== id);
+      const nextTrip = next.trips.find(item => item.id === current.id);
+      if (nextTrip.bachelorette_id === id) delete nextTrip.bachelorette_id;
     }, event('traveler_removed', { trip_id: current.id, traveler_id: id }));
+  }
+  if (action === 'set-bachelorette' || action === 'unset-bachelorette') {
+    const assign = action === 'set-bachelorette';
+    return saveChange(next => {
+      const nextTrip = next.trips.find(item => item.id === current.id);
+      if (assign) nextTrip.bachelorette_id = id; else delete nextTrip.bachelorette_id;
+    }, event(assign ? 'bachelorette_assigned' : 'bachelorette_unassigned', { trip_id: current.id, traveler_id: id }));
+  }
+  if (action === 'toggle-surprise') {
+    const hidden = !isSurprise(product.activities.find(activity => activity.id === id));
+    return saveChange(next => { next.activities.find(activity => activity.id === id).hidden_from_bachelorette = hidden; },
+      event(hidden ? 'activity_hidden_from_bachelorette' : 'activity_shown_to_bachelorette', { trip_id: current.id, activity_id: id }));
   }
   if (['accept-activity', 'remove-activity', 'restore-activity'].includes(action)) {
     const status = { 'accept-activity': 'accepted', 'remove-activity': 'removed', 'restore-activity': 'proposed' }[action];

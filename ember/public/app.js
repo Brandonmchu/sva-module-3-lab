@@ -157,21 +157,10 @@ function renderOnboardingStep() {
 }
 
 function renderHome() {
+  // The landing page shows a photo; "Try the sample trip" still links to the first trip.
   const sample = product.trips[0];
   $('#sample-link').hidden = !sample;
-  if (!sample) {
-    $('#sample-preview').innerHTML = '<h2>The bachelorette trip starts here.</h2><p class="intro">Create a trip and bring the squad into the plan.</p>';
-    return;
-  }
-  // The landing page is shared, so it never previews surprise activities.
-  const ideas = activitiesFor(sample.id).filter(activity => activity.status !== 'removed' && !isSurprise(activity));
-  // The landing page is shared too, so it shows no prices when the bachelorette is being treated.
-  const noPrices = brideTreated(sample);
-  $('#sample-link').href = '#trip/' + encodeURIComponent(sample.id);
-  $('#sample-preview').innerHTML = `<p class="eyebrow">A sample to try</p><h2>${escapeHtml(sample.title)}</h2><p class="quiet">${escapeHtml(sample.destination)} · ${dateRange(sample.start_date, sample.end_date)}</p>
-    <div class="sample-meta"><div><span>The squad</span><b>${travelersFor(sample.id).length} people</b></div>${noPrices ? '' : `<div><span>Budget per person</span><b>${escapeHtml(money(sample.budget_per_person, sample.currency))}</b></div>`}</div>
-    ${ideas.slice(0, 3).map(activity => `<div class="sample-activity"><span>${escapeHtml(activity.title)}</span>${noPrices ? '' : `<b>${escapeHtml(money(activity.estimated_cost_per_person, sample.currency))}</b>`}</div>`).join('')}
-    <a class="text-link" href="#trip/${encodeURIComponent(sample.id)}">Open this trip</a>`;
+  if (sample) $('#sample-link').href = '#trip/' + encodeURIComponent(sample.id);
 }
 
 function responseFor(activityId, travelerId) {

@@ -3,7 +3,7 @@
   "trips": [
     {
       "id": "trip-001",
-      "title": "Bride for life trip",
+      "title": "Jenny's Bachelorette Trip",
       "destination": "Secret location",
       "start_date": "2026-11-06",
       "end_date": "2026-11-08",
@@ -11,6 +11,18 @@
       "currency": "CAD",
       "status": "planning",
       "bachelorette_id": "traveler-002",
+      "bachelorette_treated": true
+    },
+    {
+      "title": "Best trip",
+      "destination": "Secret",
+      "start_date": "2026-11-24",
+      "end_date": "2026-11-30",
+      "budget_per_person": 500,
+      "currency": "CAD",
+      "id": "trip-b69b4a52-3c0f-48c6-9720-3dd79c738e4e",
+      "status": "planning",
+      "bachelorette_id": "traveler-d297f457-1911-46bc-b8c7-b173eb142ab6",
       "bachelorette_treated": true
     }
   ],
@@ -50,6 +62,33 @@
         "outdoors",
         "music"
       ]
+    },
+    {
+      "name": "Art",
+      "available_from": "2026-11-24",
+      "available_to": "2026-11-30",
+      "budget": 500,
+      "interests": [],
+      "id": "traveler-a2ba1154-53da-48c2-9dc2-33ff1b4d3b52",
+      "trip_id": "trip-b69b4a52-3c0f-48c6-9720-3dd79c738e4e"
+    },
+    {
+      "name": "Lorette",
+      "available_from": "2026-11-24",
+      "available_to": "2026-11-30",
+      "budget": 500,
+      "interests": [],
+      "id": "traveler-d297f457-1911-46bc-b8c7-b173eb142ab6",
+      "trip_id": "trip-b69b4a52-3c0f-48c6-9720-3dd79c738e4e"
+    },
+    {
+      "name": "Jess",
+      "available_from": "2026-11-06",
+      "available_to": "2026-11-08",
+      "budget": 350,
+      "interests": [],
+      "id": "traveler-bc91eead-6f3c-4176-9baf-24529ee64955",
+      "trip_id": "trip-001"
     }
   ],
   "activities": [
@@ -60,7 +99,7 @@
       "date": "2026-11-06",
       "category": "outdoors",
       "estimated_cost_per_person": 0,
-      "status": "proposed"
+      "status": "accepted"
     },
     {
       "id": "activity-002",
@@ -69,7 +108,7 @@
       "date": "2026-11-07",
       "category": "food",
       "estimated_cost_per_person": 35,
-      "status": "proposed",
+      "status": "accepted",
       "hidden_from_bachelorette": false
     },
     {
@@ -81,6 +120,16 @@
       "estimated_cost_per_person": 80,
       "status": "proposed",
       "hidden_from_bachelorette": true
+    },
+    {
+      "id": "activity-9ad66b0d-be20-465c-9744-8f115c999da0",
+      "title": "Dance party",
+      "date": "2026-11-06",
+      "category": "Nightlife",
+      "estimated_cost_per_person": 0,
+      "status": "accepted",
+      "trip_id": "trip-001",
+      "hidden_from_bachelorette": false
     }
   ],
   "responses": [
@@ -99,6 +148,14 @@
       "activity_id": "activity-003",
       "vote": "maybe",
       "comment": "Can we find a cheaper option?"
+    },
+    {
+      "id": "response-d6df75bf-9b32-4c01-accb-20ebb60c06dd",
+      "trip_id": "trip-001",
+      "traveler_id": "traveler-002",
+      "activity_id": "activity-001",
+      "vote": "yes",
+      "comment": ""
     }
   ]
 }

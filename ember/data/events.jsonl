@@ -58,3 +58,4 @@
 {"id":"d8f11720-243c-412d-ac41-9f262af63cd2","at":"2026-11-04T01:38:06.616Z","source":"product","properties":{"visitor_id":"784e518e-719d-4cd5-a81b-9c9c68a54a51","trip_id":"trip-001"},"event":"plan_viewed","actor_id":"traveler-001"}
 {"id":"c6152e6d-3955-4e54-9f2e-3687a4aaa751","at":"2026-11-04T01:38:19.896Z","source":"product","properties":{"visitor_id":"784e518e-719d-4cd5-a81b-9c9c68a54a51"},"event":"landing_viewed","actor_id":"784e518e-719d-4cd5-a81b-9c9c68a54a51"}
 {"id":"2a94e56a-d341-4aad-be49-b2dbe312ef59","at":"2026-11-04T01:38:36.690Z","source":"product","properties":{"visitor_id":"784e518e-719d-4cd5-a81b-9c9c68a54a51","trip_id":"trip-001"},"event":"plan_viewed","actor_id":"traveler-001"}
+{"id":"9805105e-4274-48ea-90fa-c00d6695cd74","at":"2026-11-04T01:39:22.811Z","source":"product","properties":{"visitor_id":"9589ec0e-f130-443f-a1ef-f610977d013d","trip_id":"trip-001"},"event":"plan_viewed","actor_id":"traveler-001"}

@@ -260,7 +260,7 @@ function openEditor(kind, id) {
     $('#traveler-dialog-heading').textContent = id ? 'Edit traveler' : 'Add traveler';
   }
   if (kind === 'activity') {
-    values = product.activities.find(activity => activity.id === id) || { id: '', title: '', date: current.start_date, category: '', estimated_cost_per_person: 0, status: 'proposed' };
+    values = product.activities.find(activity => activity.id === id) || { id: '', title: '', date: current.start_date, start_time: '', end_time: '', category: '', estimated_cost_per_person: 0, status: 'proposed' };
     $('#activity-dialog-heading').textContent = id ? 'Edit activity' : 'Add an activity';
   }
   fillForm(form, values);
@@ -414,7 +414,7 @@ function renderPlanner() {
   }
   const people = travelersFor(current.id);
   if (!people.some(person => person.id === selectedTravelers.get(current.id))) selectedTravelers.set(current.id, people[0]?.id || '');
-  const activities = activitiesFor(current.id).filter(activity => activity.status !== 'removed').sort((a, b) => a.date.localeCompare(b.date));
+  const activities = activitiesFor(current.id).filter(activity => activity.status !== 'removed').sort((a, b) => a.date.localeCompare(b.date) || (a.start_time || '').localeCompare(b.start_time || ''));
   const removed = activitiesFor(current.id).filter(activity => activity.status === 'removed');
   const cost = activities.reduce((total, activity) => total + activity.estimated_cost_per_person, 0);
   const days = [...new Set(activities.map(activity => activity.date))];
@@ -450,12 +450,19 @@ function calendarActivities(start, end) {
     .filter(activity => !query || activity.title.toLocaleLowerCase().includes(query))
     .map(activity => ({ activity, trip: product.trips.find(item => item.id === activity.trip_id) }))
     .filter(item => item.trip)
-    .sort((a, b) => a.activity.date.localeCompare(b.activity.date) || a.trip.title.localeCompare(b.trip.title) || a.activity.title.localeCompare(b.activity.title));
+    .sort((a, b) => a.activity.date.localeCompare(b.activity.date) || (a.activity.start_time || '').localeCompare(b.activity.start_time || '') || a.trip.title.localeCompare(b.trip.title) || a.activity.title.localeCompare(b.activity.title));
+}
+
+function timeText(value) {
+  if (!value) return '';
+  const [hours, minutes] = value.split(':').map(Number);
+  return new Intl.DateTimeFormat('en-CA', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'UTC' }).format(new Date(Date.UTC(2026, 0, 1, hours, minutes)));
 }
 
 function renderCalendarEvent({ activity, trip: current }) {
+  const time = activity.start_time ? `<span class="calendar-event-time">${escapeHtml(timeText(activity.start_time))}${activity.end_time ? `–${escapeHtml(timeText(activity.end_time))}` : ''}</span>` : '';
   return `<a class="calendar-event" href="#trip/${encodeURIComponent(current.id)}" title="${escapeHtml(current.title)}: ${escapeHtml(activity.title)}">
-    <span class="calendar-event-title">${escapeHtml(activity.title)}</span><span class="calendar-event-trip">${escapeHtml(current.title)}</span>
+    ${time}<span class="calendar-event-title">${escapeHtml(activity.title)}</span><span class="calendar-event-trip">${escapeHtml(current.title)}</span>
     <span class="calendar-event-cost">${escapeHtml(money(activity.estimated_cost_per_person, current.currency))} per person</span></a>`;
 }
 
@@ -601,6 +608,9 @@ $('#activity-form').addEventListener('submit', eventObject => {
     const values = Object.fromEntries(new FormData(form));
     const current = trip();
     const activity = { ...values, id: values.id || 'activity-' + crypto.randomUUID(), trip_id: current.id, title: values.title.trim(), category: values.category.trim(), estimated_cost_per_person: Number(values.estimated_cost_per_person) };
+    if (!activity.start_time) delete activity.start_time;
+    if (!activity.end_time) delete activity.end_time;
+    if (activity.start_time && activity.end_time && activity.end_time <= activity.start_time) throw new Error('End time must be after start time.');
     await saveChange(next => {
       const old = next.activities.find(item => item.id === activity.id);
       if (old) Object.assign(old, activity); else next.activities.push(activity);

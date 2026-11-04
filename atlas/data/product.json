@@ -278,6 +278,8 @@
       "trip_id": "trip-001",
       "title": "Lakeside walk",
       "date": "2026-11-06",
+      "start_time": "10:00",
+      "end_time": "11:00",
       "category": "outdoors",
       "estimated_cost_per_person": 0,
       "status": "proposed"
@@ -287,6 +289,8 @@
       "trip_id": "trip-001",
       "title": "Market lunch",
       "date": "2026-11-07",
+      "start_time": "12:00",
+      "end_time": "13:00",
       "category": "food",
       "estimated_cost_per_person": 35,
       "status": "proposed"
@@ -296,6 +300,8 @@
       "trip_id": "trip-001",
       "title": "Canoe afternoon",
       "date": "2026-11-07",
+      "start_time": "14:00",
+      "end_time": "16:00",
       "category": "outdoors",
       "estimated_cost_per_person": 80,
       "status": "proposed"
@@ -305,6 +311,8 @@
       "trip_id": "trip-002",
       "title": "Harbor coffee crawl",
       "date": "2026-11-03",
+      "start_time": "09:00",
+      "end_time": "10:30",
       "category": "food",
       "estimated_cost_per_person": 18,
       "status": "proposed"
@@ -314,6 +322,8 @@
       "trip_id": "trip-002",
       "title": "Waterfront sunset walk",
       "date": "2026-11-03",
+      "start_time": "17:00",
+      "end_time": "18:00",
       "category": "outdoors",
       "estimated_cost_per_person": 0,
       "status": "proposed"
@@ -323,6 +333,8 @@
       "trip_id": "trip-003",
       "title": "Maple loop hike",
       "date": "2026-11-14",
+      "start_time": "10:00",
+      "end_time": "12:30",
       "category": "outdoors",
       "estimated_cost_per_person": 0,
       "status": "proposed"
@@ -332,6 +344,8 @@
       "trip_id": "trip-003",
       "title": "Cider house lunch",
       "date": "2026-11-15",
+      "start_time": "12:00",
+      "end_time": "13:30",
       "category": "food",
       "estimated_cost_per_person": 32,
       "status": "proposed"
@@ -341,6 +355,8 @@
       "trip_id": "trip-004",
       "title": "Market square stroll",
       "date": "2026-11-27",
+      "start_time": "11:00",
+      "end_time": "12:00",
       "category": "culture",
       "estimated_cost_per_person": 0,
       "status": "proposed"
@@ -350,6 +366,8 @@
       "trip_id": "trip-004",
       "title": "Holiday market dinner",
       "date": "2026-11-28",
+      "start_time": "18:00",
+      "end_time": "20:00",
       "category": "food",
       "estimated_cost_per_person": 55,
       "status": "proposed"
@@ -359,6 +377,8 @@
       "trip_id": "trip-004",
       "title": "Canal lights walk",
       "date": "2026-11-29",
+      "start_time": "17:30",
+      "end_time": "18:30",
       "category": "outdoors",
       "estimated_cost_per_person": 10,
       "status": "proposed"
@@ -368,6 +388,8 @@
       "trip_id": "trip-005",
       "title": "Ski hill shuttle",
       "date": "2026-12-05",
+      "start_time": "10:00",
+      "end_time": "12:00",
       "category": "outdoors",
       "estimated_cost_per_person": 48,
       "status": "proposed"
@@ -377,6 +399,8 @@
       "trip_id": "trip-005",
       "title": "Village cocoa stop",
       "date": "2026-12-05",
+      "start_time": "14:00",
+      "end_time": "15:00",
       "category": "food",
       "estimated_cost_per_person": 12,
       "status": "proposed"
@@ -386,6 +410,8 @@
       "trip_id": "trip-005",
       "title": "Winter lights trail",
       "date": "2026-12-06",
+      "start_time": "18:00",
+      "end_time": "19:30",
       "category": "culture",
       "estimated_cost_per_person": 0,
       "status": "proposed"
@@ -395,6 +421,8 @@
       "trip_id": "trip-006",
       "title": "Lakeside sauna session",
       "date": "2026-12-12",
+      "start_time": "15:00",
+      "end_time": "17:00",
       "category": "wellness",
       "estimated_cost_per_person": 44,
       "status": "proposed"
@@ -404,6 +432,8 @@
       "trip_id": "trip-006",
       "title": "Snowshoe rental",
       "date": "2026-12-13",
+      "start_time": "09:00",
+      "end_time": "11:00",
       "category": "outdoors",
       "estimated_cost_per_person": 38,
       "status": "proposed"
@@ -413,6 +443,8 @@
       "trip_id": "trip-007",
       "title": "Cabin supper",
       "date": "2026-12-29",
+      "start_time": "18:00",
+      "end_time": "20:00",
       "category": "food",
       "estimated_cost_per_person": 60,
       "status": "proposed"
@@ -422,6 +454,8 @@
       "trip_id": "trip-007",
       "title": "Pine Ridge lookout",
       "date": "2026-12-30",
+      "start_time": "10:00",
+      "end_time": "11:30",
       "category": "outdoors",
       "estimated_cost_per_person": 15,
       "status": "proposed"
@@ -431,8 +465,285 @@
       "trip_id": "trip-007",
       "title": "New Year brunch",
       "date": "2026-12-31",
+      "start_time": "11:00",
+      "end_time": "12:30",
       "category": "food",
       "estimated_cost_per_person": 28,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-019",
+      "trip_id": "trip-001",
+      "title": "Cabin check-in",
+      "date": "2026-11-06",
+      "start_time": "15:00",
+      "end_time": "15:30",
+      "category": "lodging",
+      "estimated_cost_per_person": 0,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-020",
+      "trip_id": "trip-001",
+      "title": "Lakeside dinner",
+      "date": "2026-11-06",
+      "start_time": "18:30",
+      "end_time": "20:00",
+      "category": "food",
+      "estimated_cost_per_person": 42,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-021",
+      "trip_id": "trip-001",
+      "title": "Pancake breakfast",
+      "date": "2026-11-07",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "category": "food",
+      "estimated_cost_per_person": 18,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-022",
+      "trip_id": "trip-001",
+      "title": "Trailside brunch",
+      "date": "2026-11-08",
+      "start_time": "10:00",
+      "end_time": "11:30",
+      "category": "food",
+      "estimated_cost_per_person": 24,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-023",
+      "trip_id": "trip-002",
+      "title": "Pier boardwalk loop",
+      "date": "2026-11-03",
+      "start_time": "11:00",
+      "end_time": "12:00",
+      "category": "outdoors",
+      "estimated_cost_per_person": 0,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-024",
+      "trip_id": "trip-002",
+      "title": "Harbor fish-and-chips",
+      "date": "2026-11-03",
+      "start_time": "13:00",
+      "end_time": "14:00",
+      "category": "food",
+      "estimated_cost_per_person": 26,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-025",
+      "trip_id": "trip-003",
+      "title": "Cabin arrival and unpack",
+      "date": "2026-11-14",
+      "start_time": "15:00",
+      "end_time": "15:45",
+      "category": "lodging",
+      "estimated_cost_per_person": 0,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-026",
+      "trip_id": "trip-003",
+      "title": "Wood-fired pizza night",
+      "date": "2026-11-14",
+      "start_time": "18:00",
+      "end_time": "19:30",
+      "category": "food",
+      "estimated_cost_per_person": 34,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-027",
+      "trip_id": "trip-003",
+      "title": "Cabin coffee and pastries",
+      "date": "2026-11-15",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "category": "food",
+      "estimated_cost_per_person": 14,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-028",
+      "trip_id": "trip-004",
+      "title": "Check in and drop bags",
+      "date": "2026-11-27",
+      "start_time": "15:00",
+      "end_time": "15:30",
+      "category": "lodging",
+      "estimated_cost_per_person": 0,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-029",
+      "trip_id": "trip-004",
+      "title": "Welcome cocoa stop",
+      "date": "2026-11-27",
+      "start_time": "16:00",
+      "end_time": "16:45",
+      "category": "food",
+      "estimated_cost_per_person": 12,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-030",
+      "trip_id": "trip-004",
+      "title": "Old Town breakfast",
+      "date": "2026-11-28",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "category": "food",
+      "estimated_cost_per_person": 20,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-031",
+      "trip_id": "trip-004",
+      "title": "Craft stalls and carolers",
+      "date": "2026-11-28",
+      "start_time": "13:00",
+      "end_time": "15:00",
+      "category": "culture",
+      "estimated_cost_per_person": 15,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-032",
+      "trip_id": "trip-004",
+      "title": "Bakery breakfast",
+      "date": "2026-11-29",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "category": "food",
+      "estimated_cost_per_person": 16,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-033",
+      "trip_id": "trip-005",
+      "title": "Arrive and check in",
+      "date": "2026-12-05",
+      "start_time": "15:30",
+      "end_time": "16:00",
+      "category": "lodging",
+      "estimated_cost_per_person": 0,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-034",
+      "trip_id": "trip-005",
+      "title": "Village fondue dinner",
+      "date": "2026-12-05",
+      "start_time": "18:30",
+      "end_time": "20:00",
+      "category": "food",
+      "estimated_cost_per_person": 38,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-035",
+      "trip_id": "trip-005",
+      "title": "Snowy village breakfast",
+      "date": "2026-12-06",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "category": "food",
+      "estimated_cost_per_person": 16,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-036",
+      "trip_id": "trip-006",
+      "title": "Cabin check-in",
+      "date": "2026-12-12",
+      "start_time": "12:30",
+      "end_time": "13:00",
+      "category": "lodging",
+      "estimated_cost_per_person": 0,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-037",
+      "trip_id": "trip-006",
+      "title": "Fireside dinner",
+      "date": "2026-12-12",
+      "start_time": "19:00",
+      "end_time": "20:30",
+      "category": "food",
+      "estimated_cost_per_person": 36,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-038",
+      "trip_id": "trip-006",
+      "title": "Warm-up breakfast",
+      "date": "2026-12-13",
+      "start_time": "07:30",
+      "end_time": "08:30",
+      "category": "food",
+      "estimated_cost_per_person": 15,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-039",
+      "trip_id": "trip-007",
+      "title": "Cabin arrival and unpack",
+      "date": "2026-12-29",
+      "start_time": "15:00",
+      "end_time": "15:45",
+      "category": "lodging",
+      "estimated_cost_per_person": 0,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-040",
+      "trip_id": "trip-007",
+      "title": "Pine cabin welcome dinner",
+      "date": "2026-12-29",
+      "start_time": "20:00",
+      "end_time": "21:30",
+      "category": "food",
+      "estimated_cost_per_person": 32,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-041",
+      "trip_id": "trip-007",
+      "title": "Brunch board games",
+      "date": "2026-12-30",
+      "start_time": "12:30",
+      "end_time": "14:00",
+      "category": "food",
+      "estimated_cost_per_person": 24,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-042",
+      "trip_id": "trip-007",
+      "title": "Cabin game night",
+      "date": "2026-12-30",
+      "start_time": "19:00",
+      "end_time": "21:00",
+      "category": "games",
+      "estimated_cost_per_person": 0,
+      "status": "proposed"
+    },
+    {
+      "id": "activity-043",
+      "trip_id": "trip-007",
+      "title": "New Year's countdown",
+      "date": "2026-12-31",
+      "start_time": "20:00",
+      "end_time": "23:59",
+      "category": "celebration",
+      "estimated_cost_per_person": 20,
       "status": "proposed"
     }
   ],

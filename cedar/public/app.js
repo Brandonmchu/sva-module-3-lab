@@ -125,8 +125,8 @@ function renderOnboardingStep() {
   $('#organizer-details').disabled = basics;
   $('#onboarding-back').hidden = basics;
   $('#onboarding-step').textContent = `Step ${wizardStep} of 2`;
-  $('#onboarding-heading').textContent = basics ? 'Give your weekend a starting point.' : 'Add your preferences.';
-  $('#onboarding-intro').textContent = basics ? 'Choose a destination, dates, and a budget. You can change these later.' : 'Tell the group when you can go and what you enjoy. Add the other travelers next.';
+  $('#onboarding-heading').textContent = basics ? 'Set the starting point for your weekend.' : 'Add your preferences, then your group\'s.';
+  $('#onboarding-intro').textContent = basics ? 'Choose a destination, dates, and a target budget per person. It is a starting point for the group, and you can change it anytime.' : 'Start with when you can go, what you can spend, and what you enjoy. Next, you will add each friend\'s preferences and put activities to a vote until everyone agrees.';
   $('#onboarding-submit').textContent = basics ? 'Continue' : 'Create trip';
 }
 

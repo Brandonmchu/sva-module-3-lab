@@ -125,7 +125,7 @@ function renderOnboardingStep() {
   $('#organizer-details').disabled = basics;
   $('#onboarding-back').hidden = basics;
   $('#onboarding-step').textContent = `Step ${wizardStep} of 2`;
-  $('#onboarding-heading').textContent = basics ? 'Give your weekend a starting point.' : 'Add your preferences.';
+  $('#onboarding-heading').textContent = basics ? 'Give your trip a starting point.' : 'Add your preferences.';
   $('#onboarding-intro').textContent = basics ? 'Choose a destination, dates, and a budget. You can change these later.' : 'Tell the group when you can go and what you enjoy. Add the other travelers next.';
   $('#onboarding-submit').textContent = basics ? 'Continue' : 'Create trip';
 }
@@ -134,7 +134,7 @@ function renderHome() {
   const sample = product.trips[0];
   $('#sample-link').hidden = !sample;
   if (!sample) {
-    $('#sample-preview').innerHTML = '<h2>Your next weekend starts here.</h2><p class="intro">Create a trip and invite your group into the plan.</p>';
+    $('#sample-preview').innerHTML = '<h2>Your next group trip starts here.</h2><p class="intro">Create a trip and add your friends to the plan.</p>';
     return;
   }
   const ideas = activitiesFor(sample.id).filter(activity => activity.status !== 'removed');
@@ -188,7 +188,7 @@ function renderPlanner() {
   const removed = activitiesFor(current.id).filter(activity => activity.status === 'removed');
   const cost = activities.reduce((total, activity) => total + activity.estimated_cost_per_person, 0);
   const days = [...new Set(activities.map(activity => activity.date))];
-  $('#planner-view').innerHTML = `<div class="planner-top"><div><p class="eyebrow">Your shared weekend</p><h1>${escapeHtml(current.title)}</h1><p>${escapeHtml(current.destination)} · ${dateRange(current.start_date, current.end_date)}</p></div>
+  $('#planner-view').innerHTML = `<div class="planner-top"><div><p class="eyebrow">Your shared trip</p><h1>${escapeHtml(current.title)}</h1><p>${escapeHtml(current.destination)} · ${dateRange(current.start_date, current.end_date)}</p></div>
     <label class="trip-selector">Your trips<select id="trip-select">${product.trips.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current.id ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}</select></label></div>
     <div class="planner-toolbar"><span class="status-badge">${escapeHtml(statusName(current.status))}</span><div class="planner-actions"><button class="secondary small" data-action="edit-trip">Edit trip</button><button class="small" data-action="confirm-plan">${current.status === 'confirmed' ? 'Reopen planning' : 'Confirm plan'}</button></div></div>
     <div class="planner-columns"><div class="itinerary"><div class="section-heading"><h2>Shared itinerary</h2><button class="small" data-action="add-activity">Add activity</button></div>

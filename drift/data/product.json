@@ -58,7 +58,9 @@
       "date": "2026-11-06",
       "category": "nightlife",
       "estimated_cost_per_person": 40,
-      "status": "proposed"
+      "status": "proposed",
+      "booking_state": "booked",
+      "booking_owner_id": "traveler-001"
     },
     {
       "id": "activity-002",
@@ -76,7 +78,9 @@
       "date": "2026-11-07",
       "category": "food",
       "estimated_cost_per_person": 90,
-      "status": "proposed"
+      "status": "proposed",
+      "booking_state": "pending",
+      "booking_owner_id": "traveler-003"
     }
   ],
   "responses": [
@@ -95,6 +99,31 @@
       "activity_id": "activity-003",
       "vote": "maybe",
       "comment": "Love it, but can we keep it under $70?"
+    }
+  ],
+  "discussions": [
+    {
+      "id": "discussion-001",
+      "trip_id": "trip-001",
+      "activity_id": "activity-003",
+      "traveler_id": "traveler-002",
+      "body": "Does the $90 include tax and tip, or is that extra?",
+      "created_at": "2026-11-03T21:10:00.000Z"
+    },
+    {
+      "id": "discussion-002",
+      "trip_id": "trip-001",
+      "activity_id": "activity-003",
+      "traveler_id": "traveler-003",
+      "body": "Not confirmed yet. I'll check the full total before I book the table for 3.",
+      "created_at": "2026-11-03T21:24:00.000Z"
+    },
+    {
+      "id": "discussion-003",
+      "trip_id": "trip-001",
+      "traveler_id": "traveler-001",
+      "body": "Is everyone flying in Friday? Dani, you land Saturday morning, right?",
+      "created_at": "2026-11-03T21:30:00.000Z"
     }
   ]
 }

@@ -16,6 +16,7 @@ All prices, places, and people are fictional.
 | travelers | id, trip_id, name, available_from, available_to, budget, interests | Each traveler belongs to a trip. |
 | activities | id, trip_id, title, date, category, estimated_cost_per_person, status | Each activity belongs to a trip. |
 | responses | id, trip_id, traveler_id, activity_id, vote, comment | A traveler responds to an activity in that trip. |
+| discussions (GroupAtion) | id, trip_id, activity_id (omit for the general trip thread), traveler_id, body, created_at | A traveler posts a question or comment on one activity, or on the whole trip. Saved locally, not live chat. |
 
 Trips → travelers and activities → responses.
 The response links one traveler to one activity through their IDs.
@@ -26,6 +27,8 @@ Your product decides how to help the group resolve those differences.
 
 The base trip statuses are draft, planning, confirmed, and cancelled.
 Activity statuses are proposed, accepted, and removed. Votes are yes, no, and maybe.
+
+GroupAtion adds optional booking fields to activities: booking_state (idea, agreed, pending, booked; missing means idea), booking_owner_id (a traveler on the same trip) and booking_url (a shared link to the provider). A booking link is a reference, not proof of a booking; only booking_state records that.
 
 ## Read and save
 

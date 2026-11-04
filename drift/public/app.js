@@ -3,6 +3,7 @@ const $ = (selector, root = document) => root.querySelector(selector);
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const visitorId = crypto.randomUUID();
 const selectedTravelers = new Map();
+const openThreads = new Set();
 let product;
 let busy = false;
 let wizardStep = 1;
@@ -183,6 +184,44 @@ function responseFor(activityId, travelerId) {
   return product.responses.filter(response => response.activity_id === activityId && response.traveler_id === travelerId).at(-1);
 }
 
+// GroupAtion: booking status, owner and link on each activity; questions per activity and for the whole trip.
+const BOOKING_STATES = [['idea', 'Idea'], ['agreed', 'Group agreed'], ['pending', 'Booking pending'], ['booked', 'Booked']];
+const bookingName = value => (BOOKING_STATES.find(([key]) => key === value) || BOOKING_STATES[0])[1];
+const safeUrl = value => /^https?:\/\//i.test(value || '') ? value : '';
+const discussionsFor = (tripId, activityId) => (product.discussions || []).filter(item => item.trip_id === tripId && (activityId ? item.activity_id === activityId : !item.activity_id)).sort((a, b) => a.created_at.localeCompare(b.created_at));
+const timeText = value => new Intl.DateTimeFormat('en-CA', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(value));
+
+function renderBooking(activity, people) {
+  const state = activity.booking_state || 'idea';
+  const owner = people.find(person => person.id === activity.booking_owner_id);
+  const url = safeUrl(activity.booking_url);
+  return `<div class="booking-row"><span class="booking-badge booking-${escapeHtml(state)}">${escapeHtml(bookingName(state))}</span>
+      <span class="booking-owner">${owner ? 'Booking: <b>' + escapeHtml(owner.name) + '</b>' : 'No one is booking this yet'}</span>
+      ${url ? `<a class="booking-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">Open link ↗</a>` : ''}</div>
+    <details class="booking-edit"><summary>Update booking</summary>
+      <form class="booking-form" data-activity-id="${escapeHtml(activity.id)}"><div class="booking-fields">
+        <label>Status<select name="booking_state">${BOOKING_STATES.map(([key, name]) => `<option value="${key}" ${key === state ? 'selected' : ''}>${name}</option>`).join('')}</select></label>
+        <label>Who's booking it<select name="booking_owner_id"><option value="">No one yet</option>${people.map(person => `<option value="${escapeHtml(person.id)}" ${person.id === activity.booking_owner_id ? 'selected' : ''}>${escapeHtml(person.name)}</option>`).join('')}</select></label>
+        <label class="booking-url">Booking link (optional)<input name="booking_url" type="url" maxlength="500" placeholder="https://…" value="${escapeHtml(activity.booking_url || '')}"></label>
+        <button class="secondary small" type="submit">Save booking</button></div>
+        <p class="field-help">A link is just shared for reference. Set the status to Booked once it's actually booked.</p>
+        <p class="form-error" role="alert"></p></form></details>`;
+}
+
+function renderThread(current, activityId, people, title) {
+  const posts = discussionsFor(current.id, activityId);
+  const person = people.find(item => item.id === selectedTravelers.get(current.id));
+  const thread = posts.length ? posts.map(post => {
+    const author = people.find(item => item.id === post.traveler_id);
+    const name = author?.name || 'Former traveler';
+    return `<div class="discussion-post"><span class="discussion-avatar" aria-hidden="true">${escapeHtml(name.slice(0, 1))}</span><div><p class="discussion-meta"><b>${escapeHtml(name)}</b> · ${escapeHtml(timeText(post.created_at))}</p><p>${escapeHtml(post.body)}</p></div></div>`;
+  }).join('') : '<p class="quiet">No questions yet. Ask the first one.</p>';
+  return `<div class="discussion-thread">${title ? `<p class="discussion-context">About: <b>${escapeHtml(title)}</b></p>` : ''}${thread}
+    <form class="discussion-form" data-activity-id="${escapeHtml(activityId || '')}"><fieldset ${person ? '' : 'disabled'}><legend class="sr-only">Post a question</legend>
+      <label>${person ? 'Ask as ' + escapeHtml(person.name) : 'Add a traveler to ask a question'}<textarea name="body" required maxlength="1000" rows="2" placeholder="${activityId ? 'e.g. Does the price include tax and tip?' : 'e.g. Are we all flying in Friday morning?'}"></textarea></label>
+      <button class="secondary small" type="submit">Post</button><p class="form-error" role="alert"></p></fieldset></form></div>`;
+}
+
 function renderActivity(activity, current, people) {
   const responses = people.map(person => ({ person, response: responseFor(activity.id, person.id) })).filter(item => item.response);
   const selected = selectedTravelers.get(current.id);
@@ -194,12 +233,14 @@ function renderActivity(activity, current, people) {
     <div class="activity-heading"><h3>${escapeHtml(activity.title)}</h3><span class="activity-cost">${escapeHtml(money(activity.estimated_cost_per_person))}</span></div>
     <div class="activity-meta"><span>${escapeHtml(activity.category)}</span><span class="status-badge ${activity.status === 'proposed' ? 'proposed' : ''}">${escapeHtml(statusName(activity.status))}</span><span class="vote-totals">${totals}</span></div>
     ${outsideDates ? '<p class="budget-message">This activity is outside the trip dates.</p>' : ''}
+    ${renderBooking(activity, people)}
     <div class="activity-actions"><button class="text-button" data-action="edit-activity" data-id="${escapeHtml(activity.id)}">Edit activity</button>${activity.status !== 'accepted' ? `<button class="text-button" data-action="accept-activity" data-id="${escapeHtml(activity.id)}">Mark agreed</button>` : ''}<button class="text-button danger" data-action="remove-activity" data-id="${escapeHtml(activity.id)}">Remove</button></div>
     <form class="response-form" data-activity-id="${escapeHtml(activity.id)}"><fieldset ${person ? '' : 'disabled'}><legend>${person ? 'Your response as ' + escapeHtml(person.name) : 'Add a traveler to respond'}</legend>
       <div class="response-fields"><label>Vote<select name="vote" required><option value="" disabled ${mine ? '' : 'selected'}>Choose</option>${['yes', 'maybe', 'no'].map(vote => `<option value="${vote}" ${mine?.vote === vote ? 'selected' : ''}>${vote[0].toUpperCase() + vote.slice(1)}</option>`).join('')}</select></label>
       <label>Comment<input name="comment" value="${escapeHtml(mine?.comment || '')}" placeholder="An optional note" maxlength="500"></label><button class="secondary small" type="submit">Save response</button></div>
       <p class="form-error" role="alert"></p></fieldset></form>
     ${responses.length ? `<details class="group-responses"><summary>View ${responses.length} group ${responses.length === 1 ? 'response' : 'responses'}</summary>${responses.map(item => `<div class="group-response"><b>${escapeHtml(item.person.name)} · ${item.response.vote}</b>${item.response.comment ? `<p>${escapeHtml(item.response.comment)}</p>` : ''}</div>`).join('')}</details>` : ''}
+    <details class="discussion" data-thread="${escapeHtml(activity.id)}" ${openThreads.has(activity.id) ? 'open' : ''}><summary>💬 Discuss (${discussionsFor(current.id, activity.id).length})</summary>${renderThread(current, activity.id, people, activity.title)}</details>
   </article>`;
 }
 
@@ -235,6 +276,8 @@ function renderPlanner() {
       ${cost > current.budget_per_person ? '<p class="budget-message">The activities exceed the trip budget per person.</p>' : ''}
       ${activities.length ? days.map(day => `<h3 class="day-heading">${dateText(day)}</h3>${activities.filter(activity => activity.date === day).map(activity => renderActivity(activity, current, people)).join('')}`).join('') : '<div class="empty-state"><h3>The plan is open.</h3><p>Add an activity, give it a date and cost, then ask the group to respond.</p><button data-action="add-activity">Add the first activity</button></div>'}
       ${removed.length ? `<details class="removed-list"><summary>Removed activities (${removed.length})</summary>${removed.map(activity => `<div class="removed-row"><span>${escapeHtml(activity.title)}</span><button class="text-button" data-action="restore-activity" data-id="${escapeHtml(activity.id)}">Restore</button></div>`).join('')}</details>` : ''}
+      <section class="general-discussion"><div class="section-heading"><h2>💬 General trip discussion</h2><span class="quiet">${discussionsFor(current.id).length} posts</span></div>
+        <p class="quiet">Questions about the whole trip. Questions about one plan go in that plan's Discuss thread.</p>${renderThread(current, '', people)}</section>
     </div><aside class="people-panel"><div class="section-heading"><h2>Travelers</h2><button class="text-button" data-action="add-traveler">Add traveler</button></div>
       ${people.length ? `<label class="viewing-as">Viewing as<select id="traveler-select">${people.map(person => `<option value="${escapeHtml(person.id)}" ${person.id === selectedTravelers.get(current.id) ? 'selected' : ''}>${escapeHtml(person.name)}</option>`).join('')}</select><span class="field-help">Take turns as different travelers on this screen.</span></label>${people.map(person => renderPerson(person, current)).join('')}` : '<div class="empty-state"><p>Add the people who are going on this trip.</p><button data-action="add-traveler">Add a traveler</button></div>'}
     </aside></div>`;
@@ -365,6 +408,52 @@ document.addEventListener('submit', eventObject => {
   });
 });
 
+document.addEventListener('submit', eventObject => {
+  const form = eventObject.target;
+  if (!form.matches('.booking-form')) return;
+  eventObject.preventDefault();
+  submitForm(form, async () => {
+    const current = trip();
+    const activityId = form.dataset.activityId;
+    const values = Object.fromEntries(new FormData(form));
+    const url = values.booking_url.trim();
+    if (url && !safeUrl(url)) throw new Error('Use a link that starts with http:// or https://');
+    await saveChange(next => {
+      const activity = next.activities.find(item => item.id === activityId);
+      activity.booking_state = values.booking_state;
+      if (values.booking_owner_id) activity.booking_owner_id = values.booking_owner_id; else delete activity.booking_owner_id;
+      if (url) activity.booking_url = url; else delete activity.booking_url;
+    }, event('booking_updated', { trip_id: current.id, activity_id: activityId, booking_state: values.booking_state }));
+  });
+});
+
+document.addEventListener('submit', eventObject => {
+  const form = eventObject.target;
+  if (!form.matches('.discussion-form')) return;
+  eventObject.preventDefault();
+  submitForm(form, async () => {
+    const current = trip();
+    const travelerId = selectedTravelers.get(current.id);
+    if (!travelerId) throw new Error('Add a traveler first.');
+    const body = new FormData(form).get('body').trim();
+    if (!body) throw new Error('Write a question or comment first.');
+    const activityId = form.dataset.activityId;
+    const post = { id: 'discussion-' + crypto.randomUUID(), trip_id: current.id, traveler_id: travelerId, body, created_at: new Date().toISOString() };
+    if (activityId) post.activity_id = activityId;
+    if (activityId) openThreads.add(activityId);
+    await saveChange(next => {
+      next.discussions ||= [];
+      next.discussions.push(post);
+    }, event('question_posted', { trip_id: current.id, activity_id: activityId || 'general' }, travelerId));
+  });
+});
+
+document.addEventListener('toggle', eventObject => {
+  const thread = eventObject.target.closest?.('details[data-thread]');
+  if (!thread || eventObject.target !== thread) return;
+  if (thread.open) openThreads.add(thread.dataset.thread); else openThreads.delete(thread.dataset.thread);
+}, true);
+
 document.addEventListener('change', eventObject => {
   if (eventObject.target.id === 'trip-select') location.hash = '#trip/' + encodeURIComponent(eventObject.target.value);
   if (eventObject.target.id === 'traveler-select') { selectedTravelers.set(trip().id, eventObject.target.value); renderPlanner(); setBusy(busy); }
@@ -380,6 +469,7 @@ async function handleAction(button) {
     return saveChange(next => {
       next.travelers = next.travelers.filter(person => person.id !== id);
       next.responses = next.responses.filter(response => response.traveler_id !== id);
+      next.activities.forEach(activity => { if (activity.booking_owner_id === id) delete activity.booking_owner_id; });
     }, event('traveler_removed', { trip_id: current.id, traveler_id: id }));
   }
   if (['accept-activity', 'remove-activity', 'restore-activity'].includes(action)) {

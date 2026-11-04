@@ -37,6 +37,12 @@
       "items": {
         "$ref": "#/$defs/response"
       }
+    },
+    "discussions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/discussion"
+      }
     }
   },
   "additionalProperties": true,
@@ -188,6 +194,23 @@
             "accepted",
             "removed"
           ]
+        },
+        "booking_state": {
+          "type": "string",
+          "enum": [
+            "idea",
+            "agreed",
+            "pending",
+            "booked"
+          ]
+        },
+        "booking_owner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "booking_url": {
+          "type": "string",
+          "minLength": 1
         }
       },
       "additionalProperties": true
@@ -229,6 +252,43 @@
         },
         "comment": {
           "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "discussion": {
+      "type": "object",
+      "required": [
+        "id",
+        "trip_id",
+        "traveler_id",
+        "body",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trip_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "activity_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "traveler_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 1
         }
       },
       "additionalProperties": true

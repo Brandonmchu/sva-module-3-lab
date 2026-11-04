@@ -1157,3 +1157,40 @@ body:has(#home-view.gx-home:not([hidden])) .wordmark-dot,body:has(#new-view.gx-o
 /* Keep the brand badge clear of the trip buddy and trip title. */
 .gx-hero-art > .gx-badge { top:auto; bottom:-20px; width:80px; height:80px }
 .gx-ticket h2 { padding-right:0 }
+
+/* ===== GroupAtion booking status + discussions (planner). Uses the planner palette. ===== */
+.booking-row { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:14px 0 4px; font-size:13px }
+.booking-badge { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:999px; font-size:12px; font-weight:800; letter-spacing:.01em }
+.booking-badge::before { content:""; width:8px; height:8px; border-radius:50% }
+.booking-idea { background:#eef2f6; color:#4a5a6a } .booking-idea::before { background:#9aa8b6 }
+.booking-agreed { background:#e3f1ff; color:#1758a8 } .booking-agreed::before { background:#2f8cff }
+.booking-pending { background:#fff4d6; color:#8a5a00 } .booking-pending::before { background:#f5b300 }
+.booking-booked { background:#dff5ec; color:#0b6a4a } .booking-booked::before { background:#18a874 }
+.booking-owner { color:var(--muted,#4a6382) }
+.booking-owner b { color:var(--ink,#153d40) }
+.booking-link { color:var(--link,#126561); font-weight:700; text-decoration:underline; text-underline-offset:3px }
+.booking-edit,.discussion { margin-top:10px }
+.booking-edit > summary,.discussion > summary { cursor:pointer; font-size:13px; font-weight:800; color:var(--link,#126561); min-height:32px; display:flex; align-items:center; list-style:none }
+.booking-edit > summary::-webkit-details-marker,.discussion > summary::-webkit-details-marker { display:none }
+.booking-edit > summary::after { content:" ▾"; margin-left:4px }
+.booking-fields { display:grid; grid-template-columns:1fr 1fr; gap:0 14px; margin-top:10px; align-items:end }
+.booking-fields .booking-url { grid-column:1/-1 }
+.booking-fields button { justify-self:start; margin-bottom:20px }
+.discussion > summary { display:inline-flex; padding:0 14px; border-radius:999px; background:#e8f5f2; color:#0b5f5e }
+.discussion-thread { margin-top:12px; padding:14px; border-radius:16px; background:#f4faf8; border:1px solid #d7ebe5 }
+.discussion-context { margin:0 0 10px; font-size:12px; color:var(--muted,#4a6382) }
+.discussion-post { display:grid; grid-template-columns:34px 1fr; gap:10px; padding:10px 0; border-bottom:1px solid #e1efea }
+.discussion-post:last-of-type { border-bottom:0 }
+.discussion-post p { margin:0; font-size:14px; line-height:1.5 }
+.discussion-avatar { display:grid; place-items:center; width:34px; height:34px; border-radius:50%; background:#ffcf84; color:#153d40; font-weight:900; font-size:14px }
+.discussion-meta { font-size:12px !important; color:var(--muted,#4a6382); margin-bottom:2px !important }
+.discussion-form { margin-top:12px }
+.discussion-form fieldset { border:0; padding:0; margin:0; min-width:0 }
+.discussion-form textarea { min-height:64px }
+.general-discussion { margin-top:28px; padding:22px; border-radius:22px; background:#fff; border:1px solid #d7ebe5 }
+.general-discussion h2 { margin:0 }
+@media(max-width:700px) {
+  .booking-fields { grid-template-columns:1fr }
+  .booking-fields button,.discussion-form button { width:100%; justify-content:center }
+  .general-discussion { padding:16px }
+}

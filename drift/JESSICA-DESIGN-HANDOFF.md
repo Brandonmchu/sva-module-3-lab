@@ -129,3 +129,16 @@ Include the cute red panda trip buddy: initially stressed, increasingly happy as
 Coordinate actual code/file ownership with Ben and Ronak before editing shared frontend files. Preserve Ronak's landing-page/onboarding copy and existing working trip flows. Agree on new persisted data fields with Ben; the standalone wireframe is an in-memory demonstration, not the finished feature. If a backend field is unavailable, label the UI as a proposal rather than pretending it works.
 
 Work only within `drift/`. Run `npm run check`, verify the affected flows in the browser and on a narrow screen, and save the v1 screenshot and commit reference inside the team folder. Commit only your intended Drift paths. Coordinate one team publisher, merge ready work into the `team/drift` publish worktree, and push only `team/drift`. Keep session branches local; do not push to `main` or other teams' branches.
+
+
+## Latest PM refinement: calmer main screen
+
+Use a collapsible left sidebar in the desktop web view for trip sections, general chat, people/status details, and the mascot controls. Keep the main screen focused on the trip title, its primary action, and the selected plans. Hide secondary metrics and demo mood controls under expandable sidebar sections. Open contextual discussions on demand in a side drawer instead of displaying a chat panel permanently. On mobile, use a Trip menu button to reveal the sidebar and keep it closed while browsing plans. The PM wireframe now demonstrates this behaviour.
+
+
+## Dedicated partner discounts section
+
+Add a visible **Partner discounts** navigation entry, separate from the itinerary. Cover hotel partners, car rentals/vans, local guides, tours/activities, and other travel partners. Each offer must show the provider/source link, eligible dates, expiry, group-size requirements, original price, discount type and amount, currency, fees/exclusions, cancellation terms, and verification status. Keep the final payable total clear. Offer cards can have contextual group questions and a responsible person to check the deal. The wireframe now includes fictional hotel, car rental, and guide offers. These are examples, not existing partnerships, live quotes, negotiated deals, or guaranteed savings. Do not count unverified offers as confirmed trip bookings or mascot readiness.
+
+
+Ronak has now published redesigned GroupAtion onboarding at `/#new`; preserve that working, persisted flow. The PM planner preview remains separately available at `/groupation-wireframe.html`. Integrate the agreed design into the working product in coordination with the team; do not replace real trip creation with the in-memory preview.

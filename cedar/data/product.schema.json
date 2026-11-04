@@ -177,6 +177,10 @@
           "type": "string",
           "minLength": 1
         },
+        "time": {
+          "type": "string",
+          "pattern": "^$|^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        },
         "estimated_cost_per_person": {
           "type": "number",
           "minimum": 0

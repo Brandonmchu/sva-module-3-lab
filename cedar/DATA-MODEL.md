@@ -21,6 +21,7 @@ Trips → travelers and activities → responses.
 The response links one traveler to one activity through their IDs.
 
 Dates use YYYY-MM-DD. Budgets and activity costs use the trip currency and represent one person's amount.
+Activities may include an optional `time` in 24-hour HH:MM format (or an empty string for flexible timing). Times are local to the trip; no timezone conversion is performed. Activities sort by date, then time, with flexible activities last.
 Availability can conflict with the trip dates. Preferences and votes can conflict too.
 Your product decides how to help the group resolve those differences.
 

@@ -222,8 +222,13 @@ function renderPlanner() {
   const removed = activitiesFor(current.id).filter(activity => activity.status === 'removed');
   const cost = activities.reduce((total, activity) => total + activity.estimated_cost_per_person, 0);
   const days = [...new Set(activities.map(activity => activity.date))];
-  $('#planner-view').innerHTML = `<div class="trip-buddy planner-buddy"><div class="panda-art" data-mood="${current.status === 'confirmed' ? 'vacation' : 'planning'}" role="img" aria-label="${current.status === 'confirmed' ? 'Your red panda is relaxing in vacation mode' : 'Your happy red panda is helping organize the trip'}"></div><div class="buddy-copy"><span>Your trip buddy</span><strong>${current.status === 'confirmed' ? 'Plan confirmed. Time to chill.' : 'Our trip is coming together.'}</strong><p>${current.status === 'confirmed' ? 'The crew has a plan. Bring on the good times.' : 'Every shared decision brings the crew closer to vacation.'}</p></div></div><div class="planner-top"><div><p class="eyebrow">Your shared trip</p><h1>${escapeHtml(current.title)}</h1><p>${escapeHtml(current.destination)} · ${dateRange(current.start_date, current.end_date)}</p></div>
-    <label class="trip-selector">Your trips<select id="trip-select">${product.trips.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current.id ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}</select></label></div>
+  $('#planner-view').innerHTML = `<section class="escape-hero">
+      <div class="escape-scene" aria-hidden="true"><span class="escape-sun"></span><div class="skyline"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="music-note">♪</span><span class="music-note second">♫</span></div>
+      <div class="escape-copy"><div class="escape-label">✦ YOUR NEXT GREAT MEMORY</div><h1>${escapeHtml(current.title)}</h1><p class="escape-sub">Good times. Great company. One shared plan.</p><div class="escape-details"><span>↗ ${escapeHtml(current.destination)}</span><span>◷ ${dateRange(current.start_date, current.end_date)}</span></div><div class="crew-line"><div class="crew-avatars">${people.slice(0,5).map((p,i)=>`<span style="--avatar-color:${['#ffcf84','#e7b8f8','#bce8d8','#f5b8ab','#b9dcff'][i]}" title="${escapeHtml(p.name)}">${escapeHtml(p.name.slice(0,1))}</span>`).join('')}</div><strong>${people.length} trip mates. All the possibilities.</strong></div></div>
+      <div class="escape-buddy"><div class="panda-art" data-mood="${current.status === 'confirmed' ? 'vacation' : 'planning'}" role="img" aria-label="Your red panda trip buddy"></div><span class="buddy-sticker">${current.status === 'confirmed' ? 'Officially in vacay mode ☀' : 'Big plans. Little panda. ✨'}</span></div>
+      <span class="postcard-stamp" aria-hidden="true">LET’S<br>GO PLACES ↗</span>
+    </section>
+    <div class="trip-ribbon"><span><b>THE VIBE</b> A getaway with your favourite people</span><label class="trip-selector">Your trips<select id="trip-select">${product.trips.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current.id ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}</select></label></div>
     <div class="planner-toolbar"><span class="status-badge">${escapeHtml(statusName(current.status))}</span><div class="planner-actions"><button class="secondary small" data-action="edit-trip">Edit trip</button><button class="small" data-action="confirm-plan">${current.status === 'confirmed' ? 'Reopen planning' : 'Confirm plan'}</button></div></div>
     <div class="planner-columns"><div class="itinerary"><div class="section-heading"><h2>Shared itinerary</h2><button class="small" data-action="add-activity">Add activity</button></div>
       <div class="itinerary-summary"><strong>${escapeHtml(money(cost))}</strong><span>estimated per person · activities only</span><span>Trip budget: ${escapeHtml(money(current.budget_per_person))}</span></div>
@@ -239,6 +244,7 @@ function render() {
   if (!product) return;
   const currentRoute = route();
   const known = ['home', 'new', 'trip'].includes(currentRoute.view) ? currentRoute.view : 'home';
+  document.body.classList.toggle('design-prototype', known === 'trip');
   $('#home-view').hidden = known !== 'home';
   $('#new-view').hidden = known !== 'new';
   $('#planner-view').hidden = known !== 'trip';

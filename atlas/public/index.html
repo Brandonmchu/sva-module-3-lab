@@ -99,6 +99,7 @@
     <form id="activity-form"><div class="dialog-header"><h2 id="activity-dialog-heading">Add an activity</h2><button type="button" class="text-button" data-close="activity-dialog">Close</button></div>
       <input name="id" type="hidden"><label>Activity name<input name="title" required maxlength="120"></label>
       <div class="form-grid"><label>Date<input name="date" type="date" required></label><label>Category<input name="category" required placeholder="Food, outdoors, music"></label></div>
+      <div class="form-grid"><label>Start time<input name="start_time" type="time"></label><label>End time<input name="end_time" type="time"></label></div>
       <div class="form-grid"><label>Estimated cost per person<input name="estimated_cost_per_person" type="number" min="0" step="0.01" required></label><label>Plan status<select name="status"><option value="proposed">Proposed</option><option value="accepted">Agreed</option><option value="removed">Removed</option></select></label></div>
       <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save activity</button></div>
     </form>

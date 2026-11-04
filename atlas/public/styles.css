@@ -1196,6 +1196,11 @@ dialog::backdrop {
 .calendar-event-title {
   font-weight:700
 }
+.calendar-event-time {
+  color:var(--accent);
+  font-size:10px;
+  font-weight:700
+}
 .calendar-event-trip,.calendar-event-cost {
   color:var(--muted)
 }

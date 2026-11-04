@@ -62,6 +62,9 @@ function validateProduct(product) {
     if (records.travelers.get(response.traveler_id)?.trip_id !== response.trip_id) throw fail('Response traveler_id must belong to its trip.');
     if (records.activities.get(response.activity_id)?.trip_id !== response.trip_id) throw fail('Response activity_id must belong to its trip.');
   }
+  for (const activity of product.activities) {
+    if (activity.start_time && activity.end_time && activity.end_time <= activity.start_time) throw fail('Activity end_time must follow start_time.');
+  }
   for (const expense of product.expenses) {
     if (expense.amount <= 0) throw fail('Expense amount must be greater than zero.');
     if (records.travelers.get(expense.paid_by_traveler_id)?.trip_id !== expense.trip_id) throw fail('Expense payer must belong to its trip.');

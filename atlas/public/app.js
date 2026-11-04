@@ -260,7 +260,7 @@ function openEditor(kind, id) {
     $('#traveler-dialog-heading').textContent = id ? 'Edit traveler' : 'Add traveler';
   }
   if (kind === 'activity') {
-    values = product.activities.find(activity => activity.id === id) || { id: '', title: '', date: current.start_date, category: '', estimated_cost_per_person: 0, status: 'proposed' };
+    values = product.activities.find(activity => activity.id === id) || { id: '', title: '', date: current.start_date, start_time: '', end_time: '', category: '', estimated_cost_per_person: 0, status: 'proposed' };
     $('#activity-dialog-heading').textContent = id ? 'Edit activity' : 'Add an activity';
   }
   fillForm(form, values);
@@ -414,7 +414,7 @@ function renderPlanner() {
   }
   const people = travelersFor(current.id);
   if (!people.some(person => person.id === selectedTravelers.get(current.id))) selectedTravelers.set(current.id, people[0]?.id || '');
-  const activities = activitiesFor(current.id).filter(activity => activity.status !== 'removed').sort((a, b) => a.date.localeCompare(b.date));
+  const activities = activitiesFor(current.id).filter(activity => activity.status !== 'removed').sort((a, b) => a.date.localeCompare(b.date) || (a.start_time || '').localeCompare(b.start_time || ''));
   const removed = activitiesFor(current.id).filter(activity => activity.status === 'removed');
   const cost = activities.reduce((total, activity) => total + activity.estimated_cost_per_person, 0);
   const days = [...new Set(activities.map(activity => activity.date))];
@@ -453,13 +453,32 @@ function calendarActivities(start, end) {
     .filter(activity => !query || activity.title.toLocaleLowerCase().includes(query))
     .map(activity => ({ activity, trip: product.trips.find(item => item.id === activity.trip_id) }))
     .filter(item => item.trip)
-    .sort((a, b) => a.activity.date.localeCompare(b.activity.date) || a.trip.title.localeCompare(b.trip.title) || a.activity.title.localeCompare(b.activity.title));
+    .sort((a, b) => a.activity.date.localeCompare(b.activity.date) || (a.activity.start_time || '').localeCompare(b.activity.start_time || '') || a.trip.title.localeCompare(b.trip.title) || a.activity.title.localeCompare(b.activity.title));
+}
+
+function calendarTrips(start, end) {
+  return product.trips
+    .filter(current => current.start_date <= end && current.end_date >= start)
+    .filter(current => !calendarTripId || current.id === calendarTripId)
+    .sort((a, b) => a.start_date.localeCompare(b.start_date) || a.title.localeCompare(b.title));
+}
+
+function timeText(value) {
+  if (!value) return '';
+  const [hours, minutes] = value.split(':').map(Number);
+  return new Intl.DateTimeFormat('en-CA', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'UTC' }).format(new Date(Date.UTC(2026, 0, 1, hours, minutes)));
 }
 
 function renderCalendarEvent({ activity, trip: current }) {
+  const time = activity.start_time ? `<span class="calendar-event-time">${escapeHtml(timeText(activity.start_time))}${activity.end_time ? `–${escapeHtml(timeText(activity.end_time))}` : ''}</span>` : '';
   return `<a class="calendar-event" href="#trip/${encodeURIComponent(current.id)}" title="${escapeHtml(current.title)}: ${escapeHtml(activity.title)}">
-    <span class="calendar-event-title">${escapeHtml(activity.title)}</span><span class="calendar-event-trip">${escapeHtml(current.title)}</span>
+    ${time}<span class="calendar-event-title">${escapeHtml(activity.title)}</span><span class="calendar-event-trip">${escapeHtml(current.title)}</span>
     <span class="calendar-event-cost">${escapeHtml(money(activity.estimated_cost_per_person, current.currency))} per person</span></a>`;
+}
+
+function renderCalendarTrip(current) {
+  return `<a class="calendar-event calendar-trip" href="#trip/${encodeURIComponent(current.id)}" title="${escapeHtml(current.title)}: ${escapeHtml(dateRange(current.start_date, current.end_date))}">
+    <span class="calendar-event-title">${escapeHtml(current.title)}</span><span class="calendar-event-trip">${escapeHtml(dateRange(current.start_date, current.end_date))}</span></a>`;
 }
 
 function renderCalendarList(start, end) {
@@ -470,16 +489,22 @@ function renderCalendarList(start, end) {
     <div class="calendar-day-events">${entries.filter(({ activity }) => activity.date === day).map(renderCalendarEvent).join('')}</div></section>`).join('');
 }
 
+function renderCalendarTrips(start, end) {
+  const entries = calendarTrips(start, end);
+  if (!entries.length) return `<div class="empty-state calendar-empty"><h2>No trips in this view</h2><p>Try another date or trip.</p>${product.trips[0] ? `<a class="button small" href="#trip/${encodeURIComponent(calendarTripId || product.trips[0].id)}">Open a trip</a>` : '<a class="button small" href="#new">Start a trip</a>'}</div>`;
+  return `<div class="calendar-day-events">${entries.map(renderCalendarTrip).join('')}</div>`;
+}
+
 function renderCalendarMonth() {
   const monthStart = calendarDate.slice(0, 7) + '-01';
   const gridStart = startOfWeek(monthStart);
   const cells = Array.from({ length: 42 }, (_, index) => {
     const day = addDays(gridStart, index);
-    const entries = calendarActivities(day, day);
+    const entries = calendarTrips(day, day).filter(current => current.start_date === day);
     const outsideMonth = day.slice(0, 7) !== monthStart.slice(0, 7);
     return `<div class="calendar-cell${outsideMonth ? ' outside-month' : ''}${day === todayDate() ? ' today' : ''}">
       <button class="calendar-date" type="button" data-calendar-date="${day}" aria-label="Show ${new Intl.DateTimeFormat('en-CA', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(utcDate(day))}">${Number(day.slice(-2))}</button>
-      <div class="calendar-cell-events">${entries.slice(0, 3).map(renderCalendarEvent).join('')}${entries.length > 3 ? `<button class="calendar-more" type="button" data-calendar-date="${day}">+${entries.length - 3} more</button>` : ''}</div>
+      <div class="calendar-cell-events">${entries.slice(0, 3).map(renderCalendarTrip).join('')}${entries.length > 3 ? `<button class="calendar-more" type="button" data-calendar-date="${day}">+${entries.length - 3} more</button>` : ''}</div>
     </div>`;
   });
   return `<div class="calendar-grid-shell"><div class="calendar-weekdays" aria-hidden="true">${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => `<span>${day}</span>`).join('')}</div><div class="calendar-grid">${cells.join('')}</div></div>`;
@@ -489,7 +514,7 @@ function renderCalendar() {
   if (!product.trips.some(item => item.id === calendarTripId)) calendarTripId = '';
   const heading = calendarHeading();
   const tripOptions = product.trips.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === calendarTripId ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('');
-  const eventFilter = `<label class="calendar-event-filter">Event name<input type="search" id="calendar-event-filter" value="${escapeHtml(calendarEventQuery)}" placeholder="Search events"></label>`;
+  const eventFilter = calendarDisplay === 'agenda' ? `<label class="calendar-event-filter">Event name<input type="search" id="calendar-event-filter" value="${escapeHtml(calendarEventQuery)}" placeholder="Search events"></label>` : '';
   const monthStart = calendarDate.slice(0, 7) + '-01';
   const start = calendarView === 'day' ? calendarDate : calendarView === 'week' ? startOfWeek(calendarDate) : calendarDisplay === 'agenda' ? monthStart : startOfWeek(monthStart);
   const end = calendarView === 'day' ? calendarDate : calendarView === 'week' ? addDays(start, 6) : calendarDisplay === 'agenda' ? dateKey(new Date(Date.UTC(utcDate(monthStart).getUTCFullYear(), utcDate(monthStart).getUTCMonth() + 1, 0))) : addDays(start, 41);
@@ -498,7 +523,7 @@ function renderCalendar() {
       <div class="calendar-view-switch" role="group" aria-label="Date range">${['day', 'week', 'month'].map(view => `<button type="button" class="calendar-view-button${calendarView === view ? ' active' : ''}" data-calendar-view="${view}" aria-pressed="${calendarView === view}">${view[0].toUpperCase() + view.slice(1)}</button>`).join('')}</div></div>
       <div class="calendar-date-nav"><button type="button" class="secondary small" data-calendar-shift="-1" aria-label="Previous ${calendarView}">‹</button><button type="button" class="secondary small" data-calendar-today>Today</button><button type="button" class="secondary small" data-calendar-shift="1" aria-label="Next ${calendarView}">›</button><h2>${escapeHtml(heading)}</h2></div>
       <div class="calendar-filters">${eventFilter}<label class="calendar-trip-filter">Trip name<select id="calendar-trip-filter"><option value="">All trips</option>${tripOptions}</select></label></div></div>
-    ${calendarDisplay === 'calendar' && calendarView === 'month' ? renderCalendarMonth() : `<div class="calendar-list${calendarDisplay === 'agenda' ? ' agenda-list' : ''}">${renderCalendarList(start, end)}</div>`}`;
+    ${calendarDisplay === 'calendar' && calendarView === 'month' ? renderCalendarMonth() : `<div class="calendar-list${calendarDisplay === 'agenda' ? ' agenda-list' : ''}">${calendarDisplay === 'agenda' ? renderCalendarList(start, end) : renderCalendarTrips(start, end)}</div>`}`;
 }
 
 function render() {
@@ -604,6 +629,9 @@ $('#activity-form').addEventListener('submit', eventObject => {
     const values = Object.fromEntries(new FormData(form));
     const current = trip();
     const activity = { ...values, id: values.id || 'activity-' + crypto.randomUUID(), trip_id: current.id, title: values.title.trim(), category: values.category.trim(), estimated_cost_per_person: Number(values.estimated_cost_per_person) };
+    if (!activity.start_time) delete activity.start_time;
+    if (!activity.end_time) delete activity.end_time;
+    if (activity.start_time && activity.end_time && activity.end_time <= activity.start_time) throw new Error('End time must be after start time.');
     await saveChange(next => {
       const old = next.activities.find(item => item.id === activity.id);
       if (old) Object.assign(old, activity); else next.activities.push(activity);

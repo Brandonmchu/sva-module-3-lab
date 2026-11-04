@@ -154,18 +154,20 @@ function renderActivity(activity, current, people) {
   const selected = selectedTravelers.get(current.id);
   const person = people.find(item => item.id === selected);
   const mine = responseFor(activity.id, selected);
-  const totals = ['yes', 'maybe', 'no'].map(vote => responses.filter(item => item.response.vote === vote).length + ' ' + vote).join(' · ');
+  const totals = ['yes', 'maybe', 'no'].map(vote => `<span class="vote-count ${vote}"><b>${responses.filter(item => item.response.vote === vote).length}</b> ${vote}</span>`).join('');
   const outsideDates = activity.date < current.start_date || activity.date > current.end_date;
-  return `<article class="activity" data-activity-id="${escapeHtml(activity.id)}">
+  return `<article class="activity ${escapeHtml(activity.status)}" data-activity-id="${escapeHtml(activity.id)}">
+    <div class="activity-meta"><span class="status-badge ${activity.status === 'proposed' ? 'proposed' : ''}">${escapeHtml(statusName(activity.status))}</span><span>${escapeHtml(activity.category)}</span></div>
     <div class="activity-heading"><h3>${escapeHtml(activity.title)}</h3><span class="activity-cost">${escapeHtml(money(activity.estimated_cost_per_person))}</span></div>
-    <div class="activity-meta"><span>${escapeHtml(activity.category)}</span><span class="status-badge ${activity.status === 'proposed' ? 'proposed' : ''}">${escapeHtml(statusName(activity.status))}</span><span class="vote-totals">${totals}</span></div>
+    <div class="vote-totals">${totals}</div>
     ${outsideDates ? '<p class="budget-message">This activity is outside the trip dates.</p>' : ''}
-    <div class="activity-actions"><button class="text-button" data-action="edit-activity" data-id="${escapeHtml(activity.id)}">Edit activity</button>${activity.status !== 'accepted' ? `<button class="text-button" data-action="accept-activity" data-id="${escapeHtml(activity.id)}">Mark agreed</button>` : ''}<button class="text-button danger" data-action="remove-activity" data-id="${escapeHtml(activity.id)}">Remove</button></div>
+    <details class="vote-box"><summary>${mine ? 'Your vote: ' + mine.vote[0].toUpperCase() + mine.vote.slice(1) + ' · change' : "Who's in? Add your vote"}</summary>
     <form class="response-form" data-activity-id="${escapeHtml(activity.id)}"><fieldset ${person ? '' : 'disabled'}><legend>${person ? 'Your response as ' + escapeHtml(person.name) : 'Add a traveler to respond'}</legend>
       <div class="response-fields"><label>Vote<select name="vote" required><option value="" disabled ${mine ? '' : 'selected'}>Choose</option>${['yes', 'maybe', 'no'].map(vote => `<option value="${vote}" ${mine?.vote === vote ? 'selected' : ''}>${vote[0].toUpperCase() + vote.slice(1)}</option>`).join('')}</select></label>
       <label>Comment<input name="comment" value="${escapeHtml(mine?.comment || '')}" placeholder="An optional note" maxlength="500"></label><button class="secondary small" type="submit">Save response</button></div>
-      <p class="form-error" role="alert"></p></fieldset></form>
+      <p class="form-error" role="alert"></p></fieldset></form></details>
     ${responses.length ? `<details class="group-responses"><summary>View ${responses.length} group ${responses.length === 1 ? 'response' : 'responses'}</summary>${responses.map(item => `<div class="group-response"><b>${escapeHtml(item.person.name)} · ${item.response.vote}</b>${item.response.comment ? `<p>${escapeHtml(item.response.comment)}</p>` : ''}</div>`).join('')}</details>` : ''}
+    <details class="action-menu"><summary aria-label="Activity actions" title="Actions"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></summary><div class="action-list">    <button class="text-button" data-action="edit-activity" data-id="${escapeHtml(activity.id)}">Edit activity</button>${activity.status !== 'accepted' ? `<button class="text-button" data-action="accept-activity" data-id="${escapeHtml(activity.id)}">Mark agreed</button>` : ''}<button class="text-button danger" data-action="remove-activity" data-id="${escapeHtml(activity.id)}">Remove</button></div></details>
   </article>`;
 }
 
@@ -173,7 +175,7 @@ function renderPerson(person, current) {
   const partial = person.available_from > current.start_date || person.available_to < current.end_date;
   return `<article class="person"><div class="person-heading"><h3>${escapeHtml(person.name)}</h3><span class="quiet">${escapeHtml(money(person.budget))}</span></div>
     <p>${dateRange(person.available_from, person.available_to)}</p>${partial ? '<p class="availability-warning">Availability differs from the trip dates.</p>' : ''}
-    <p>${escapeHtml(person.interests.join(', ') || 'No interests added yet.')}</p><div class="person-actions"><button class="text-button" data-action="edit-traveler" data-id="${escapeHtml(person.id)}">Edit preferences</button><button class="text-button danger" data-action="remove-traveler" data-id="${escapeHtml(person.id)}">Remove</button></div></article>`;
+    ${person.interests.length ? `<p class="interests">${person.interests.map(interest => `<span>${escapeHtml(interest)}</span>`).join('')}</p>` : '<p>No interests added yet.</p>'}<div class="person-actions"><button class="text-button" data-action="edit-traveler" title="Edit preferences" data-id="${escapeHtml(person.id)}">Edit preferences</button><button class="text-button danger" data-action="remove-traveler" title="Remove" data-id="${escapeHtml(person.id)}">Remove</button></div></article>`;
 }
 
 function renderPlanner() {
@@ -355,6 +357,7 @@ async function handleAction(button) {
 document.addEventListener('click', eventObject => {
   const close = eventObject.target.closest('[data-close]');
   if (close) $('#' + close.dataset.close).close();
+  document.querySelectorAll('.action-menu[open]').forEach(menu => { if (!menu.contains(eventObject.target) || eventObject.target.closest('[data-action]')) menu.open = false; });
   const button = eventObject.target.closest('[data-action]');
   if (button && !busy) handleAction(button).catch(error => notice(error.message, true));
 });

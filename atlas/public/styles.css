@@ -1,15 +1,18 @@
 /* A neutral baseline. Change the visual direction for your customers. */
 :root {
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  color:#24322e;
-  background:#f6f7f3;
+  color:#332c29;
+  background:#fbf7f3;
   font-synthesis:none;
-  --accent:#32624d;
-  --muted:#64716a;
-  --line:#dce2d9;
-  --paper:#fff;
-  --tint:#e8efe6;
-  --danger:#9a432e
+  --accent:#c96645;
+  --accent-hover:#b85838;
+  --muted:#766a62;
+  --line:#eadfd7;
+  --paper:#fffdfb;
+  --tint:#fff1e7;
+  --canvas:#fbf7f3;
+  --text:#332c29;
+  --danger:#a34a37
 }
 * {
   box-sizing:border-box
@@ -44,7 +47,7 @@ button,.button {
   transition:background .15s,transform .15s
 }
 button:hover,.button:hover {
-  background:#264d3c
+  background:var(--accent-hover)
 }
 button:active,.button:active {
   transform:translateY(1px)
@@ -80,7 +83,7 @@ button:disabled {
   color:var(--danger)
 }
 :focus-visible {
-  outline:3px solid #83a391;
+  outline:3px solid #e5a181;
   outline-offset:4px
 }
 [hidden] {
@@ -204,7 +207,7 @@ main {
   color:var(--muted)
 }
 .sample-preview {
-  background:#eef1e9;
+  background:var(--tint);
   border:1px solid var(--line);
   padding:32px;
   border-radius:12px
@@ -220,7 +223,7 @@ main {
   grid-template-columns:1fr 1fr;
   gap:20px;
   padding:22px 0;
-  border-top:1px solid #d1d9cd
+  border-top:1px solid var(--line)
 }
 .sample-meta span {
   display:block;
@@ -234,7 +237,7 @@ main {
 }
 .sample-activity {
   padding:13px 0;
-  border-top:1px solid #d1d9cd;
+  border-top:1px solid var(--line);
   display:flex;
   justify-content:space-between;
   gap:20px;
@@ -276,16 +279,16 @@ label {
 input,select,textarea {
   width:100%;
   padding:11px 12px;
-  border:1px solid #cbd4c9;
+  border:1px solid #dfd1c7;
   border-radius:6px;
   background:white;
-  color:#24322e;
+  color:var(--text);
   font-size:14px;
   line-height:1.35;
   min-height:42px
 }
 input::placeholder,textarea::placeholder {
-  color:#89948a
+  color:#a3948b
 }
 input[type=date] {
   min-width:0
@@ -324,8 +327,8 @@ textarea {
 }
 .notice.error {
   border-color:var(--danger);
-  background:#f7ede7;
-  color:#783820
+  background:#f9eae4;
+  color:#743b2d
 }
 .planner {
   padding-top:32px
@@ -373,7 +376,7 @@ textarea {
   font-weight:650
 }
 .status-badge.proposed {
-  background:#eef0ec;
+  background:#f2eee9;
   color:var(--muted)
 }
 .planner-columns {
@@ -399,7 +402,7 @@ textarea {
 }
 .itinerary-summary strong {
   font-size:22px;
-  color:#24322e;
+  color:var(--text);
   font-weight:650
 }
 .budget-message {
@@ -479,7 +482,7 @@ summary {
   line-height:1.5
 }
 .group-response b {
-  color:#24322e;
+  color:var(--text);
   font-weight:600
 }
 .group-response p {
@@ -529,7 +532,7 @@ summary {
 }
 .empty-state {
   padding:32px 24px;
-  border:1px dashed #b8c5b8;
+  border:1px dashed #d9c7bc;
   border-radius:8px;
   margin-bottom:20px
 }
@@ -671,8 +674,8 @@ summary {
 .expense-shares span {
   padding:5px 7px;
   border-radius:4px;
-  background:#f1f3ef;
-  color:#4d5b52;
+  background:#f6eee8;
+  color:#62564f;
   font-size:10px
 }
 .expense-actions {
@@ -681,7 +684,7 @@ summary {
   gap:14px;
   margin-top:10px;
   padding-top:8px;
-  border-top:1px solid #edf0ea
+  border-top:1px solid #f1e8e1
 }
 .expense-actions .quiet {
   margin-right:auto
@@ -695,7 +698,7 @@ summary {
   padding:14px;
   border:1px solid var(--line);
   border-radius:8px;
-  background:#fbfcfa
+  background:#fffaf6
 }
 .expense-split-editor legend {
   padding:0 6px;
@@ -774,11 +777,11 @@ dialog {
   border:1px solid var(--line);
   border-radius:12px;
   padding:28px;
-  color:#24322e;
+  color:var(--text);
   background:white
 }
 dialog::backdrop {
-  background:rgb(30 43 35 / .35)
+  background:rgb(51 44 41 / .35)
 }
 .dialog-header {
   justify-content:space-between;
@@ -801,7 +804,7 @@ dialog::backdrop {
   margin-top:20px
 }
 .skeleton {
-  background:#e5eae1;
+  background:#eee5df;
   border-radius:5px;
   width:40%;
   height:22px;
@@ -933,7 +936,7 @@ dialog::backdrop {
   min-width:700px
 }
 .calendar-weekdays {
-  background:#eef1e9;
+  background:#f5ece5;
   border-bottom:1px solid var(--line)
 }
 .calendar-weekdays span {
@@ -959,10 +962,10 @@ dialog::backdrop {
   border-bottom:0
 }
 .calendar-cell.outside-month {
-  background:#f8f9f6
+  background:#fbf8f5
 }
 .calendar-cell.today {
-  background:#f2f6ef
+  background:#fff5e9
 }
 .calendar-date {
   min-width:30px;
@@ -971,7 +974,7 @@ dialog::backdrop {
   border:0;
   border-radius:50%;
   background:transparent;
-  color:#24322e;
+  color:var(--text);
   font-size:12px
 }
 .calendar-date:hover {
@@ -982,7 +985,7 @@ dialog::backdrop {
   color:white
 }
 .calendar-cell.outside-month .calendar-date {
-  color:#89948a
+  color:#a3948b
 }
 .calendar-cell-events {
   display:grid;
@@ -998,13 +1001,13 @@ dialog::backdrop {
   border-left:3px solid var(--accent);
   border-radius:4px;
   background:var(--tint);
-  color:#24322e;
+  color:var(--text);
   font-size:11px;
   line-height:1.35;
   overflow-wrap:anywhere
 }
 .calendar-event:hover {
-  background:#dce9dc
+  background:#f8e3d6
 }
 .calendar-event-title {
   font-weight:700

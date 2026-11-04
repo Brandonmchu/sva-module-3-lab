@@ -508,6 +508,15 @@ async function load() {
     $('#load-error-message').textContent = error.message;
   }
 }
+// Landing carousel: a hidden second copy of the slides lets the CSS animation loop without a gap.
+const carouselTrack = $('.carousel-track');
+if (carouselTrack && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  [...carouselTrack.children].forEach(slide => {
+    const copy = slide.cloneNode(true);
+    copy.setAttribute('aria-hidden', 'true');
+    carouselTrack.append(copy);
+  });
+}
 $('#retry-load').addEventListener('click', load);
 window.addEventListener('hashchange', handleRoute);
 load();

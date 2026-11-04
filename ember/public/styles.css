@@ -1089,3 +1089,57 @@ dialog::backdrop {
     font-size:12px
   }
 }
+
+/* Photo carousel: shows 4 at a time (2 on phones) and loops continuously */
+.photo-carousel {
+  grid-column:1/-1;
+  container-type:inline-size;
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)
+}
+.carousel-track {
+  display:flex;
+  width:max-content;
+  margin:0;
+  padding:0;
+  list-style:none;
+  animation:carousel-loop 40s linear infinite
+}
+.photo-carousel:hover .carousel-track,
+.photo-carousel:focus-within .carousel-track {
+  animation-play-state:paused
+}
+/* Margin, not gap, so the duplicated half is exactly 50% of the track and the loop has no jump. */
+.carousel-slide {
+  flex:0 0 calc((100cqi - 3 * 16px) / 4);
+  margin-right:16px;
+  aspect-ratio:4/5;
+  border-radius:16px;
+  overflow:hidden;
+  border:1px solid var(--gold);
+  box-shadow:0 10px 24px rgb(var(--accent-rgb) / .1)
+}
+.carousel-slide img {
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover
+}
+@keyframes carousel-loop {
+  to { transform:translateX(-50%) }
+}
+@media(max-width:600px) {
+  .carousel-slide {
+    flex-basis:calc((100cqi - 12px) / 2);
+    margin-right:12px
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .photo-carousel {
+    overflow-x:auto
+  }
+  .carousel-track {
+    animation:none
+  }
+}

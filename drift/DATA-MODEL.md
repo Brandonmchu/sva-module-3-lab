@@ -71,3 +71,11 @@ You can add fields or collections. Preserve the base IDs and relationships for t
 If you change base field rules, update data/product.schema.json and the local validation as necessary.
 The server validates the subset of schema rules that the starter uses.
 Run npm run check before you commit product data or events.
+
+## Shared travel details
+
+Activities may also represent transport, stays, food/activities or partner offers through `plan_kind`. Optional details include provider, local start/end dates and times with IANA time zones, meeting point/route, participants, original provider quote/currency/price basis, offer eligibility/expiry and notes. `estimated_cost_per_person` remains in the trip currency; quotes are displayed separately with no automatic currency conversion. Partner offers are excluded from the itinerary estimate.
+
+Trips may store `country_code` for the destination flag and `mascot_stage` (`auto`, `starting`, `planning`, `relaxed`, `vacation`). Auto follows shared planning, booking status, confirmation and trip dates. Manual mood selection is an MVP preview saved with the trip.
+
+Generated fictional profile photos for the three sample travelers live under `public/avatars/`. Other travelers use initials. Photos are presentation assets, not identity verification or real user photographs. Booking provider flows and sample partner discounts remain explicitly labeled simulations. Planning details, booking ownership, votes, discussions and shared offers use the real local product API and persist.

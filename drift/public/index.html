@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="/design-prototype.css">
   <link rel="stylesheet" href="/mobile-preview.css">
   <link rel="stylesheet" href="/booking-placeholder.css">
+  <link rel="stylesheet" href="/planner-navigation.css">
   <script src="/app.js" type="module"></script>
   <script src="/mobile-preview.js" type="module"></script>
 </head>
@@ -181,7 +182,7 @@
       <label>Trip name<input name="title" required maxlength="100"></label><label>Destination<input name="destination" required maxlength="150"></label>
       <div class="form-grid"><label>Start date<input name="start_date" type="date" required></label><label>End date<input name="end_date" type="date" required></label></div>
       <div class="form-grid"><label>Budget per person<input name="budget_per_person" type="number" min="0" step="0.01" required></label><label>Currency<input name="currency" required pattern="[A-Za-z]{3}" maxlength="3"></label></div>
-      <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save trip</button></div>
+      <label>Destination flag<select name="country_code"><option value="US">United States 🇺🇸</option><option value="CA">Canada 🇨🇦</option><option value="PT">Portugal 🇵🇹</option><option value="FR">France 🇫🇷</option><option value="GB">United Kingdom 🇬🇧</option><option value="IT">Italy 🇮🇹</option><option value="ES">Spain 🇪🇸</option><option value="MX">Mexico 🇲🇽</option><option value="JP">Japan 🇯🇵</option><option value="other">Other destination 🌍</option></select></label><p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save trip</button></div>
     </form>
   </dialog>
 
@@ -196,10 +197,10 @@
 
   <dialog id="activity-dialog" aria-labelledby="activity-dialog-heading">
     <form id="activity-form"><div class="dialog-header"><h2 id="activity-dialog-heading">Add an activity</h2><button type="button" class="text-button" data-close="activity-dialog">Close</button></div>
-      <input name="id" type="hidden"><label>Activity name<input name="title" required maxlength="120"></label>
+      <input name="id" type="hidden"><label>Plan or booking name<input name="title" required maxlength="120" placeholder="Hotel option, flight, dinner, concert…"></label><div class="form-grid"><label>Section<select name="plan_kind"><option value="transport">Flights, trains & cars</option><option value="stays">Places to stay</option><option value="plans" selected>Food & activities</option><option value="offers">Partner discounts</option></select></label><label>Provider / platform<input name="provider" maxlength="100" placeholder="Airline, hotel, Airbnb, VRBO, guide…"></label></div>
       <div class="form-grid"><label>Date<input name="date" type="date" required></label><label>Category<input name="category" required placeholder="Food, outdoors, music"></label></div>
       <div class="form-grid"><label>Estimated cost per person<input name="estimated_cost_per_person" type="number" min="0" step="0.01" required></label><label>Plan status<select name="status"><option value="proposed">Proposed</option><option value="accepted">Agreed</option><option value="removed">Removed</option></select></label></div>
-      <p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Save activity</button></div>
+      <details class="shared-plan-fields" open><summary>Travel details & shared price</summary><div class="form-grid"><label>Departure / start time<input name="local_time" type="time"></label><label>Start time zone<input name="time_zone" maxlength="80" placeholder="America/Toronto"></label><label>Arrival / check-out date<input name="end_date" type="date"></label><label>Arrival / end time<input name="end_time" type="time"></label><label>Arrival time zone<input name="end_time_zone" maxlength="80" placeholder="Europe/Lisbon"></label><label>Meeting point / route<input name="location" maxlength="200" placeholder="Airport, station, address, route…"></label><label>Provider quote (optional)<input name="quote_price" type="number" min="0" step="0.01"></label><label>Quote currency<select name="quote_currency"><option>CAD</option><option>USD</option><option>EUR</option><option>GBP</option><option>JPY</option><option>MXN</option></select></label><label>Price basis<select name="price_basis"><option>per person</option><option>group total</option><option>per night</option><option>per room / night</option></select></label><label>Who is joining?<input name="participants" maxlength="250" placeholder="Everyone, or trip mate names"></label></div><p class="field-help">Provider quotes keep their original currency and price basis. The itinerary estimate above is per person in the trip currency; no exchange rate is assumed.</p></details><label>Shared provider link<input name="booking_url" type="url" maxlength="500" placeholder="https://…"></label><div class="form-grid"><label>Booking status<select name="booking_state"><option value="idea">Idea</option><option value="agreed">Group agreed</option><option value="pending">Booking pending</option><option value="booked">Booked</option></select></label><label>Who's booking it?<select name="booking_owner_id"><option value="">No one yet</option></select></label></div><label>Offer, eligibility & expiry<input name="offer_terms" maxlength="500" placeholder="Group size, discount, deadline and terms to confirm"></label><label>Details for the group<textarea name="details" maxlength="1000" rows="3" placeholder="Baggage, cancellation terms, check-in, meeting point, questions…"></textarea></label><p class="form-error" role="alert"></p><div class="form-actions"><button type="submit">Share with the group</button></div>
     </form>
   </dialog>
   </div>

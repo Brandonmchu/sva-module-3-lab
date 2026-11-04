@@ -9,7 +9,9 @@
       "end_date": "2026-11-08",
       "budget_per_person": 600,
       "currency": "USD",
-      "status": "planning"
+      "status": "planning",
+      "mascot_stage": "auto",
+      "country_code": "US"
     }
   ],
   "travelers": [
@@ -81,6 +83,80 @@
       "status": "proposed",
       "booking_state": "pending",
       "booking_owner_id": "traveler-003"
+    },
+    {
+      "id": "activity-groupation-flight-sample",
+      "trip_id": "trip-001",
+      "title": "Sample flight option · Toronto → Nashville",
+      "date": "2026-11-06",
+      "category": "Flight",
+      "plan_kind": "transport",
+      "estimated_cost_per_person": 180,
+      "status": "proposed",
+      "booking_state": "idea",
+      "provider": "Airline option · fictional example",
+      "local_time": "08:30",
+      "time_zone": "America/Toronto",
+      "end_date": "2026-11-06",
+      "end_time": "10:00",
+      "end_time_zone": "America/Chicago",
+      "location": "YYZ → BNA · meeting point to confirm",
+      "quote_price": "180",
+      "quote_currency": "USD",
+      "price_basis": "per person",
+      "participants": "Priya, Maya · Dani travels Saturday",
+      "details": "Fictional example for the MVP. Compare baggage, airport transfers and cancellation terms before choosing a provider.",
+      "offer_terms": ""
+    },
+    {
+      "id": "activity-groupation-stay-sample",
+      "trip_id": "trip-001",
+      "title": "Sample shared stay · near the concert district",
+      "date": "2026-11-06",
+      "category": "Stay",
+      "plan_kind": "stays",
+      "estimated_cost_per_person": 160,
+      "status": "proposed",
+      "booking_state": "pending",
+      "booking_owner_id": "traveler-001",
+      "provider": "Hotel, Airbnb or VRBO · compare options",
+      "local_time": "15:00",
+      "time_zone": "America/Chicago",
+      "end_date": "2026-11-08",
+      "end_time": "11:00",
+      "end_time_zone": "America/Chicago",
+      "location": "Nashville concert district · address to confirm",
+      "quote_price": "480",
+      "quote_currency": "USD",
+      "price_basis": "group total",
+      "participants": "Priya, Maya, Dani",
+      "offer_terms": "Ask about a group rate; no discount or partner agreement confirmed.",
+      "details": "Fictional two-night example split three ways. Confirm room sharing, cleaning fees, late arrival and cancellation terms."
+    },
+    {
+      "id": "activity-00278a3f-1e66-4659-835b-674c9d7da27d",
+      "title": "Car rental / group van",
+      "plan_kind": "offers",
+      "provider": "Sample car rental partner · unverified",
+      "date": "2026-11-06",
+      "category": "Partner offer",
+      "estimated_cost_per_person": 0,
+      "status": "proposed",
+      "local_time": "",
+      "time_zone": "",
+      "end_date": "",
+      "end_time": "",
+      "end_time_zone": "",
+      "location": "",
+      "quote_price": "",
+      "quote_currency": "USD",
+      "price_basis": "per person",
+      "participants": "",
+      "booking_state": "idea",
+      "booking_owner_id": "traveler-002",
+      "offer_terms": "10% illustrative discount. Seats, insurance, mileage and driver eligibility to confirm. Provider confirmation required.",
+      "details": "MVP example only. No partnership or discount has been confirmed.",
+      "trip_id": "trip-001"
     }
   ],
   "responses": [
@@ -124,6 +200,14 @@
       "traveler_id": "traveler-001",
       "body": "Is everyone flying in Friday? Dani, you land Saturday morning, right?",
       "created_at": "2026-11-03T21:30:00.000Z"
+    },
+    {
+      "id": "discussion-482e7f09-5fc0-4dfd-9a13-c9a218312c16",
+      "trip_id": "trip-001",
+      "traveler_id": "traveler-001",
+      "body": "Can we confirm the insurance, luggage space and final group price before booking?",
+      "created_at": "2026-11-04T02:18:57.558Z",
+      "activity_id": "activity-00278a3f-1e66-4659-835b-674c9d7da27d"
     }
   ]
 }

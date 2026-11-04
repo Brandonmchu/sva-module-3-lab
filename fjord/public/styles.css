@@ -732,3 +732,33 @@ dialog::backdrop {
     transition:none!important
   }
 }
+/* Top 3 things to do per traveler interest (Gemini suggestions) */
+.ideas .idea-group {
+  padding-top:10px;
+  line-height:1.5
+}
+.ideas .idea-group b {
+  color:#24322e;
+  font-weight:600;
+  text-transform:capitalize
+}
+.ideas ol {
+  margin:4px 0 0;
+  padding-left:18px
+}
+.ideas li {
+  padding-top:4px
+}
+.ideas .idea-title {
+  color:#24322e
+}
+.person .ideas p {
+  margin-top:2px
+}
+.ideas-actions {
+  margin-top:8px
+}
+.ideas-actions [aria-disabled="true"] {
+  color:var(--muted);
+  cursor:progress
+}

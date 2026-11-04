@@ -98,6 +98,19 @@
             "confirmed",
             "cancelled"
           ]
+        },
+        "country_code": {
+          "type": "string"
+        },
+        "mascot_stage": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "starting",
+            "planning",
+            "relaxed",
+            "vacation"
+          ]
         }
       },
       "additionalProperties": true
@@ -211,6 +224,54 @@
         "booking_url": {
           "type": "string",
           "minLength": 1
+        },
+        "provider": {
+          "type": "string"
+        },
+        "local_time": {
+          "type": "string"
+        },
+        "time_zone": {
+          "type": "string"
+        },
+        "end_date": {
+          "type": "string"
+        },
+        "end_time": {
+          "type": "string"
+        },
+        "end_time_zone": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "quote_price": {
+          "type": "string"
+        },
+        "quote_currency": {
+          "type": "string"
+        },
+        "price_basis": {
+          "type": "string"
+        },
+        "participants": {
+          "type": "string"
+        },
+        "offer_terms": {
+          "type": "string"
+        },
+        "details": {
+          "type": "string"
+        },
+        "plan_kind": {
+          "type": "string",
+          "enum": [
+            "transport",
+            "stays",
+            "plans",
+            "offers"
+          ]
         }
       },
       "additionalProperties": true

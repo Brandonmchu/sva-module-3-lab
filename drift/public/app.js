@@ -10,6 +10,33 @@ let busy = false;
 let wizardStep = 1;
 let tripDraft;
 let previousRoute;
+let plannerPanel = 'itinerary';
+const kindOf = activity => activity.plan_kind || (/flight|train|transport|rental/i.test(activity.category) ? 'transport' : /hotel|stay|airbnb|vrbo/i.test(activity.category) ? 'stays' : 'plans');
+const panelTitles = {itinerary:'Shared itinerary',transport:'Flights, trains & cars',stays:'Places to stay',plans:'Food & activities',questions:'Questions on every plan'};
+const countryFlags = {US:'🇺🇸',CA:'🇨🇦',PT:'🇵🇹',FR:'🇫🇷',GB:'🇬🇧',IT:'🇮🇹',ES:'🇪🇸',MX:'🇲🇽',JP:'🇯🇵'};
+function pandaMood(current, activities) {
+  if (current.mascot_stage && current.mascot_stage !== 'auto') return current.mascot_stage;
+  if (!activities.length) return 'starting';
+  const today = new Date().toLocaleDateString('en-CA');
+  if (current.status === 'confirmed' && today >= current.start_date && today <= current.end_date) return 'vacation';
+  if (current.status === 'confirmed' || activities.every(a => a.booking_state === 'booked' || a.status === 'accepted')) return 'relaxed';
+  return activities.some(a => a.booking_state === 'booked' || a.status === 'accepted' || a.booking_state === 'pending') ? 'planning' : 'starting';
+}
+function moodOptions(value) { return [['auto','Follow planning progress'],['starting','Stressed · just starting'],['planning','Happier · plans taking shape'],['relaxed','Ready · sunglasses & bag'],['vacation','At destination · flag T-shirt']].map(([key,label])=>`<option value="${key}" ${value === key ? 'selected' : ''}>${label}</option>`).join(''); }
+function partnerOffers() { return `<section class="partner-offers"><div class="offer-heading"><p class="eyebrow">Better together</p><h2>Partner discounts</h2><p>Illustrative group offers for the MVP. These are examples, not negotiated deals or live quotes.</p></div><div class="offer-examples">${[['Hotel group rate','20%','6+ rooms · fees and cancellation terms to confirm'],['Car rental / group van','10%','Seats, insurance, mileage and driver eligibility to confirm'],['Local guide & group experience','15%','6+ guests · language, meeting point and inclusions to confirm']].map(([name,rate,terms])=>`<article class="offer-example"><h3>${name}</h3><strong>${rate} example saving</strong><p>${terms}</p><p>Provider confirmation and final price required.</p><button class="secondary small" data-offer-title="${name}" data-offer-rate="${rate}" data-offer-terms="${terms}">Share an offer to discuss</button></article>`).join('')}</div><button class="small" data-action="add-activity" data-kind="offers">+ Share another partner offer</button><p class="profile-note">Offers you share below are saved with this trip and have their own discussion.</p></section>`; }
+
+function avatar(person, extra = '') {
+  const sampleIds = ['traveler-001', 'traveler-002', 'traveler-003'];
+  const index = sampleIds.indexOf(person?.id);
+  return index < 0 ? `<span class="profile-photo profile-fallback ${extra}" aria-hidden="true">${escapeHtml((person?.name || '?').slice(0,1))}</span>` : `<img class="profile-photo ${extra}" src="/avatars/traveler-${index + 1}.png" alt="${escapeHtml(person.name)} — sample profile photo" width="40" height="40">`;
+}
+document.addEventListener('click', e => {
+  const button = e.target.closest?.('[data-planner-panel]');
+  if (!button) return;
+  plannerPanel = button.dataset.plannerPanel;
+  if (plannerPanel === 'questions') activitiesFor(trip().id).forEach(a => openThreads.add(a.id));
+  renderPlanner();
+});
 
 async function api(path, options = {}) {
   const response = await fetch(path, options);
@@ -98,14 +125,17 @@ function openEditor(kind, id) {
   if (!current) return;
   const form = $('#' + kind + '-form');
   let values;
-  if (kind === 'trip') values = current;
+  if (kind === 'trip') values = { country_code: 'other', ...current };
   if (kind === 'traveler') {
     values = product.travelers.find(person => person.id === id) || { id: '', name: '', available_from: current.start_date, available_to: current.end_date, budget: current.budget_per_person, interests: [] };
     $('#traveler-dialog-heading').textContent = id ? 'Edit traveler' : 'Add traveler';
   }
   if (kind === 'activity') {
-    values = product.activities.find(activity => activity.id === id) || { id: '', title: '', date: current.start_date, category: '', estimated_cost_per_person: 0, status: 'proposed' };
-    $('#activity-dialog-heading').textContent = id ? 'Edit activity' : 'Add an activity';
+    values = product.activities.find(activity => activity.id === id) || { id: '', title: '', date: current.start_date, category: 'Group plan', estimated_cost_per_person: 0, status: 'proposed', plan_kind: ['transport','stays','plans','offers'].includes(plannerPanel) ? plannerPanel : 'plans', quote_currency: current.currency, price_basis: 'per person' };
+    values = { ...values, plan_kind: kindOf(values), quote_currency: values.quote_currency || current.currency };
+    form.elements.namedItem('booking_owner_id').innerHTML = '<option value="">No one yet</option>' + travelersFor(current.id).map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join('');
+    $('#activity-dialog-heading').textContent = id ? 'Edit shared plan' : 'Share a plan or booking';
+
   }
   fillForm(form, values);
   $('#' + kind + '-dialog').showModal();
@@ -215,7 +245,7 @@ function renderThread(current, activityId, people, title) {
   const thread = posts.length ? posts.map(post => {
     const author = people.find(item => item.id === post.traveler_id);
     const name = author?.name || 'Former traveler';
-    return `<div class="discussion-post"><span class="discussion-avatar" aria-hidden="true">${escapeHtml(name.slice(0, 1))}</span><div><p class="discussion-meta"><b>${escapeHtml(name)}</b> · ${escapeHtml(timeText(post.created_at))}</p><p>${escapeHtml(post.body)}</p></div></div>`;
+    return `<div class="discussion-post">${avatar(author, 'discussion-photo')}<div><p class="discussion-meta"><b>${escapeHtml(name)}</b> · ${escapeHtml(timeText(post.created_at))}</p><p>${escapeHtml(post.body)}</p></div></div>`;
   }).join('') : '<p class="quiet">No questions yet. Ask the first one.</p>';
   return `<div class="discussion-thread">${title ? `<p class="discussion-context">About: <b>${escapeHtml(title)}</b></p>` : ''}${thread}
     <form class="discussion-form" data-activity-id="${escapeHtml(activityId || '')}"><fieldset ${person ? '' : 'disabled'}><legend class="sr-only">Post a question</legend>
@@ -230,24 +260,26 @@ function renderActivity(activity, current, people) {
   const mine = responseFor(activity.id, selected);
   const totals = ['yes', 'maybe', 'no'].map(vote => responses.filter(item => item.response.vote === vote).length + ' ' + vote).join(' · ');
   const outsideDates = activity.date < current.start_date || activity.date > current.end_date;
-  return `<article class="activity" data-activity-id="${escapeHtml(activity.id)}">
-    <div class="activity-heading"><h3>${escapeHtml(activity.title)}</h3><span class="activity-cost">${escapeHtml(money(activity.estimated_cost_per_person))}</span></div>
+  return `<article class="activity" data-kind="${escapeHtml(kindOf(activity))}" data-activity-id="${escapeHtml(activity.id)}">
+    <div class="activity-heading"><h3>${escapeHtml(activity.title)}</h3><span class="activity-cost">${kindOf(activity) === 'offers' ? 'Price to confirm' : escapeHtml(money(activity.estimated_cost_per_person)) + ' / person'}</span></div>
     <div class="activity-meta"><span>${escapeHtml(activity.category)}</span><span class="status-badge ${activity.status === 'proposed' ? 'proposed' : ''}">${escapeHtml(statusName(activity.status))}</span><span class="vote-totals">${totals}</span></div>
     ${outsideDates ? '<p class="budget-message">This activity is outside the trip dates.</p>' : ''}
+    <dl class="plan-details">${[['Provider',activity.provider],['Date & local time',activity.date + (activity.local_time ? ' · ' + activity.local_time + ' · ' + (activity.time_zone || 'Time zone not specified') : '')],['Arrival / check-out',activity.end_date ? activity.end_date + (activity.end_time ? ' · ' + activity.end_time : '') + (activity.end_time_zone ? ' · ' + activity.end_time_zone : '') : ''],['Meeting point / route',activity.location],['Shared quote',activity.quote_price ? activity.quote_currency + ' ' + activity.quote_price + ' · ' + (activity.price_basis || 'per person') + ' · unverified' : ''],['Who is joining',activity.participants],['Offer & eligibility',activity.offer_terms]].filter(([,v])=>v).map(([label,value])=>`<div><dt>${label}</dt><dd>${escapeHtml(value)}</dd></div>`).join('')}</dl>
+    ${activity.details ? `<p class="plan-notes">${escapeHtml(activity.details)}</p>` : ''}
     ${renderBooking(activity, people)}
     <div class="activity-actions"><button class="text-button" data-action="edit-activity" data-id="${escapeHtml(activity.id)}">Edit activity</button>${activity.status !== 'accepted' ? `<button class="text-button" data-action="accept-activity" data-id="${escapeHtml(activity.id)}">Mark agreed</button>` : ''}<button class="text-button danger" data-action="remove-activity" data-id="${escapeHtml(activity.id)}">Remove</button></div>
     <form class="response-form" data-activity-id="${escapeHtml(activity.id)}"><fieldset ${person ? '' : 'disabled'}><legend>${person ? 'Your response as ' + escapeHtml(person.name) : 'Add a traveler to respond'}</legend>
       <div class="response-fields"><label>Vote<select name="vote" required><option value="" disabled ${mine ? '' : 'selected'}>Choose</option>${['yes', 'maybe', 'no'].map(vote => `<option value="${vote}" ${mine?.vote === vote ? 'selected' : ''}>${vote[0].toUpperCase() + vote.slice(1)}</option>`).join('')}</select></label>
       <label>Comment<input name="comment" value="${escapeHtml(mine?.comment || '')}" placeholder="An optional note" maxlength="500"></label><button class="secondary small" type="submit">Save response</button></div>
       <p class="form-error" role="alert"></p></fieldset></form>
-    ${responses.length ? `<details class="group-responses"><summary>View ${responses.length} group ${responses.length === 1 ? 'response' : 'responses'}</summary>${responses.map(item => `<div class="group-response"><b>${escapeHtml(item.person.name)} · ${item.response.vote}</b>${item.response.comment ? `<p>${escapeHtml(item.response.comment)}</p>` : ''}</div>`).join('')}</details>` : ''}
+    ${responses.length ? `<details class="group-responses"><summary>View ${responses.length} group ${responses.length === 1 ? 'response' : 'responses'}</summary>${responses.map(item => `<div class="group-response">${avatar(item.person)} <b>${escapeHtml(item.person.name)} · ${item.response.vote}</b>${item.response.comment ? `<p>${escapeHtml(item.response.comment)}</p>` : ''}</div>`).join('')}</details>` : ''}
     <details class="discussion" data-thread="${escapeHtml(activity.id)}" ${openThreads.has(activity.id) ? 'open' : ''}><summary>💬 Discuss (${discussionsFor(current.id, activity.id).length})</summary>${renderThread(current, activity.id, people, activity.title)}</details>
   </article>`;
 }
 
 function renderPerson(person, current) {
   const partial = person.available_from > current.start_date || person.available_to < current.end_date;
-  return `<article class="person"><div class="person-heading"><h3>${escapeHtml(person.name)}</h3><span class="quiet">${escapeHtml(money(person.budget))}</span></div>
+  return `<article class="person"><div class="person-heading"><h3>${avatar(person)}${escapeHtml(person.name)}</h3><span class="quiet">${escapeHtml(money(person.budget))}</span></div>
     <p>${dateRange(person.available_from, person.available_to)}</p>${partial ? '<p class="availability-warning">Availability differs from the trip dates.</p>' : ''}
     <p>${escapeHtml(person.interests.join(', ') || 'No interests added yet.')}</p><div class="person-actions"><button class="text-button" data-action="edit-traveler" data-id="${escapeHtml(person.id)}">Edit preferences</button><button class="text-button danger" data-action="remove-traveler" data-id="${escapeHtml(person.id)}">Remove</button></div></article>`;
 }
@@ -262,27 +294,35 @@ function renderPlanner() {
   if (!people.some(person => person.id === selectedTravelers.get(current.id))) selectedTravelers.set(current.id, people[0]?.id || '');
   const activities = activitiesFor(current.id).filter(activity => activity.status !== 'removed').sort((a, b) => a.date.localeCompare(b.date));
   const removed = activitiesFor(current.id).filter(activity => activity.status === 'removed');
-  const cost = activities.reduce((total, activity) => total + activity.estimated_cost_per_person, 0);
-  const days = [...new Set(activities.map(activity => activity.date))];
-  $('#planner-view').innerHTML = `<section class="escape-hero">
+  const cost = activities.filter(a => kindOf(a) !== 'offers').reduce((total, activity) => total + activity.estimated_cost_per_person, 0);
+  const visibleActivities = plannerPanel === 'questions' ? activities : ['transport','stays','plans','offers'].includes(plannerPanel) ? activities.filter(a => kindOf(a) === plannerPanel) : activities.filter(a => kindOf(a) !== 'offers');
+  const days = [...new Set(visibleActivities.map(activity => activity.date))];
+  const mood = pandaMood(current, activities.filter(a => kindOf(a) !== 'offers'));
+  const booked = activities.filter(a => kindOf(a) !== 'offers' && a.booking_state === 'booked').length;
+  const budget = people.filter(p => cost > p.budget).map(p => p.name);
+  const moodLabel = {starting:'So many ideas. Let’s make a plan.',planning:'Our trip is coming together!',relaxed:'Packed, shades on. Ready to go!',vacation:'Hello, '+current.destination+'!'}[mood];
+  $('#planner-view').dataset.panel = plannerPanel;
+  $('#planner-view').innerHTML = `<div class="planner-layout"><aside class="trip-sidebar"><p class="sidebar-label">YOUR GROUP GETAWAY</p><h2>Make room<br>for memories.</h2><nav aria-label="Trip sections">${[['itinerary','✦','Overview'],['transport','✈','Flights, trains & cars'],['stays','⌂','Places to stay'],['plans','♫','Food & activities'],['offers','%','Partner discounts'],['bookings','↗','Booking preview'],['questions','?','All questions'],['people','☺','The crew'],['discussion','☏','Group chat']].map(([key,icon,label]) => `<button type="button" data-planner-panel="${key}" aria-pressed="${plannerPanel === key}"><span aria-hidden="true">${icon}</span>${label}</button>`).join('')}</nav><div class="sidebar-crew"><div class="crew-avatars">${people.slice(0,5).map(p => avatar(p)).join('')}</div><p>${people.length} friends, one great trip.</p><small>Fictional sample profile photos</small></div><div class="panda-progress"><label>Trip buddy<select class="panda-stage">${moodOptions(current.mascot_stage || 'auto')}</select></label><p>${escapeHtml(moodLabel)}</p><span class="profile-note">${booked} booked · ${activities.filter(a => kindOf(a) !== 'offers').length} shared plans</span></div><a href="#home">← Back to home</a></aside><div class="planner-content"><section class="escape-hero">
       <div class="escape-scene" aria-hidden="true"><span class="escape-sun"></span><div class="skyline"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="music-note">♪</span><span class="music-note second">♫</span></div>
-      <div class="escape-copy"><div class="escape-label">✦ YOUR NEXT GREAT MEMORY</div><h1>${escapeHtml(current.title)}</h1><p class="escape-sub">Good times. Great company. One shared plan.</p><div class="escape-details"><span>↗ ${escapeHtml(current.destination)}</span><span>◷ ${dateRange(current.start_date, current.end_date)}</span></div><div class="crew-line"><div class="crew-avatars">${people.slice(0,5).map((p,i)=>`<span style="--avatar-color:${['#ffcf84','#e7b8f8','#bce8d8','#f5b8ab','#b9dcff'][i]}" title="${escapeHtml(p.name)}">${escapeHtml(p.name.slice(0,1))}</span>`).join('')}</div><strong>${people.length} trip mates. All the possibilities.</strong></div></div>
-      <div class="escape-buddy"><div class="panda-art" data-mood="${current.status === 'confirmed' ? 'vacation' : 'planning'}" role="img" aria-label="Your red panda trip buddy"></div><span class="buddy-sticker">${current.status === 'confirmed' ? 'Officially in vacay mode ☀' : 'Big plans. Little panda. ✨'}</span></div>
+      <div class="escape-copy"><div class="escape-label">✦ YOUR NEXT GREAT MEMORY</div><h1>${escapeHtml(current.title)}</h1><p class="escape-sub">Good times. Great company. One shared plan.</p><div class="escape-details"><span>↗ ${escapeHtml(current.destination)}</span><span>◷ ${dateRange(current.start_date, current.end_date)}</span></div><div class="crew-line"><div class="crew-avatars">${people.slice(0,5).map(p => avatar(p)).join('')}</div><strong>${people.length} trip mates. All the possibilities.</strong></div></div>
+      <div class="escape-buddy"><div class="mascot-frame"><div class="panda-art" data-mood="${mood}" role="img" aria-label="Red panda: ${escapeHtml(moodLabel)}"></div>${mood === 'vacation' ? `<span class="destination-flag" aria-label="Destination flag">${countryFlags[current.country_code || 'other'] || '🌍'}</span>` : ''}</div><span class="buddy-sticker">${escapeHtml(moodLabel)}</span></div>
       <span class="postcard-stamp" aria-hidden="true">LET’S<br>GO PLACES ↗</span>
     </section>
     <div class="trip-ribbon"><span><b>THE VIBE</b> A getaway with your favourite people</span><label class="trip-selector">Your trips<select id="trip-select">${product.trips.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current.id ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}</select></label></div>
-    <div class="planner-toolbar"><span class="status-badge">${escapeHtml(statusName(current.status))}</span><div class="planner-actions"><button class="secondary small" data-action="edit-trip">Edit trip</button><button class="small" data-action="confirm-plan">${current.status === 'confirmed' ? 'Reopen planning' : 'Confirm plan'}</button></div></div>
+    <div class="panda-mobile-control"><label>Trip buddy<select class="panda-stage">${moodOptions(current.mascot_stage || 'auto')}</select></label></div><div class="planner-toolbar"><span class="status-badge">${escapeHtml(statusName(current.status))}</span><div class="planner-actions"><button class="secondary small" data-action="edit-trip">Edit trip</button><button class="small" data-action="confirm-plan">${current.status === 'confirmed' ? 'Reopen planning' : 'Confirm plan'}</button></div></div>
     ${bookingPlaceholder(current)}
-    <div class="planner-columns"><div class="itinerary"><div class="section-heading"><h2>Shared itinerary</h2><button class="small" data-action="add-activity">Add activity</button></div>
-      <div class="itinerary-summary"><strong>${escapeHtml(money(cost))}</strong><span>estimated per person · activities only</span><span>Trip budget: ${escapeHtml(money(current.budget_per_person))}</span></div>
-      ${cost > current.budget_per_person ? '<p class="budget-message">The activities exceed the trip budget per person.</p>' : ''}
-      ${activities.length ? days.map(day => `<h3 class="day-heading">${dateText(day)}</h3>${activities.filter(activity => activity.date === day).map(activity => renderActivity(activity, current, people)).join('')}`).join('') : '<div class="empty-state"><h3>The plan is open.</h3><p>Add an activity, give it a date and cost, then ask the group to respond.</p><button data-action="add-activity">Add the first activity</button></div>'}
+    <div class="planner-columns"><div class="itinerary"><div class="section-heading"><h2>${panelTitles[plannerPanel] || 'Shared plans'}</h2><button class="small" data-action="add-activity">+ Share a plan</button></div>
+      <div class="itinerary-summary"><strong>${escapeHtml(money(cost))}</strong><span>estimated per person · shared travel plans</span><span>Trip budget: ${escapeHtml(money(current.budget_per_person))}</span></div>
+      ${budget.length ? `<p class="budget-message">Above ${escapeHtml(budget.join(', '))}’s stated budget. Check preferences with the crew.</p>` : ''}
+      ${cost > current.budget_per_person ? '<p class="budget-message">The shared travel plans exceed the trip budget per person.</p>' : ''}
+      ${visibleActivities.length ? days.map(day => `<h3 class="day-heading">${dateText(day)}</h3>${visibleActivities.filter(activity => activity.date === day).map(activity => renderActivity(activity, current, people)).join('')}`).join('') : '<div class="empty-state"><h3>No plans in this section yet.</h3><p>Share a link, dates, prices and details for the group.</p><button data-action="add-activity">Share the first plan</button></div>'}
+      ${partnerOffers()}
       ${removed.length ? `<details class="removed-list"><summary>Removed activities (${removed.length})</summary>${removed.map(activity => `<div class="removed-row"><span>${escapeHtml(activity.title)}</span><button class="text-button" data-action="restore-activity" data-id="${escapeHtml(activity.id)}">Restore</button></div>`).join('')}</details>` : ''}
       <section class="general-discussion"><div class="section-heading"><h2>💬 General trip discussion</h2><span class="quiet">${discussionsFor(current.id).length} posts</span></div>
         <p class="quiet">Questions about the whole trip. Questions about one plan go in that plan's Discuss thread.</p>${renderThread(current, '', people)}</section>
     </div><aside class="people-panel"><div class="section-heading"><h2>Travelers</h2><button class="text-button" data-action="add-traveler">Add traveler</button></div>
       ${people.length ? `<label class="viewing-as">Viewing as<select id="traveler-select">${people.map(person => `<option value="${escapeHtml(person.id)}" ${person.id === selectedTravelers.get(current.id) ? 'selected' : ''}>${escapeHtml(person.name)}</option>`).join('')}</select><span class="field-help">Take turns as different travelers on this screen.</span></label>${people.map(person => renderPerson(person, current)).join('')}` : '<div class="empty-state"><p>Add the people who are going on this trip.</p><button data-action="add-traveler">Add a traveler</button></div>'}
-    </aside></div>`;
+    </aside></div></div></div>`;
 }
 
 function render() {
@@ -354,7 +394,7 @@ $('#trip-form').addEventListener('submit', eventObject => {
   const form = eventObject.currentTarget;
   submitForm(form, async () => {
     const current = trip();
-    const values = readTripForm(form);
+    const values = { ...readTripForm(form), country_code: form.elements.namedItem('country_code').value };
     await saveChange(next => Object.assign(next.trips.find(item => item.id === current.id), values), event('trip_updated', { trip_id: current.id }));
     $('#trip-dialog').close();
   });
@@ -381,9 +421,16 @@ $('#activity-form').addEventListener('submit', eventObject => {
   submitForm(form, async () => {
     const values = Object.fromEntries(new FormData(form));
     const current = trip();
+    if (values.end_date) checkDates(values.date, values.end_date, 'Travel dates');
+    for (const zone of [values.time_zone, values.end_time_zone].filter(Boolean)) { try { new Intl.DateTimeFormat('en', {timeZone:zone}); } catch { throw new Error('Use a valid time zone, such as America/Toronto or Europe/Lisbon.'); } }
+    if (values.booking_url && !safeUrl(values.booking_url)) throw new Error('Use an http or https provider link.');
     const activity = { ...values, id: values.id || 'activity-' + crypto.randomUUID(), trip_id: current.id, title: values.title.trim(), category: values.category.trim(), estimated_cost_per_person: Number(values.estimated_cost_per_person) };
+    if (!activity.booking_url) delete activity.booking_url;
+    if (!activity.booking_owner_id) delete activity.booking_owner_id;
     await saveChange(next => {
       const old = next.activities.find(item => item.id === activity.id);
+      if (old && !values.booking_url) delete old.booking_url;
+      if (old && !values.booking_owner_id) delete old.booking_owner_id;
       if (old) Object.assign(old, activity); else next.activities.push(activity);
     }, event(values.id ? 'plan_updated' : 'activity_proposed', { trip_id: current.id, activity_id: activity.id }));
     $('#activity-dialog').close();
@@ -457,6 +504,10 @@ document.addEventListener('toggle', eventObject => {
 }, true);
 
 document.addEventListener('change', eventObject => {
+  if (eventObject.target.matches('.panda-stage')) {
+    const value = eventObject.target.value;
+    saveChange(next => { next.trips.find(t => t.id === trip().id).mascot_stage = value; }, event('mascot_stage_changed', {trip_id:trip().id,stage:value})).catch(error => notice(error.message,true));
+  }
   if (eventObject.target.id === 'trip-select') location.hash = '#trip/' + encodeURIComponent(eventObject.target.value);
   if (eventObject.target.id === 'traveler-select') { selectedTravelers.set(trip().id, eventObject.target.value); renderPlanner(); setBusy(busy); }
 });
@@ -466,7 +517,7 @@ async function handleAction(button) {
   const current = trip();
   if (action === 'edit-trip') return openEditor('trip');
   if (action === 'add-traveler' || action === 'edit-traveler') return openEditor('traveler', id);
-  if (action === 'add-activity' || action === 'edit-activity') return openEditor('activity', id);
+  if (action === 'add-activity' || action === 'edit-activity') { openEditor('activity', id); if (button.dataset.kind) $('#activity-form').elements.namedItem('plan_kind').value = button.dataset.kind; return; }
   if (action === 'remove-traveler') {
     return saveChange(next => {
       next.travelers = next.travelers.filter(person => person.id !== id);
@@ -508,3 +559,15 @@ async function load() {
 $('#retry-load').addEventListener('click', load);
 window.addEventListener('hashchange', handleRoute);
 load();
+
+document.addEventListener('click', eventObject => {
+ const button = eventObject.target.closest?.('[data-offer-title]');
+ if (!button) return;
+ openEditor('activity');
+ const form = $('#activity-form');
+ form.elements.namedItem('title').value = button.dataset.offerTitle;
+ form.elements.namedItem('plan_kind').value = 'offers';
+ form.elements.namedItem('category').value = 'Partner offer';
+ form.elements.namedItem('offer_terms').value = button.dataset.offerRate + ' illustrative discount. ' + button.dataset.offerTerms + '. Provider confirmation required.';
+ form.elements.namedItem('details').value = 'MVP example only. No partnership or discount has been confirmed.';
+});

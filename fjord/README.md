@@ -79,6 +79,10 @@ Open http://127.0.0.1:3006.
 No package install, account, API key, or hosted database is necessary.
 Open this folder in your AI tool. Read AGENTS.md, DATA-MODEL.md, and mockdata.md.
 
+### AI route suggestions
+
+The basic shared planner still runs without an API key. Generating destination-specific route options requires `OPENAI_API_KEY` in the server environment. Set the variable locally before `npm start`, and keep the key out of Git and browser code. `OPENAI_MODEL` can optionally choose another Responses API model; the default is `gpt-4.1-mini`. The app sends the reviewed trip brief, destination, dates, budget, and currency to the AI planner. Suggested place details, travel times, and costs are estimates to verify before travel.
+
 ## Files
 
 | File | Use |

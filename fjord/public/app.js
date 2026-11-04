@@ -8,6 +8,8 @@ let busy = false;
 let wizardStep = 1;
 let tripDraft;
 let previousRoute;
+let selectedGeneratedRoute = null;
+let generatedRoutes = [];
 
 async function api(path, options = {}) {
   const response = await fetch(path, options);
@@ -112,10 +114,57 @@ function openEditor(kind, id) {
 function resetOnboarding() {
   wizardStep = 1;
   tripDraft = undefined;
+  selectedGeneratedRoute = null;
+  generatedRoutes = [];
   $('#new-trip-form').reset();
   $('.form-error', $('#new-trip-form')).textContent = '';
   renderOnboardingStep();
 }
+
+async function createRouteOptions() {
+  const form = $('#new-trip-form');
+  const fields = form.elements;
+  const brief = $('#trip-brief').value.trim();
+  const destination = fields.namedItem('destination').value.trim();
+  const start_date = fields.namedItem('start_date').value;
+  const end_date = fields.namedItem('end_date').value;
+  const budget_per_person = Number(fields.namedItem('budget_per_person').value);
+  const currency = fields.namedItem('currency').value.trim().toUpperCase();
+  if (!destination || !start_date || !end_date || !fields.namedItem('budget_per_person').value || !/^[A-Z]{3}$/.test(currency)) { $('.form-error', form).textContent = 'Add a destination, both dates, a budget, and a three-letter currency before generating routes.'; return; }
+  if (end_date < start_date) { $('.form-error', form).textContent = 'End date must be on or after start date.'; return; }
+  $('.form-error', form).textContent = '';
+  if (!fields.namedItem('title').value) fields.namedItem('title').value = `A weekend in ${destination}`;
+  const button = $('#route-options-button'); button.disabled = true; button.textContent = 'Planning your routes…';
+  try {
+    const plan = await api('/api/routes', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ destination, start_date, end_date, budget_per_person, currency, brief }) });
+    generatedRoutes = plan.options; selectedGeneratedRoute = null;
+    $('#route-options').hidden = false;
+    $('#route-options').innerHTML = `<p class="field-help route-disclaimer">Suggested times and costs are estimates. Check hours, transport, and bookings before travel.</p><div class="route-option-grid">${generatedRoutes.map((option,index) => `<article class="route-option"><p class="eyebrow">ROUTE ${index+1}</p><h3>${escapeHtml(option.name)}</h3><p>${escapeHtml(option.summary)}</p><b>${escapeHtml(money(option.estimated_total_per_person,currency))} estimated / person · ${option.stops.length} stops</b><details><summary>See the full route</summary>${option.stops.map(stop => `<div class="route-stop"><strong>${escapeHtml(dateText(stop.date))} · ${escapeHtml(stop.time)} · ${escapeHtml(stop.title)}</strong><span>${escapeHtml(stop.place)} · ${escapeHtml(stop.duration_minutes)} min · ${escapeHtml(money(stop.estimated_cost_per_person,currency))}</span><p>${escapeHtml(stop.description)}</p><small>${escapeHtml(stop.travel_from_previous)} · ${escapeHtml(stop.booking_note)}</small></div>`).join('')}</details><button type="button" class="small" data-route-choice="${index}">Choose this draft</button></article>`).join('')}</div>`;
+  } catch (error) { $('.form-error', form).textContent = error.message; }
+  finally { button.disabled = false; button.textContent = 'Make my route options'; }
+}
+
+$('#route-options-button').addEventListener('click', createRouteOptions);
+$('#route-options').addEventListener('click', e => {
+  const choice = e.target.closest('[data-route-choice]'); if (!choice) return;
+  selectedGeneratedRoute = Number(choice.dataset.routeChoice);
+  $('#route-options').querySelectorAll('.route-option').forEach(card => card.classList.toggle('chosen', card.contains(choice)));
+  $('#onboarding-submit').textContent = 'Continue with this draft';
+});
+$('#voice-button').addEventListener('click', () => {
+  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const button = $('#voice-button');
+  if (!Speech) { $('#voice-status').textContent = 'Voice input is not supported in this browser. Try the latest Chrome or Edge, or type your trip idea.'; return; }
+  const recognition = new Speech(); recognition.lang = 'en-US'; recognition.interimResults = false; recognition.maxAlternatives = 1;
+  button.disabled = true; $('#voice-status').textContent = 'Listening… Speak your trip idea now.';
+  recognition.onresult = e => { $('#trip-brief').value = e.results[0][0].transcript; $('#voice-status').textContent = 'Voice note captured. Review or edit the text, then make your route options.'; };
+  recognition.onerror = e => {
+    const messages = { 'not-allowed':'Microphone access is blocked. Allow microphone access for this site in your browser, then try again.', 'service-not-allowed':'Voice recognition is unavailable here. Try Chrome or Edge, or type your trip idea.', 'audio-capture':'No microphone was found. Connect a microphone or type your trip idea.', 'no-speech':'No speech was detected. Try again and speak after Listening appears.', 'network':'Voice recognition could not connect. Check your connection and try again.' };
+    $('#voice-status').textContent = messages[e.error] || 'Voice input could not start. Check microphone access, or type your trip idea.';
+  };
+  recognition.onend = () => { button.disabled = false; if ($('#voice-status').textContent === 'Listening… Speak your trip idea now.') $('#voice-status').textContent = 'No speech was captured. Try again or type your trip idea.'; };
+  try { recognition.start(); } catch { button.disabled = false; $('#voice-status').textContent = 'Voice input could not start. Check microphone access, or type your trip idea.'; }
+});
 
 function renderOnboardingStep() {
   const basics = wizardStep === 1;
@@ -125,24 +174,34 @@ function renderOnboardingStep() {
   $('#organizer-details').disabled = basics;
   $('#onboarding-back').hidden = basics;
   $('#onboarding-step').textContent = `Step ${wizardStep} of 2`;
-  $('#onboarding-heading').textContent = basics ? 'Give your weekend a starting point.' : 'Add your preferences.';
-  $('#onboarding-intro').textContent = basics ? 'Choose a destination, dates, and a budget. You can change these later.' : 'Tell the group when you can go and what you enjoy. Add the other travelers next.';
-  $('#onboarding-submit').textContent = basics ? 'Continue' : 'Create trip';
+  $('#onboarding-heading').textContent = basics ? 'Pick a place to begin.' : 'Put yourself on the map.';
+  $('#onboarding-intro').textContent = basics ? 'Set a destination, dates, and a comfortable budget. Your group can fine-tune the plan together.' : 'Add your availability, budget, and favorite things. You can bring in the rest of the crew next.';
+  $('#onboarding-submit').textContent = basics ? 'Next: your details' : 'Start our plan';
 }
 
 function renderHome() {
   const sample = product.trips[0];
+  const posterArt = `<div class="poster-art" aria-hidden="true"><svg viewBox="0 0 640 430" role="presentation" focusable="false">
+    <rect width="640" height="430" fill="#e8b67c"/>
+    <circle cx="472" cy="116" r="62" fill="#a83e36"/>
+    <path d="M0 242 142 91l105 123 88-104 180 177v143H0Z" fill="#5b8a72"/>
+    <path d="m0 278 157-93 102 94 108-72 117 69 156-105v229H0Z" fill="#315746"/>
+    <path d="M0 340q114-43 229 0t229 0 182-2v92H0Z" fill="#f3ead3"/>
+    <path d="M0 376q115-34 229 0t229 0 182-2" fill="none" stroke="#a83e36" stroke-width="8"/>
+    <path d="M0 405q115-28 229 0t229 0 182-2" fill="none" stroke="#d4a574" stroke-width="7"/>
+    <path d="m145 91 24 28 27-8-54-20 3-25 21 22" fill="#f3ead3" opacity=".9"/>
+    <path d="m335 110 28 31 31-10-57-21 4-31 22 27" fill="#f3ead3" opacity=".9"/>
+  </svg><span class="poster-label">TAKE THE LONG WAY</span></div>`;
   $('#sample-link').hidden = !sample;
   if (!sample) {
-    $('#sample-preview').innerHTML = '<h2>Your next weekend starts here.</h2><p class="intro">Create a trip and invite your group into the plan.</p>';
+    $('#sample-preview').innerHTML = `${posterArt}<div class="poster-details"><p class="eyebrow">YOUR NEXT STORY</p><h2>Your next weekend starts here.</h2><p class="quiet">Choose a destination, then bring your people into the plan.</p></div>`;
     return;
   }
   const ideas = activitiesFor(sample.id).filter(activity => activity.status !== 'removed');
   $('#sample-link').href = '#trip/' + encodeURIComponent(sample.id);
-  $('#sample-preview').innerHTML = `<p class="eyebrow">A sample to try</p><h2>${escapeHtml(sample.title)}</h2><p class="quiet">${escapeHtml(sample.destination)} · ${dateRange(sample.start_date, sample.end_date)}</p>
-    <div class="sample-meta"><div><span>Travelers</span><b>${travelersFor(sample.id).length} people</b></div><div><span>Budget per person</span><b>${escapeHtml(money(sample.budget_per_person, sample.currency))}</b></div></div>
-    ${ideas.slice(0, 3).map(activity => `<div class="sample-activity"><span>${escapeHtml(activity.title)}</span><b>${escapeHtml(money(activity.estimated_cost_per_person, sample.currency))}</b></div>`).join('')}
-    <a class="text-link" href="#trip/${encodeURIComponent(sample.id)}">Open this trip</a>`;
+  $('#sample-preview').innerHTML = `${posterArt}<div class="poster-details"><p class="eyebrow">A WEEKEND IN THE MAKING</p><h2>${escapeHtml(sample.destination)}</h2><p class="quiet">${dateRange(sample.start_date, sample.end_date)} · ${travelersFor(sample.id).length} travelers</p>
+    <div class="sample-meta"><div><span>THE GROUP BUDGET</span><b>${escapeHtml(money(sample.budget_per_person, sample.currency))} <small>/ person</small></b></div><div><span>ON THE PLAN</span><b>${ideas.length} ${ideas.length === 1 ? 'idea' : 'ideas'}</b></div></div>
+    <a class="text-link" href="#trip/${encodeURIComponent(sample.id)}">See the shared plan <span aria-hidden="true">→</span></a></div>`;
 }
 
 function responseFor(activityId, travelerId) {
@@ -159,6 +218,7 @@ function renderActivity(activity, current, people) {
   return `<article class="activity" data-activity-id="${escapeHtml(activity.id)}">
     <div class="activity-heading"><h3>${escapeHtml(activity.title)}</h3><span class="activity-cost">${escapeHtml(money(activity.estimated_cost_per_person))}</span></div>
     <div class="activity-meta"><span>${escapeHtml(activity.category)}</span><span class="status-badge ${activity.status === 'proposed' ? 'proposed' : ''}">${escapeHtml(statusName(activity.status))}</span><span class="vote-totals">${totals}</span></div>
+    ${activity.description ? `<div class="activity-detail"><p><strong>${escapeHtml(activity.time || '')}${activity.place ? ' · ' + escapeHtml(activity.place) : ''}</strong>${activity.duration_minutes ? ' · about ' + escapeHtml(activity.duration_minutes) + ' min' : ''}</p><p>${escapeHtml(activity.description)}</p>${activity.travel_from_previous ? `<p><b>Getting there:</b> ${escapeHtml(activity.travel_from_previous)}</p>` : ''}${activity.booking_note ? `<p><b>Before you go:</b> ${escapeHtml(activity.booking_note)}</p>` : ''}</div>` : ''}
     ${outsideDates ? '<p class="budget-message">This activity is outside the trip dates.</p>' : ''}
     <div class="activity-actions"><button class="text-button" data-action="edit-activity" data-id="${escapeHtml(activity.id)}">Edit activity</button>${activity.status !== 'accepted' ? `<button class="text-button" data-action="accept-activity" data-id="${escapeHtml(activity.id)}">Mark agreed</button>` : ''}<button class="text-button danger" data-action="remove-activity" data-id="${escapeHtml(activity.id)}">Remove</button></div>
     <form class="response-form" data-activity-id="${escapeHtml(activity.id)}"><fieldset ${person ? '' : 'disabled'}><legend>${person ? 'Your response as ' + escapeHtml(person.name) : 'Add a traveler to respond'}</legend>
@@ -188,9 +248,24 @@ function renderPlanner() {
   const removed = activitiesFor(current.id).filter(activity => activity.status === 'removed');
   const cost = activities.reduce((total, activity) => total + activity.estimated_cost_per_person, 0);
   const days = [...new Set(activities.map(activity => activity.date))];
+  const routeActivities = activities.slice(0, 4);
+  const routeY = [62, 36, 68, 42];
+  const routePoints = routeActivities.map((_, index) => ({
+    x: routeActivities.length === 1 ? 400 : 145 + index * (510 / (routeActivities.length - 1)),
+    y: routeY[index]
+  }));
+  const routePath = routePoints.length === 1
+    ? `M 70 ${routePoints[0].y} Q 230 ${routePoints[0].y} ${routePoints[0].x} ${routePoints[0].y}`
+    : routePoints.slice(1).map((point, index) => {
+      const previous = routePoints[index];
+      const segment = `Q ${(previous.x + point.x) / 2} ${previous.y} ${point.x} ${point.y}`;
+      return index === 0 ? `M ${previous.x} ${previous.y} ${segment}` : segment;
+    }).join(' ');
+  const routeLine = `<div class="route-visual"><div class="route-visual-heading"><div><p class="eyebrow">THE ROUTE</p><h2>Your weekend, at a glance</h2></div><span class="field-help">Illustrative route · confirm local details</span></div><svg viewBox="0 0 800 132" role="img" aria-label="A suggested route connecting ${routeActivities.length} trip stops"><path d="${routePath}" fill="none" stroke="#315746" stroke-width="4" stroke-dasharray="8 9"/>${routeActivities.map((activity,index)=>{const point=routePoints[index];return `<g transform="translate(${point.x},${point.y})"><circle r="19" fill="#a83e36"/><text y="5" text-anchor="middle" fill="#fffdf7" font-size="14">${index+1}</text><text y="43" text-anchor="middle" fill="#3e2f26" font-size="12">${escapeHtml(activity.title.slice(0,22))}</text></g>`;}).join('')}</svg></div>`;
   $('#planner-view').innerHTML = `<div class="planner-top"><div><p class="eyebrow">Your shared weekend</p><h1>${escapeHtml(current.title)}</h1><p>${escapeHtml(current.destination)} · ${dateRange(current.start_date, current.end_date)}</p></div>
     <label class="trip-selector">Your trips<select id="trip-select">${product.trips.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current.id ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}</select></label></div>
     <div class="planner-toolbar"><span class="status-badge">${escapeHtml(statusName(current.status))}</span><div class="planner-actions"><button class="secondary small" data-action="edit-trip">Edit trip</button><button class="small" data-action="confirm-plan">${current.status === 'confirmed' ? 'Reopen planning' : 'Confirm plan'}</button></div></div>
+    ${activities.length ? routeLine : ''}
     <div class="planner-columns"><div class="itinerary"><div class="section-heading"><h2>Shared itinerary</h2><button class="small" data-action="add-activity">Add activity</button></div>
       <div class="itinerary-summary"><strong>${escapeHtml(money(cost))}</strong><span>estimated per person · activities only</span><span>Trip budget: ${escapeHtml(money(current.budget_per_person))}</span></div>
       ${cost > current.budget_per_person ? '<p class="budget-message">The activities exceed the trip budget per person.</p>' : ''}
@@ -257,7 +332,12 @@ $('#new-trip-form').addEventListener('submit', eventObject => {
     await saveChange(next => {
       next.trips.push({ ...tripDraft, id: tripId, status: 'planning' });
       next.travelers.push(person);
-    }, [event('trip_created', { trip_id: tripId }, person.id), event('traveler_added', { trip_id: tripId, traveler_id: person.id }, person.id), event('onboarding_completed', { trip_id: tripId }, person.id)]);
+      if (selectedGeneratedRoute !== null) {
+        generatedRoutes[selectedGeneratedRoute].stops.forEach(stop => {
+          next.activities.push({ id: 'activity-' + crypto.randomUUID(), trip_id: tripId, title: stop.title, date: stop.date, category: stop.category || 'Experience', estimated_cost_per_person: stop.estimated_cost_per_person, status: 'proposed', time:stop.time, place:stop.place, description:stop.description, duration_minutes:stop.duration_minutes, travel_from_previous:stop.travel_from_previous, booking_note:stop.booking_note });
+        });
+      }
+    }, [event('trip_created', { trip_id: tripId }, person.id), event('traveler_added', { trip_id: tripId, traveler_id: person.id }, person.id), event('onboarding_completed', { trip_id: tripId, generated_route: selectedGeneratedRoute }, person.id)]);
     selectedTravelers.set(tripId, person.id);
     location.hash = '#trip/' + encodeURIComponent(tripId);
   });
@@ -296,7 +376,7 @@ $('#activity-form').addEventListener('submit', eventObject => {
   submitForm(form, async () => {
     const values = Object.fromEntries(new FormData(form));
     const current = trip();
-    const activity = { ...values, id: values.id || 'activity-' + crypto.randomUUID(), trip_id: current.id, title: values.title.trim(), category: values.category.trim(), estimated_cost_per_person: Number(values.estimated_cost_per_person) };
+    const activity = { ...values, id: values.id || 'activity-' + crypto.randomUUID(), trip_id: current.id, title: values.title.trim(), category: values.category.trim(), estimated_cost_per_person: Number(values.estimated_cost_per_person), duration_minutes: values.duration_minutes ? Number(values.duration_minutes) : 0 };
     await saveChange(next => {
       const old = next.activities.find(item => item.id === activity.id);
       if (old) Object.assign(old, activity); else next.activities.push(activity);

@@ -10,6 +10,16 @@
       "budget_per_person": 350,
       "currency": "CAD",
       "status": "planning"
+    },
+    {
+      "title": "Quebec City Trip 2026",
+      "destination": "Quebec City",
+      "start_date": "2026-11-14",
+      "end_date": "2026-11-16",
+      "budget_per_person": 500,
+      "currency": "CAD",
+      "id": "trip-0e9fd0d0-e3f6-4e2e-9a4b-8ec126e525ca",
+      "status": "planning"
     }
   ],
   "travelers": [
@@ -48,6 +58,30 @@
         "outdoors",
         "music"
       ]
+    },
+    {
+      "name": "David",
+      "available_from": "2026-11-14",
+      "available_to": "2026-11-16",
+      "budget": 500,
+      "interests": [
+        "Food",
+        "photography",
+        "sights"
+      ],
+      "id": "traveler-a67c7c8d-fdf2-40ad-ae79-9704ed0e1db9",
+      "trip_id": "trip-0e9fd0d0-e3f6-4e2e-9a4b-8ec126e525ca"
+    },
+    {
+      "name": "Newton",
+      "available_from": "2026-11-14",
+      "available_to": "2026-11-16",
+      "budget": 500,
+      "interests": [
+        "Pizza"
+      ],
+      "id": "traveler-0758b507-d915-47c3-ade6-86c9393ac6aa",
+      "trip_id": "trip-0e9fd0d0-e3f6-4e2e-9a4b-8ec126e525ca"
     }
   ],
   "activities": [
@@ -77,6 +111,15 @@
       "category": "outdoors",
       "estimated_cost_per_person": 80,
       "status": "proposed"
+    },
+    {
+      "id": "activity-6775ccbf-eaf5-4e47-b86b-c4f785eaa6d7",
+      "title": "Food",
+      "date": "2026-11-14",
+      "category": "food",
+      "estimated_cost_per_person": 50,
+      "status": "proposed",
+      "trip_id": "trip-0e9fd0d0-e3f6-4e2e-9a4b-8ec126e525ca"
     }
   ],
   "responses": [

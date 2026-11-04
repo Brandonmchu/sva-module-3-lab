@@ -966,9 +966,18 @@ dialog::backdrop {
   background:linear-gradient(180deg,var(--gold-wash),var(--paper))
 }
 .action-menu {
-  position:relative;
-  margin-top:14px;
+  position:absolute;
+  right:22px;
+  bottom:22px;
+  margin:0;
   text-align:right
+}
+.activity {
+  position:relative;
+  min-height:84px
+}
+.activity:has(.vote-box[open]) {
+  padding-bottom:76px
 }
 .action-menu summary {
   display:inline-flex;

@@ -10,7 +10,8 @@
       "budget_per_person": 350,
       "currency": "CAD",
       "status": "planning",
-      "bachelorette_id": "traveler-002"
+      "bachelorette_id": "traveler-002",
+      "bachelorette_treated": true
     }
   ],
   "travelers": [
@@ -68,7 +69,8 @@
       "date": "2026-11-07",
       "category": "food",
       "estimated_cost_per_person": 35,
-      "status": "proposed"
+      "status": "proposed",
+      "hidden_from_bachelorette": false
     },
     {
       "id": "activity-003",

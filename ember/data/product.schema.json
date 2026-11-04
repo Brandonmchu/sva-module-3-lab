@@ -97,6 +97,10 @@
           "type": "string",
           "minLength": 1,
           "description": "Optional. The traveler on this trip who is the bachelorette."
+        },
+        "bachelorette_treated": {
+          "type": "boolean",
+          "description": "Optional. When true and a bachelorette is set, prices are hidden from her and her share is split across the rest of the squad."
         }
       },
       "additionalProperties": true

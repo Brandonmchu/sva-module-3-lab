@@ -32,12 +32,13 @@ Activity statuses are proposed, accepted, and removed. Votes are yes, no, and ma
 | Field | On | Meaning |
 |---|---|---|
 | bachelorette_id | trips (optional) | The traveler on this trip who is the bachelorette. The server rejects an ID that is not a traveler on the same trip. |
+| bachelorette_treated | trips (optional, boolean) | The squad covers the bachelorette. Prices are hidden when she is viewing, and each other person's cost is estimated_cost_per_person × squad size ÷ (squad size − 1). |
 | hidden_from_bachelorette | activities (optional, boolean) | A surprise. When "Viewing as" is the bachelorette, the activity, its cost, and its responses are left out of the plan. |
 
 Removing the bachelorette's traveler record clears bachelorette_id.
 Hiding is a screen-level view rule, not access control: GET /api/product still returns every activity.
 
-Ember events: bachelorette_assigned, bachelorette_unassigned, activity_hidden_from_bachelorette, activity_shown_to_bachelorette.
+Ember events: bachelorette_treated, bachelorette_not_treated, bachelorette_assigned, bachelorette_unassigned, activity_hidden_from_bachelorette, activity_shown_to_bachelorette.
 
 ## Read and save
 

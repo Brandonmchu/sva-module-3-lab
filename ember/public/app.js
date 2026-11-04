@@ -33,6 +33,13 @@ const brideFor =tripRecord => product.travelers.find(person => person.id === tri
 const viewerIsBride = tripRecord => Boolean(tripRecord?.bachelorette_id) && selectedTravelers.get(tripRecord.id) === tripRecord.bachelorette_id;
 const isSurprise = activity => activity.hidden_from_bachelorette === true;
 const visibleTo = (tripRecord, activity) => !(viewerIsBride(tripRecord) && isSurprise(activity));
+// Treating the bachelorette: she sees no prices, and everyone else's cost includes a split of her share.
+const brideTreated = tripRecord => Boolean(brideFor(tripRecord)) && tripRecord.bachelorette_treated === true;
+const hidePrices = tripRecord => brideTreated(tripRecord) && viewerIsBride(tripRecord);
+const payingCount = tripRecord => travelersFor(tripRecord.id).length - (brideTreated(tripRecord) ? 1 : 0);
+const shareOf = (tripRecord, perPerson) => brideTreated(tripRecord) && payingCount(tripRecord) > 0
+  ? Math.round(perPerson * travelersFor(tripRecord.id).length / payingCount(tripRecord) * 100) / 100
+  : perPerson;
 const event = (name, properties, actorId = actor()) => ({ event: name, actor_id: actorId, source: 'product', properties: { visitor_id: visitorId, ...properties } });
 const interests = value => [...new Set(value.split(',').map(item => item.trim()).filter(Boolean))];
 const dateText = value => new Intl.DateTimeFormat('en-CA', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(value + 'T12:00:00Z'));
@@ -105,7 +112,14 @@ function openEditor(kind, id) {
   if (!current) return;
   const form = $('#' + kind + '-form');
   let values;
-  if (kind === 'trip') values = current;
+  if (kind === 'trip') {
+    values = current;
+    const bride = brideFor(current);
+    $('#treat-row').hidden = !bride || viewerIsBride(current);
+    if (bride) $('#treat-help').textContent = `Hide prices from ${bride.name} and split her share across the rest of the squad.`;
+  }
+  // Price fields keep their saved values but are not shown to a treated bachelorette.
+  document.querySelectorAll('#' + kind + '-form .price-field').forEach(field => { field.hidden = hidePrices(current); });
   if (kind === 'traveler') {
     const existing = product.travelers.find(person => person.id === id) || { id: '', name: '', available_from: current.start_date, available_to: current.end_date, budget: current.budget_per_person, interests: [] };
     values = { ...existing, is_bachelorette: Boolean(id) && current.bachelorette_id === id };
@@ -154,10 +168,12 @@ function renderHome() {
   }
   // The landing page is shared, so it never previews surprise activities.
   const ideas = activitiesFor(sample.id).filter(activity => activity.status !== 'removed' && !isSurprise(activity));
+  // The landing page is shared too, so it shows no prices when the bachelorette is being treated.
+  const noPrices = brideTreated(sample);
   $('#sample-link').href = '#trip/' + encodeURIComponent(sample.id);
   $('#sample-preview').innerHTML = `<p class="eyebrow">A sample to try</p><h2>${escapeHtml(sample.title)}</h2><p class="quiet">${escapeHtml(sample.destination)} · ${dateRange(sample.start_date, sample.end_date)}</p>
-    <div class="sample-meta"><div><span>The squad</span><b>${travelersFor(sample.id).length} people</b></div><div><span>Budget per person</span><b>${escapeHtml(money(sample.budget_per_person, sample.currency))}</b></div></div>
-    ${ideas.slice(0, 3).map(activity => `<div class="sample-activity"><span>${escapeHtml(activity.title)}</span><b>${escapeHtml(money(activity.estimated_cost_per_person, sample.currency))}</b></div>`).join('')}
+    <div class="sample-meta"><div><span>The squad</span><b>${travelersFor(sample.id).length} people</b></div>${noPrices ? '' : `<div><span>Budget per person</span><b>${escapeHtml(money(sample.budget_per_person, sample.currency))}</b></div>`}</div>
+    ${ideas.slice(0, 3).map(activity => `<div class="sample-activity"><span>${escapeHtml(activity.title)}</span>${noPrices ? '' : `<b>${escapeHtml(money(activity.estimated_cost_per_person, sample.currency))}</b>`}</div>`).join('')}
     <a class="text-link" href="#trip/${encodeURIComponent(sample.id)}">Open this trip</a>`;
 }
 
@@ -213,22 +229,24 @@ function renderActivity(activity, current, people) {
   const selected = selectedTravelers.get(current.id);
   const person = people.find(item => item.id === selected);
   const mine = responseFor(activity.id, selected);
-  const totals = ['yes', 'maybe', 'no'].map(vote => responses.filter(item => item.response.vote === vote).length + ' ' + vote).join(' · ');
+  const totals = ['yes', 'maybe', 'no'].map(vote => `<span class="vote-count ${vote}"><b>${responses.filter(item => item.response.vote === vote).length}</b> ${vote}</span>`).join('');
   const outsideDates = activity.date < current.start_date || activity.date > current.end_date;
   const bride = brideFor(current);
   const surprise = isSurprise(activity);
   const showSurpriseControls = bride && !viewerIsBride(current);
   const surpriseToggle = showSurpriseControls ? `<button class="text-button" data-action="toggle-surprise" data-id="${escapeHtml(activity.id)}">${surprise ? 'Show to ' + escapeHtml(bride.name) : 'Hide from ' + escapeHtml(bride.name)}</button>` : '';
-  return `<article class="activity ${surprise && showSurpriseControls ? 'surprise' : ''}" data-activity-id="${escapeHtml(activity.id)}">
-    <div class="activity-heading"><h3>${escapeHtml(activity.title)}</h3><span class="activity-cost">${escapeHtml(money(activity.estimated_cost_per_person))}</span></div>
-    <div class="activity-meta"><span>${escapeHtml(activity.category)}</span><span class="status-badge ${activity.status === 'proposed' ? 'proposed' : ''}">${escapeHtml(statusName(activity.status))}</span>${surprise && showSurpriseControls ? `<span class="status-badge surprise">Surprise · hidden from ${escapeHtml(bride.name)}</span>` : ''}<span class="vote-totals">${totals}</span></div>
+  return `<article class="activity ${escapeHtml(activity.status)} ${surprise && showSurpriseControls ? 'surprise' : ''}" data-activity-id="${escapeHtml(activity.id)}">
+    <div class="activity-meta"><span class="status-badge ${activity.status === 'proposed' ? 'proposed' : ''}">${escapeHtml(statusName(activity.status))}</span><span>${escapeHtml(activity.category)}</span>${surprise && showSurpriseControls ? `<span class="status-badge surprise">Surprise · hidden from ${escapeHtml(bride.name)}</span>` : ''}</div>
+    <div class="activity-heading"><h3>${escapeHtml(activity.title)}</h3>${hidePrices(current) ? '' : `<span class="activity-cost" ${brideTreated(current) ? `title="${escapeHtml(money(activity.estimated_cost_per_person))} each, with ${escapeHtml(bride.name)}'s share split across the squad"` : ''}>${escapeHtml(money(shareOf(current, activity.estimated_cost_per_person)))}</span>`}</div>
+    <div class="vote-totals">${totals}</div>
     ${outsideDates ? '<p class="budget-message">This activity is outside the trip dates.</p>' : ''}
-    <div class="activity-actions"><button class="text-button" data-action="edit-activity" data-id="${escapeHtml(activity.id)}">Edit activity</button>${surpriseToggle}${activity.status !== 'accepted' ? `<button class="text-button" data-action="accept-activity" data-id="${escapeHtml(activity.id)}">Mark agreed</button>` : ''}<button class="text-button danger" data-action="remove-activity" data-id="${escapeHtml(activity.id)}">Remove</button></div>
+    <details class="vote-box"><summary>${mine ? 'Your vote: ' + mine.vote[0].toUpperCase() + mine.vote.slice(1) + ' · change' : "Who's in? Add your vote"}</summary>
     <form class="response-form" data-activity-id="${escapeHtml(activity.id)}"><fieldset ${person ? '' : 'disabled'}><legend>${person ? 'Your vote as ' + escapeHtml(person.name) : 'Add someone to the squad to vote'}</legend>
       <div class="response-fields"><label>Vote<select name="vote" required><option value="" disabled ${mine ? '' : 'selected'}>Choose</option>${['yes', 'maybe', 'no'].map(vote => `<option value="${vote}" ${mine?.vote === vote ? 'selected' : ''}>${vote[0].toUpperCase() + vote.slice(1)}</option>`).join('')}</select></label>
       <label>Comment<input name="comment" value="${escapeHtml(mine?.comment || '')}" placeholder="An optional note" maxlength="500"></label><button class="secondary small" type="submit">Save vote</button></div>
-      <p class="form-error" role="alert"></p></fieldset></form>
+      <p class="form-error" role="alert"></p></fieldset></form></details>
     ${responses.length ? `<details class="group-responses"><summary>See how the squad voted (${responses.length})</summary>${responses.map(item => `<div class="group-response"><b>${escapeHtml(item.person.name)} · ${item.response.vote}</b>${item.response.comment ? `<p>${escapeHtml(item.response.comment)}</p>` : ''}</div>`).join('')}</details>` : ''}
+    <details class="action-menu"><summary aria-label="Activity actions" title="Actions"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></summary><div class="action-list"><button class="text-button" data-action="edit-activity" data-id="${escapeHtml(activity.id)}">Edit activity</button>${surpriseToggle}${activity.status !== 'accepted' ? `<button class="text-button" data-action="accept-activity" data-id="${escapeHtml(activity.id)}">Mark agreed</button>` : ''}<button class="text-button danger" data-action="remove-activity" data-id="${escapeHtml(activity.id)}">Remove</button></div></details>
   </article>`;
 }
 
@@ -239,10 +257,10 @@ function renderPerson(person, current) {
   const brideButton = viewerIsBride(current) ? '' : isBride
     ?`<button class="text-button" data-action="unset-bachelorette" data-id="${escapeHtml(person.id)}">Unassign</button>`
     : (!current.bachelorette_id ? `<button class="text-button" data-action="set-bachelorette" data-id="${escapeHtml(person.id)}">Make bachelorette</button>` : '');
-  return `<article class="person"><div class="person-heading"><h3>${escapeHtml(person.name)}</h3><span class="quiet">${escapeHtml(money(person.budget))}</span></div>
+  return `<article class="person${isBride ? ' bride' : ''}"><div class="person-heading"><h3>${escapeHtml(person.name)}</h3>${hidePrices(current) ? '' : `<span class="quiet">${escapeHtml(money(person.budget))}</span>`}</div>
     ${isBride ? '<span class="status-badge bride">Bachelorette</span>' : ''}
     <p>${dateRange(person.available_from, person.available_to)}</p>${partial ? '<p class="availability-warning">Availability differs from the trip dates.</p>' : ''}
-    <p>${escapeHtml(person.interests.join(', ') || 'No interests added yet.')}</p><div class="person-actions">${brideButton}<button class="text-button" data-action="edit-traveler" data-id="${escapeHtml(person.id)}">Edit preferences</button><button class="text-button danger" data-action="remove-traveler" data-id="${escapeHtml(person.id)}">Remove</button></div></article>`;
+    ${person.interests.length ? `<p class="interests">${person.interests.map(interest => `<span>${escapeHtml(interest)}</span>`).join('')}</p>` : '<p>No interests added yet.</p>'}<div class="person-actions">${brideButton}<button class="text-button" data-action="edit-traveler" title="Edit preferences" data-id="${escapeHtml(person.id)}">Edit preferences</button><button class="text-button danger" data-action="remove-traveler" title="Remove" data-id="${escapeHtml(person.id)}">Remove</button></div></article>`;
 }
 
 function renderPlanner() {
@@ -261,7 +279,14 @@ function renderPlanner() {
   const surpriseNote = bride && !viewerIsBride(current)
     ? `<p class="surprise-note">${surpriseCount ? `${surpriseCount} surprise ${surpriseCount === 1 ? 'activity is' : 'activities are'} hidden from ${escapeHtml(bride.name)}. Switch “Viewing as” to ${escapeHtml(bride.name)} to see her version of the plan.` : `Use “Hide from ${escapeHtml(bride.name)}” on any activity to keep it a surprise.`}</p>`
     : '';
-  const cost = activities.reduce((total, activity) => total + activity.estimated_cost_per_person, 0);
+  const cost = activities.reduce((total, activity) => total + shareOf(current, activity.estimated_cost_per_person), 0);
+  const treated = brideTreated(current);
+  const treatButton = bride && !viewerIsBride(current)
+    ? `<button class="text-button" data-action="toggle-treat">${treated ? 'Stop treating ' + escapeHtml(bride.name) : 'Treat ' + escapeHtml(bride.name) + ': split her share'}</button>`
+    : '';
+  // A treated bachelorette sees no totals or budget warnings at all.
+  const summary = hidePrices(current) ? '' : `<div class="itinerary-summary"><strong>${escapeHtml(money(cost))}</strong><span>estimated per person · activities only${treated ? ` · includes ${escapeHtml(bride.name)}'s share, split ${payingCount(current)} ways` : ''}</span><span>Trip budget: ${escapeHtml(money(current.budget_per_person))}</span>${treatButton}</div>
+      ${cost > current.budget_per_person ? '<p class="budget-message">The activities exceed the trip budget per person.</p>' : ''}`;
   const days = [...new Set(activities.map(activity => activity.date))];
   $('#planner-view').innerHTML = `<div class="planner-top"><div><p class="eyebrow">Your bachelorette trip</p><h1>${escapeHtml(current.title)}</h1><p>${escapeHtml(current.destination)} · ${dateRange(current.start_date, current.end_date)}</p></div>
     <label class="trip-selector">Your trips<select id="trip-select">${product.trips.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current.id ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}</select></label></div>
@@ -269,8 +294,7 @@ function renderPlanner() {
     ${current.bride_code ? `<div class="landing-note"><b>${escapeHtml(brideFor(current)?.name || 'The bride')}'s private link</b><p>Send this to ${escapeHtml(brideFor(current)?.name || 'her')}. She sees only her own questions, never the budget or itinerary.</p><p class="quiet">${escapeHtml(location.origin + '/#bride/' + current.bride_code)}</p><button class="secondary small" data-action="copy-bride-link">Copy link</button></div>` : ''}
     ${current.bride_brief ? `<div class="landing-note"><b>${escapeHtml(brideFor(current)?.name || 'The bride')}'s brief</b><p>Vibe: ${escapeHtml(current.bride_brief.vibe.join(', ') || 'No preference')}</p><p>Can't do: ${escapeHtml(current.bride_brief.unavailable || 'Nothing listed')}</p><p>Needs: ${escapeHtml(current.bride_brief.needs || 'Nothing listed')}</p><p>Hard no's: ${escapeHtml(current.bride_brief.hard_nos || 'Nothing listed')}</p><p>Surprise level: ${escapeHtml(surpriseLabels[current.bride_brief.surprise] || '')}</p>${current.bride_brief.note ? `<p>Note: ${escapeHtml(current.bride_brief.note)}</p>` : ''}</div>` : ''}
     <div class="planner-columns"><div class="itinerary"><div class="section-heading"><h2>The itinerary</h2><button class="small" data-action="add-activity">Add activity</button></div>
-      <div class="itinerary-summary"><strong>${escapeHtml(money(cost))}</strong><span>estimated per person · activities only</span><span>Trip budget: ${escapeHtml(money(current.budget_per_person))}</span></div>
-      ${cost > current.budget_per_person ? '<p class="budget-message">The activities exceed the trip budget per person.</p>' : ''}
+      ${summary}
       ${surpriseNote}
       ${activities.length ? days.map(day => `<h3 class="day-heading">${dateText(day)}</h3>${activities.filter(activity => activity.date === day).map(activity => renderActivity(activity, current, people)).join('')}`).join('') : '<div class="empty-state"><h3>The plan is open.</h3><p>Add an activity, give it a date and cost, then let the squad vote.</p><button data-action="add-activity">Add the first activity</button></div>'}
       ${removed.length ? `<details class="removed-list"><summary>Removed activities (${removed.length})</summary>${removed.map(activity => `<div class="removed-row"><span>${escapeHtml(activity.title)}</span><button class="text-button" data-action="restore-activity" data-id="${escapeHtml(activity.id)}">Restore</button></div>`).join('')}</details>` : ''}
@@ -353,7 +377,13 @@ $('#trip-form').addEventListener('submit', eventObject => {
   submitForm(form, async () => {
     const current = trip();
     const values = readTripForm(form);
-    await saveChange(next => Object.assign(next.trips.find(item => item.id === current.id), values), event('trip_updated', { trip_id: current.id }));
+    // Only someone other than the bachelorette can change whether she is treated.
+    if (brideFor(current) && !viewerIsBride(current)) values.bachelorette_treated = form.elements.namedItem('bachelorette_treated').checked;
+    const records = [event('trip_updated', { trip_id: current.id })];
+    if ('bachelorette_treated' in values && values.bachelorette_treated !== (current.bachelorette_treated === true)) {
+      records.push(event(values.bachelorette_treated ? 'bachelorette_treated' : 'bachelorette_not_treated', { trip_id: current.id, traveler_id: current.bachelorette_id }));
+    }
+    await saveChange(next => Object.assign(next.trips.find(item => item.id === current.id), values), records);
     $('#trip-dialog').close();
   });
 });
@@ -447,6 +477,11 @@ async function handleAction(button) {
       if (assign) nextTrip.bachelorette_id = id; else delete nextTrip.bachelorette_id;
     }, event(assign ? 'bachelorette_assigned' : 'bachelorette_unassigned', { trip_id: current.id, traveler_id: id }));
   }
+  if (action === 'toggle-treat') {
+    const treat = !brideTreated(current);
+    return saveChange(next => { next.trips.find(item => item.id === current.id).bachelorette_treated = treat; },
+      event(treat ? 'bachelorette_treated' : 'bachelorette_not_treated', { trip_id: current.id, traveler_id: current.bachelorette_id }));
+  }
   if (action === 'toggle-surprise') {
     const hidden = !isSurprise(product.activities.find(activity => activity.id === id));
     return saveChange(next => { next.activities.find(activity => activity.id === id).hidden_from_bachelorette = hidden; },
@@ -465,6 +500,7 @@ async function handleAction(button) {
 document.addEventListener('click', eventObject => {
   const close = eventObject.target.closest('[data-close]');
   if (close) $('#' + close.dataset.close).close();
+  document.querySelectorAll('.action-menu[open]').forEach(menu => { if (!menu.contains(eventObject.target) || eventObject.target.closest('[data-action]')) menu.open = false; });
   const button = eventObject.target.closest('[data-action]');
   if (button && !busy) handleAction(button).catch(error => notice(error.message, true));
 });

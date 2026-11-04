@@ -66,6 +66,17 @@ Hotels, Airbnb/VRBO hosts, transport, or activities may have group offers. This 
 
 An offer should show its source, terms, group size requirement, and verification state. Unverified offers must be labelled clearly. Do not count hypothetical savings in a confirmed price.
 
+## Cute red panda trip mascot
+
+The mascot is a cute red panda whose mood follows the group's planning progress. Keep the tone warm, encouraging, playful, and visually consistent across desktop and mobile.
+
+- **Just starting:** a little stressed or overwhelmed while key trip details are undecided.
+- **Planning:** becomes more relaxed and happier as the group adds details and agrees on decisions.
+- **Travel-ready:** happy, wearing sunglasses and carrying a travel bag when the required essentials are ready.
+- **At the destination:** wears a T-shirt with the flag for the trip's explicitly selected current location. The demo uses Portugal for its fictional Lisbon trip. For multi-country trips, update the shirt for the current stop.
+
+The wireframe includes a mascot-state preview selector and a simple illustrative progress response. Jessica should refine the artwork and motion. Agree with Ben on production readiness rules: use confirmed required details, not the number of optional items. Arrival/current location should be explicit trip state; do not infer physical location from the browser. Use a text mood label, accessible alternatives, and reduced-motion behaviour. The prototype's SVG is a functional art placeholder, not the final character asset.
+
 ## Mobile app and preview requirements
 
 GroupAtion must support a mobile app experience as well as desktop. The wireframe includes a **Mobile view / Desktop view** button: it switches the same live demo into a 390-pixel phone layout without discarding the current discussion or shared items.
@@ -113,7 +124,7 @@ You are working with Jessica, the designer for Team Drift's GroupAtion app. Ben 
 
 Read `drift/GROUPATION-PLAN.md`, this `drift/JESSICA-DESIGN-HANDOFF.md`, `drift/DATA-MODEL.md`, and `drift/mockdata.md`. Run the app and open `/groupation-wireframe.html` to review the PM's clickable proposal. Carry forward Jessica's Groupation branding commit `0055822`. Use the wireframe to understand structure and behaviour; Jessica owns the final visual design.
 
-Design the shared trip dashboard and booking cards for flights/trains, hotels/Airbnb/VRBO, restaurants, concerts, and other activities. Make dates, time zones, original currency, price basis, booking state, responsible person, and shared links clear. Design a mobile app experience as well as desktop, and add a Mobile view / Desktop view button that previews the same app and preserves its current state. Use touch-friendly phone navigation, cards, forms, and contextual discussion panels. Treat home-screen installation as a separate implementation task and do not claim native iOS/Android delivery from a responsive preview alone. Use friendly circular member headshots beside messages and in the trip member list, with member names and initials fallbacks. The wireframe portraits are fictional samples; use actual member-provided photos in the product. Add an interaction design for questions/comments attached to each item, an All questions view, and general trip discussion. Distinguish proposed group offers from confirmed prices. Keep real booking/payment integrations outside the class MVP.
+Include the cute red panda trip buddy: initially stressed, increasingly happy as required plans are completed, travel-ready with sunglasses and a bag, and wearing the current destination’s flag on a T-shirt at arrival. Refine the sample SVG and agree on progress/arrival states with Ben. Design the shared trip dashboard and booking cards for flights/trains, hotels/Airbnb/VRBO, restaurants, concerts, and other activities. Make dates, time zones, original currency, price basis, booking state, responsible person, and shared links clear. Design a mobile app experience as well as desktop, and add a Mobile view / Desktop view button that previews the same app and preserves its current state. Use touch-friendly phone navigation, cards, forms, and contextual discussion panels. Treat home-screen installation as a separate implementation task and do not claim native iOS/Android delivery from a responsive preview alone. Use friendly circular member headshots beside messages and in the trip member list, with member names and initials fallbacks. The wireframe portraits are fictional samples; use actual member-provided photos in the product. Add an interaction design for questions/comments attached to each item, an All questions view, and general trip discussion. Distinguish proposed group offers from confirmed prices. Keep real booking/payment integrations outside the class MVP.
 
 Coordinate actual code/file ownership with Ben and Ronak before editing shared frontend files. Preserve Ronak's landing-page/onboarding copy and existing working trip flows. Agree on new persisted data fields with Ben; the standalone wireframe is an in-memory demonstration, not the finished feature. If a backend field is unavailable, label the UI as a proposal rather than pretending it works.
 

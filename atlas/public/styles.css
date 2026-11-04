@@ -841,11 +841,39 @@ dialog::backdrop {
   background:white
 }
 .calendar-toolbar {
-  display:flex;
-  justify-content:space-between;
+  display:grid;
+  grid-template-columns:auto minmax(max-content,1fr) auto;
   align-items:center;
   gap:20px;
   padding:22px 0
+}
+.calendar-toolbar-leading {
+  display:flex;
+  align-items:center;
+  gap:12px
+}
+.calendar-display-switch {
+  display:inline-flex;
+  padding:4px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:white
+}
+.calendar-display-button {
+  padding:8px 11px;
+  border:0;
+  border-radius:5px;
+  background:transparent;
+  color:var(--muted);
+  font-size:12px
+}
+.calendar-display-button:hover {
+  background:var(--tint);
+  color:var(--accent)
+}
+.calendar-display-button.active {
+  background:var(--accent);
+  color:white
 }
 .calendar-view-switch {
   display:inline-flex;
@@ -880,6 +908,18 @@ dialog::backdrop {
   margin-left:8px;
   font-size:17px;
   text-align:right
+}
+.calendar-filters {
+  display:flex;
+  align-items:end;
+  gap:12px
+}
+.calendar-event-filter {
+  width:190px;
+  margin:0
+}
+.calendar-event-filter input,.calendar-trip-filter select {
+  min-height:40px
 }
 .calendar-grid-shell {
   overflow-x:auto;
@@ -1045,6 +1085,19 @@ dialog::backdrop {
   .calendar-cell {
     min-height:112px
   }
+  .calendar-toolbar {
+    grid-template-columns:1fr auto
+  }
+  .calendar-toolbar-leading {
+    grid-column:1/-1;
+    flex-wrap:wrap
+  }
+  .calendar-date-nav {
+    justify-content:start
+  }
+  .calendar-filters {
+    justify-content:end
+  }
   .expense-columns {
     grid-template-columns:1fr;
     gap:24px
@@ -1159,9 +1212,12 @@ dialog::backdrop {
     width:100%
   }
   .calendar-toolbar {
+    grid-template-columns:1fr;
     align-items:stretch;
-    flex-direction:column;
     gap:14px
+  }
+  .calendar-toolbar-leading {
+    grid-column:auto
   }
   .calendar-view-switch {
     align-self:start
@@ -1173,6 +1229,14 @@ dialog::backdrop {
     min-width:0;
     margin-left:auto;
     font-size:15px
+  }
+  .calendar-filters {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    align-items:end
+  }
+  .calendar-event-filter,.calendar-trip-filter {
+    width:100%
   }
   .calendar-cell {
     min-height:100px

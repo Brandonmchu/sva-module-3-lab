@@ -11,6 +11,8 @@ let previousRoute;
 let calendarView = 'month';
 let calendarDate = todayDate();
 let calendarTripId = '';
+let calendarDisplay = 'calendar';
+let calendarEventQuery = '';
 let expenseTripId = '';
 let settlementTripId = '';
 
@@ -441,9 +443,11 @@ function calendarHeading() {
 }
 
 function calendarActivities(start, end) {
+  const query = calendarEventQuery.trim().toLocaleLowerCase();
   return product.activities
     .filter(activity => activity.status !== 'removed' && activity.date >= start && activity.date <= end)
     .filter(activity => !calendarTripId || activity.trip_id === calendarTripId)
+    .filter(activity => !query || activity.title.toLocaleLowerCase().includes(query))
     .map(activity => ({ activity, trip: product.trips.find(item => item.id === activity.trip_id) }))
     .filter(item => item.trip)
     .sort((a, b) => a.activity.date.localeCompare(b.activity.date) || a.trip.title.localeCompare(b.trip.title) || a.activity.title.localeCompare(b.activity.title));
@@ -482,13 +486,16 @@ function renderCalendar() {
   if (!product.trips.some(item => item.id === calendarTripId)) calendarTripId = '';
   const heading = calendarHeading();
   const tripOptions = product.trips.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === calendarTripId ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('');
-  const start = calendarView === 'day' ? calendarDate : calendarView === 'week' ? startOfWeek(calendarDate) : startOfWeek(calendarDate.slice(0, 7) + '-01');
-  const end = calendarView === 'day' ? calendarDate : calendarView === 'week' ? addDays(start, 6) : addDays(start, 41);
+  const eventFilter = `<label class="calendar-event-filter">Event name<input type="search" id="calendar-event-filter" value="${escapeHtml(calendarEventQuery)}" placeholder="Search events"></label>`;
+  const monthStart = calendarDate.slice(0, 7) + '-01';
+  const start = calendarView === 'day' ? calendarDate : calendarView === 'week' ? startOfWeek(calendarDate) : calendarDisplay === 'agenda' ? monthStart : startOfWeek(monthStart);
+  const end = calendarView === 'day' ? calendarDate : calendarView === 'week' ? addDays(start, 6) : calendarDisplay === 'agenda' ? dateKey(new Date(Date.UTC(utcDate(monthStart).getUTCFullYear(), utcDate(monthStart).getUTCMonth() + 1, 0))) : addDays(start, 41);
   $('#calendar-view').innerHTML = `<div class="calendar-header"><div><p class="eyebrow">Plan together</p><h1>Trip calendar</h1><p class="calendar-intro">See what’s on across your group trips.</p></div>
-    </div><div class="calendar-toolbar"><div class="calendar-view-switch" role="group" aria-label="Calendar view">${['day', 'week', 'month'].map(view => `<button type="button" class="calendar-view-button${calendarView === view ? ' active' : ''}" data-calendar-view="${view}" aria-pressed="${calendarView === view}">${view[0].toUpperCase() + view.slice(1)}</button>`).join('')}</div>
+    </div><div class="calendar-toolbar"><div class="calendar-toolbar-leading"><div class="calendar-display-switch" role="group" aria-label="Calendar display">${[['calendar', 'Calendar'], ['agenda', 'Agenda']].map(([display, label]) => `<button type="button" class="calendar-display-button${calendarDisplay === display ? ' active' : ''}" data-calendar-display="${display}" aria-pressed="${calendarDisplay === display}">${label}</button>`).join('')}</div>
+      <div class="calendar-view-switch" role="group" aria-label="Date range">${['day', 'week', 'month'].map(view => `<button type="button" class="calendar-view-button${calendarView === view ? ' active' : ''}" data-calendar-view="${view}" aria-pressed="${calendarView === view}">${view[0].toUpperCase() + view.slice(1)}</button>`).join('')}</div></div>
       <div class="calendar-date-nav"><button type="button" class="secondary small" data-calendar-shift="-1" aria-label="Previous ${calendarView}">‹</button><button type="button" class="secondary small" data-calendar-today>Today</button><button type="button" class="secondary small" data-calendar-shift="1" aria-label="Next ${calendarView}">›</button><h2>${escapeHtml(heading)}</h2></div>
-      <label class="calendar-trip-filter">Trip name<select id="calendar-trip-filter"><option value="">All trips</option>${tripOptions}</select></label></div>
-    ${calendarView === 'month' ? renderCalendarMonth() : `<div class="calendar-list">${renderCalendarList(start, end)}</div>`}`;
+      <div class="calendar-filters">${eventFilter}<label class="calendar-trip-filter">Trip name<select id="calendar-trip-filter"><option value="">All trips</option>${tripOptions}</select></label></div></div>
+    ${calendarDisplay === 'calendar' && calendarView === 'month' ? renderCalendarMonth() : `<div class="calendar-list${calendarDisplay === 'agenda' ? ' agenda-list' : ''}">${renderCalendarList(start, end)}</div>`}`;
 }
 
 function render() {
@@ -674,6 +681,17 @@ document.addEventListener('change', eventObject => {
   if (eventObject.target.id === 'expense-split-mode') convertSplitMode($('#expense-form'), eventObject.target.value);
 });
 
+document.addEventListener('input', eventObject => {
+  if (eventObject.target.id === 'calendar-event-filter') {
+    const cursor = eventObject.target.selectionStart;
+    calendarEventQuery = eventObject.target.value;
+    renderCalendar();
+    const input = $('#calendar-event-filter');
+    input.focus();
+    input.setSelectionRange(cursor, cursor);
+  }
+});
+
 async function handleAction(button) {
   const { action, id } = button.dataset;
   const current = trip();
@@ -718,6 +736,12 @@ document.addEventListener('click', eventObject => {
   const calendarViewButton = eventObject.target.closest('[data-calendar-view]');
   if (calendarViewButton) {
     calendarView = calendarViewButton.dataset.calendarView;
+    renderCalendar();
+    return;
+  }
+  const calendarDisplayButton = eventObject.target.closest('[data-calendar-display]');
+  if (calendarDisplayButton) {
+    calendarDisplay = calendarDisplayButton.dataset.calendarDisplay;
     renderCalendar();
     return;
   }

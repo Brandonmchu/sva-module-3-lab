@@ -211,7 +211,7 @@ function renderPerson(person, current) {
   const brideButton = viewerIsBride(current) ? '' : isBride
     ?`<button class="text-button" data-action="unset-bachelorette" data-id="${escapeHtml(person.id)}">Unassign</button>`
     : (!current.bachelorette_id ? `<button class="text-button" data-action="set-bachelorette" data-id="${escapeHtml(person.id)}">Make bachelorette</button>` : '');
-  return `<article class="person"><div class="person-heading"><h3>${escapeHtml(person.name)}</h3>${hidePrices(current) ? '' : `<span class="quiet">${escapeHtml(money(person.budget))}</span>`}</div>
+  return `<article class="person${isBride ? ' bride' : ''}"><div class="person-heading"><h3>${escapeHtml(person.name)}</h3>${hidePrices(current) ? '' : `<span class="quiet">${escapeHtml(money(person.budget))}</span>`}</div>
     ${isBride ? '<span class="status-badge bride">Bachelorette</span>' : ''}
     <p>${dateRange(person.available_from, person.available_to)}</p>${partial ? '<p class="availability-warning">Availability differs from the trip dates.</p>' : ''}
     ${person.interests.length ? `<p class="interests">${person.interests.map(interest => `<span>${escapeHtml(interest)}</span>`).join('')}</p>` : '<p>No interests added yet.</p>'}<div class="person-actions">${brideButton}<button class="text-button" data-action="edit-traveler" title="Edit preferences" data-id="${escapeHtml(person.id)}">Edit preferences</button><button class="text-button danger" data-action="remove-traveler" title="Remove" data-id="${escapeHtml(person.id)}">Remove</button></div></article>`;

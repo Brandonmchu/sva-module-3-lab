@@ -81,6 +81,7 @@ npm start
 Open http://127.0.0.1:3006.
 No package install, account, or hosted database is necessary.
 The "Top 3 things to do" interest suggestions call the Gemini API with the key in `.env` in this folder (`GEMINI_API_KEY=...`).
+Git ignores `.env`, so each teammate creates their own. Never commit a key.
 Restart the app after you change `.env`. Without a key, the rest of the app works and saved suggestions still show.
 Open this folder in your AI tool. Read AGENTS.md, DATA-MODEL.md, and mockdata.md.
 

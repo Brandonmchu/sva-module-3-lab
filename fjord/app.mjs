@@ -90,6 +90,32 @@ async function readJson(request) {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 }
 
+async function generateRoutes(input) {
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) throw fail('AI route planning is not configured. Set OPENAI_API_KEY on the server and restart Fjord.', 503);
+  const { destination, start_date, end_date, budget_per_person, currency, brief } = input || {};
+  if (typeof destination !== 'string' || !destination.trim() || typeof start_date !== 'string' || typeof end_date !== 'string' || !Number.isFinite(budget_per_person) || budget_per_person < 0 || typeof currency !== 'string') throw fail('Add a destination, dates, budget, and currency first.');
+  validateValue(start_date, { type:'string', format:'date' }, 'start_date');
+  validateValue(end_date, { type:'string', format:'date' }, 'end_date');
+  if (end_date < start_date) throw fail('End date must follow start date.');
+  const days = Math.round((Date.parse(end_date) - Date.parse(start_date)) / 86400000) + 1;
+  if (days > 4) throw fail('Choose a trip of up to four days for route suggestions.');
+  const system = `You are Fjord's careful trip planner. Return ONLY a JSON object with an options array of exactly 3 distinct routes: Best fit, Lower cost, More to explore. Each option has name, summary, estimated_total_per_person (number), and stops (array). Each stop has date (YYYY-MM-DD), time (HH:MM 24-hour), title, place, category, description (2 useful sentences explaining what to do and why it fits), duration_minutes (number), travel_from_previous (realistic mode and approximate time, or "Start of day"), estimated_cost_per_person (number), booking_note (what to check before going). Use real, destination-specific places; group nearby places in sensible order; cover every trip day with a reasonable morning, afternoon and evening plan. Include meal breaks. Avoid impossible travel or invented addresses. Use the request's interests and must-see places. Respect the per-person budget; describe exclusions like lodging and long-distance transport in each summary. Costs and times are estimates, never claim verified opening hours or availability. Keep all text in English. No markdown.`;
+  const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 60000);
+  let result;
+  try {
+    const upstream = await fetch('https://api.openai.com/v1/responses', { method:'POST', headers:{ Authorization:'Bearer ' + key, 'Content-Type':'application/json' }, body:JSON.stringify({ model:process.env.OPENAI_MODEL || 'gpt-4.1-mini', instructions:system, input:JSON.stringify({ destination:destination.trim(), start_date, end_date, budget_per_person, currency, brief:String(brief || '').slice(0,2000) }), text:{ format:{ type:'json_object' } }, max_output_tokens:6500 }), signal:controller.signal });
+    result = await upstream.json();
+    if (!upstream.ok) throw fail('AI planner request failed: ' + (result.error?.message || upstream.status), 502);
+  } catch (error) { if (error.status) throw error; throw fail('AI planner could not connect. Try again shortly.', 502); }
+  finally { clearTimeout(timeout); }
+  const content = result.output?.flatMap(item => item.content || []).find(item => item.type === 'output_text')?.text;
+  let plan; try { plan = JSON.parse(content); } catch { throw fail('AI planner returned an incomplete route. Please try again.', 502); }
+  const expectedDates = Array.from({length:days}, (_,index) => new Date(Date.parse(start_date) + index * 86400000).toISOString().slice(0,10));
+  if (!Array.isArray(plan.options) || plan.options.length !== 3 || plan.options.some(option => !option.name || !option.summary || !Number.isFinite(option.estimated_total_per_person) || !Array.isArray(option.stops) || option.stops.length < days * 2 || expectedDates.some(date => !option.stops.some(stop => stop.date === date)) || option.stops.some(stop => stop.date < start_date || stop.date > end_date || !/^\d{2}:\d{2}$/.test(stop.time) || !stop.title || !stop.place || !stop.description || !stop.travel_from_previous || !stop.booking_note || !Number.isFinite(stop.duration_minutes) || !Number.isFinite(stop.estimated_cost_per_person) || stop.estimated_cost_per_person < 0))) throw fail('AI planner returned an incomplete route. Please try again.', 502);
+  return plan;
+}
+
 function validateEvent(event) {
   if (!event || typeof event !== 'object' || Array.isArray(event)) throw fail('Each event must be an object.');
   for (const field of schema.required) {
@@ -182,6 +208,10 @@ try {
             return json(response, 201, { added: count });
           }
           throw fail('Use GET or POST for events.', 405);
+        }
+        if (pathname === '/api/routes') {
+          if (request.method !== 'POST') throw fail('Use POST for route generation.', 405);
+          return json(response, 200, await generateRoutes(await readJson(request)));
         }
         if (request.method !== 'GET' && request.method !== 'HEAD') throw fail('Method not supported.', 405);
         const file = resolve(publicRoot, '.' + (pathname === '/' ? '/index.html' : pathname));

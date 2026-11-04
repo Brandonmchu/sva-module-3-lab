@@ -76,7 +76,9 @@ npm start
 ```
 
 Open http://127.0.0.1:3006.
-No package install, account, API key, or hosted database is necessary.
+No package install, account, or hosted database is necessary.
+The "Top 3 things to do" interest suggestions call the Gemini API with the key in `.env` in this folder (`GEMINI_API_KEY=...`).
+Restart the app after you change `.env`. Without a key, the rest of the app works and saved suggestions still show.
 Open this folder in your AI tool. Read AGENTS.md, DATA-MODEL.md, and mockdata.md.
 
 ### AI route suggestions
@@ -93,12 +95,14 @@ The basic shared planner still runs without an API key. Generating destination-s
 | data/product.schema.json | Base product fields and types |
 | data/events.jsonl | Committed usage events, initially empty |
 | data/schema.json | Shared event shape |
+| data/suggestions.json | Cached Gemini "Top 3 things to do" for each trip interest |
+| .env | Gemini key and optional model settings for the suggestions |
 | mockdata.md | Product data and simulation instructions |
 | feedback.md | Customer observations and scenario assumptions |
 | public/index.html | Landing page, onboarding, and form markup |
 | public/styles.css | Visual design and responsive layout |
 | public/app.js | Trip features, interactions, and usage events |
-| app.mjs | Local server, product API, event API, and data checks |
+| app.mjs | Local server, product API, event API, suggestions API, and data checks |
 
 ## Build and exchange
 

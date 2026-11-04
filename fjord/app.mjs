@@ -3,6 +3,7 @@ import { readFileSync, appendFileSync, writeFileSync, renameSync } from 'node:fs
 import { dirname, resolve, sep, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
+import { parseEnv } from 'node:util';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const publicRoot = resolve(root, 'public');
@@ -11,7 +12,22 @@ const schema = JSON.parse(readFileSync(resolve(root, 'data/schema.json'), 'utf8'
 const productFile = resolve(root, 'data/product.json');
 const productSchema = JSON.parse(readFileSync(resolve(root, 'data/product.schema.json'), 'utf8'));
 const config = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
+const suggestionsFile = resolve(root, 'data/suggestions.json');
 const fail = (message, status = 400) => Object.assign(new Error(message), { status });
+
+// Optional settings such as GEMINI_API_KEY. Real environment variables win over .env.
+// Accept UTF-8 with or without a BOM, and UTF-16LE, which Windows PowerShell often writes.
+function loadEnv(file) {
+  let bytes;
+  try { bytes = readFileSync(file); }
+  catch (error) { if (error.code !== 'ENOENT') console.warn('.env could not be read: ' + error.message); return; }
+  const text = (bytes[0] === 0xff && bytes[1] === 0xfe ? bytes.toString('utf16le') : bytes.toString('utf8')).replace(/^﻿/, '');
+  for (const [key, value] of Object.entries(parseEnv(text))) if (process.env[key] === undefined) process.env[key] = value.trim();
+  if (!process.env.GEMINI_API_KEY) console.warn('.env has no GEMINI_API_KEY line, so interest suggestions are off. Save .env as plain text with GEMINI_API_KEY=your-key.');
+}
+loadEnv(resolve(root, '.env'));
+const geminiModel = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+const geminiFallbackModel = process.env.GEMINI_FALLBACK_MODEL || 'gemini-3.5-flash-lite';
 
 function validateValue(value, rule, label) {
   if (rule.$ref) rule = productSchema.$defs[rule.$ref.split('/').at(-1)];
@@ -175,6 +191,97 @@ function appendEvents(input) {
   return events.length;
 }
 
+// Interest suggestions: the top 3 things to do per traveler interest, looked up with Gemini.
+// They are cached in data/suggestions.json per trip, destination, and interest, so each lookup runs once.
+const interestKey = value => String(value).trim().replace(/^(and|&)\s+/i, '').toLowerCase();
+const cleanText = (value, limit) => String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, limit);
+
+function readSuggestions() {
+  let data;
+  try { data = JSON.parse(readFileSync(suggestionsFile, 'utf8')); }
+  catch (error) {
+    if (error.code === 'ENOENT') return { version: 1, lookups: [] };
+    throw fail('data/suggestions.json: ' + error.message, 500);
+  }
+  if (!Array.isArray(data?.lookups)) throw fail('data/suggestions.json must have a lookups array.', 500);
+  return data;
+}
+
+function saveSuggestions(data) {
+  const temporary = suggestionsFile + '.tmp';
+  writeFileSync(temporary, JSON.stringify(data, null, 2) + '\n');
+  renameSync(temporary, suggestionsFile);
+}
+
+async function askGemini(trip, interest) {
+  const prompt = [
+    `A group of friends is planning a weekend trip to ${trip.destination} from ${trip.start_date} to ${trip.end_date}.`,
+    `Their total budget is about ${trip.budget_per_person} ${trip.currency} per person.`,
+    `List the top 3 things to do in or near ${trip.destination} for someone interested in "${interest}", suited to a group of friends at that time of year.`,
+    'Name real, specific places or experiences. Keep each description to one short sentence.',
+    `Estimate the cost per person in ${trip.currency}. Use 0 when it is free.`
+  ].join('\n');
+  const idea = { type: 'object', properties: { title: { type: 'string' }, description: { type: 'string' }, estimated_cost_per_person: { type: 'number' } }, required: ['title', 'description', 'estimated_cost_per_person'] };
+  const request = model => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
+    body: JSON.stringify({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: 'application/json', responseJsonSchema: { type: 'object', properties: { ideas: { type: 'array', items: idea } }, required: ['ideas'] } }
+    }),
+    signal: AbortSignal.timeout(60000)
+  });
+  // When Gemini is busy or rate-limited, retry once, then ask the faster fallback model.
+  const attempts = [geminiModel, geminiModel, geminiFallbackModel];
+  let response, model;
+  for (const [index, next] of attempts.entries()) {
+    if (index) await new Promise(done => setTimeout(done, 1500));
+    model = next;
+    response = await request(model);
+    if (![429, 500, 503].includes(response.status)) break;
+  }
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw fail('Gemini could not answer: ' + (body.error?.message || response.status + ' ' + response.statusText), 502);
+  const text = (body.candidates?.[0]?.content?.parts || []).map(part => part.text || '').join('');
+  let ideas;
+  try { ideas = JSON.parse(text).ideas; } catch { ideas = undefined; }
+  if (!Array.isArray(ideas) || !ideas.length) throw fail('Gemini returned no ideas for "' + interest + '".', 502);
+  return {
+    model,
+    ideas: ideas.slice(0, 3).map(item => ({
+      title: cleanText(item.title, 120) || 'Untitled idea',
+      description: cleanText(item.description, 300),
+      estimated_cost_per_person: Number.isFinite(item.estimated_cost_per_person) && item.estimated_cost_per_person >= 0 ? Math.round(item.estimated_cost_per_person) : 0
+    }))
+  };
+}
+
+async function findSuggestions(input) {
+  const product = readProduct();
+  const trip = product.trips.find(item => item.id === input?.trip_id);
+  if (!trip) throw fail('Choose an existing trip.', 404);
+  const data = readSuggestions();
+  const cached = interest => data.lookups.some(lookup => lookup.trip_id === trip.id && lookup.destination === trip.destination && lookup.currency === trip.currency && lookup.interest === interest);
+  const wanted = [...new Set(product.travelers.filter(person => person.trip_id === trip.id).flatMap(person => person.interests).map(interestKey).filter(Boolean))];
+  // Look up at most 12 interests per request. The response reports how many are left.
+  const uncached = wanted.filter(interest => !cached(interest));
+  const missing = uncached.slice(0, 12);
+  if (missing.length && !process.env.GEMINI_API_KEY) throw fail('Suggestions are not set up on this computer. Add GEMINI_API_KEY to the .env file in this folder, then restart the app.', 503);
+  const results = await Promise.allSettled(missing.map(interest => askGemini(trip, interest)));
+  const fresh = readSuggestions();
+  results.forEach((result, index) => {
+    if (result.status !== 'fulfilled') return;
+    fresh.lookups = fresh.lookups.filter(lookup => lookup.trip_id !== trip.id || lookup.interest !== missing[index]);
+    fresh.lookups.push({ id: 'suggestion-' + randomUUID(), trip_id: trip.id, destination: trip.destination, currency: trip.currency, interest: missing[index], model: result.value.model, created_at: new Date().toISOString(), ideas: result.value.ideas });
+  });
+  const added = results.filter(result => result.status === 'fulfilled').length;
+  if (added) saveSuggestions(fresh);
+  const failed = results.flatMap((result, index) => result.status === 'rejected' ? [missing[index]] : []);
+  results.forEach((result, index) => { if (result.status === 'rejected') console.warn('Suggestion lookup failed for "' + missing[index] + '": ' + result.reason.message); });
+  if (failed.length && !added) throw results.find(result => result.status === 'rejected').reason;
+  return { lookups: fresh.lookups, added, failed, remaining: uncached.length - missing.length };
+}
+
 function json(response, status, value) {
   response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
   response.end(JSON.stringify(value));
@@ -183,9 +290,11 @@ function json(response, status, value) {
 try {
   const product = readProduct();
   const events = readEvents();
+  const suggestions = readSuggestions();
   if (process.argv.includes('--check')) {
     console.log('Valid product: ' + product.trips.length + ' trips, ' + product.travelers.length + ' travelers, ' + product.activities.length + ' activities, ' + product.responses.length + ' responses.');
     console.log('Valid data: ' + events.length + ' events.');
+    console.log('Valid suggestions: ' + suggestions.lookups.length + ' cached interest lookups.');
   } else {
     const port = Number(process.env.PORT ?? config.config.port);
     if (!Number.isInteger(port) || port < 0 || port > 65535) throw fail('PORT must be an integer from 0 to 65535.');
@@ -212,6 +321,11 @@ try {
         if (pathname === '/api/routes') {
           if (request.method !== 'POST') throw fail('Use POST for route generation.', 405);
           return json(response, 200, await generateRoutes(await readJson(request)));
+        }
+        if (pathname === '/api/suggestions') {
+          if (request.method === 'GET') return json(response, 200, readSuggestions());
+          if (request.method === 'POST') return json(response, 200, await findSuggestions(await readJson(request)));
+          throw fail('Use GET or POST for suggestions.', 405);
         }
         if (request.method !== 'GET' && request.method !== 'HEAD') throw fail('Method not supported.', 405);
         const file = resolve(publicRoot, '.' + (pathname === '/' ? '/index.html' : pathname));

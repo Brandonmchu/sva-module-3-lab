@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "lookups": [
+    {
+      "id": "suggestion-56936818-dbd2-429c-93ab-217b4d9135fb",
+      "trip_id": "trip-0e9fd0d0-e3f6-4e2e-9a4b-8ec126e525ca",
+      "destination": "Quebec City",
+      "currency": "CAD",
+      "interest": "food",
+      "model": "gemini-3.6-flash",
+      "created_at": "2026-11-04T01:36:49.276Z",
+      "ideas": [
+        {
+          "title": "Chez Boulay - Bistro Boréal",
+          "description": "Enjoy a seasonal dinner featuring regional boreal ingredients and Nordic-inspired Quebecois cuisine.",
+          "estimated_cost_per_person": 80
+        },
+        {
+          "title": "Le Grand Marché de Québec",
+          "description": "Sample artisan cheeses, maple treats, and local delicacies from regional vendors at the central public market.",
+          "estimated_cost_per_person": 25
+        },
+        {
+          "title": "Le Chic Shack",
+          "description": "Indulge in gourmet poutines paired with local craft beers and artisanal milkshakes near Château Frontenac.",
+          "estimated_cost_per_person": 30
+        }
+      ]
+    },
+    {
+      "id": "suggestion-ac2dfb5f-9d25-4507-8741-8c6e253ecc31",
+      "trip_id": "trip-0e9fd0d0-e3f6-4e2e-9a4b-8ec126e525ca",
+      "destination": "Quebec City",
+      "currency": "CAD",
+      "interest": "photography",
+      "model": "gemini-3.5-flash-lite",
+      "created_at": "2026-11-04T01:36:49.276Z",
+      "ideas": [
+        {
+          "title": "Old Quebec Exploration",
+          "description": "Capture the historic European charm of Dufferin Terrace and Quartier Petit Champlain dusted in early winter scenery.",
+          "estimated_cost_per_person": 0
+        },
+        {
+          "title": "Montmorency Falls Park",
+          "description": "Photograph the dramatic frozen edges of the massive waterfall via the suspension bridge and cable car.",
+          "estimated_cost_per_person": 20
+        },
+        {
+          "title": "Plains of Abraham",
+          "description": "Snap moody, wide landscape shots of the sprawling historic parkland overlooking the Saint Lawrence River.",
+          "estimated_cost_per_person": 0
+        }
+      ]
+    },
+    {
+      "id": "suggestion-d90f7362-0aa8-4078-b986-9b89c36bba5c",
+      "trip_id": "trip-0e9fd0d0-e3f6-4e2e-9a4b-8ec126e525ca",
+      "destination": "Quebec City",
+      "currency": "CAD",
+      "interest": "sights",
+      "model": "gemini-3.5-flash-lite",
+      "created_at": "2026-11-04T01:36:49.276Z",
+      "ideas": [
+        {
+          "title": "Stroll Through Old Quebec",
+          "description": "Walk along the historic cobblestone streets of UNESCO-listed Old Quebec to admire the European-style architecture and early festive winter decorations.",
+          "estimated_cost_per_person": 0
+        },
+        {
+          "title": "Visit Fairmont Le Château Frontenac",
+          "description": "Explore the majestic grounds of the world's most photographed hotel and enjoy panoramic views of the St. Lawrence River from Dufferin Terrace.",
+          "estimated_cost_per_person": 0
+        },
+        {
+          "title": "Admire Montmorency Falls Park",
+          "description": "Take a short drive outside the city to witness the towering frozen-edged waterfall via suspension bridges and scenic viewing platforms.",
+          "estimated_cost_per_person": 15
+        }
+      ]
+    },
+    {
+      "id": "suggestion-66f157ad-a543-4846-80b5-75a677688ea4",
+      "trip_id": "trip-0e9fd0d0-e3f6-4e2e-9a4b-8ec126e525ca",
+      "destination": "Quebec City",
+      "currency": "CAD",
+      "interest": "pizza",
+      "model": "gemini-3.6-flash",
+      "created_at": "2026-11-04T01:36:49.276Z",
+      "ideas": [
+        {
+          "title": "Neapolitan Pizza Tasting at Nina Pizza Napolitaine",
+          "description": "Enjoy authentic wood-fired Neapolitan pizzas with fresh ingredients in the trendy Saint-Roch neighborhood.",
+          "estimated_cost_per_person": 35
+        },
+        {
+          "title": "Artisanal Pizza and Wine at Pizzeria No. 900 Saint-Jean",
+          "description": "Savor certified Neapolitan-style pizzas paired with fine wines right on historic Rue Saint-Jean.",
+          "estimated_cost_per_person": 30
+        },
+        {
+          "title": "Craft Beer and Wood-Fired Pizza at Microbrasserie La Souche Limoilou",
+          "description": "Pair locally brewed Quebec craft beers with gourmet wood-fired pizzas in a cozy pub setting.",
+          "estimated_cost_per_person": 40
+        }
+      ]
+    }
+  ]
+}

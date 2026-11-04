@@ -10,11 +10,14 @@ let tripDraft;
 let previousRoute;
 let selectedGeneratedRoute = null;
 let generatedRoutes = [];
+let suggestions = [];
+const lookingUp = new Set();
+const openIdeas = new Set();
 
 async function api(path, options = {}) {
   const response = await fetch(path, options);
   const body = await response.json();
-  if (!response.ok) throw new Error(body.error || 'The request failed. Please try again.');
+  if (!response.ok) throw Object.assign(new Error(body.error || 'The request failed. Please try again.'), { status: response.status });
   return body;
 }
 
@@ -28,7 +31,10 @@ const travelersFor = tripId => product.travelers.filter(person => person.trip_id
 const activitiesFor = tripId => product.activities.filter(activity => activity.trip_id === tripId);
 const actor = () => selectedTravelers.get(trip()?.id) || visitorId;
 const event = (name, properties, actorId = actor()) => ({ event: name, actor_id: actorId, source: 'product', properties: { visitor_id: visitorId, ...properties } });
-const interests = value => [...new Set(value.split(',').map(item => item.trim()).filter(Boolean))];
+// "Food, photography, and sights" becomes Food, photography, sights.
+const interestLabel = value => String(value).trim().replace(/^(and|&)\s+/i, '');
+const interestKey = value => interestLabel(value).toLowerCase();
+const interests = value => [...new Set(value.split(',').map(interestLabel).filter(Boolean))];
 const dateText = value => new Intl.DateTimeFormat('en-CA', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(value + 'T12:00:00Z'));
 const dateRange = (start, end) => dateText(start) + ' – ' + dateText(end);
 const money = (value, currency = trip()?.currency || 'CAD') => new Intl.NumberFormat('en-CA', { style: 'currency', currency, maximumFractionDigits: 2 }).format(value);
@@ -229,11 +235,60 @@ function renderActivity(activity, current, people) {
   </article>`;
 }
 
+// Top 3 things to do per interest, from the cached Gemini lookups for this trip and destination.
+function renderIdeas(person, current) {
+  const items = person.interests.filter(interestKey);
+  if (!items.length) return '';
+  const found = items.map(interest => ({ interest, lookup: suggestions.find(item => item.trip_id === current.id && item.destination === current.destination && item.currency === current.currency && item.interest === interestKey(interest)) })).filter(item => item.lookup);
+  const loading = lookingUp.has(current.id);
+  const label = loading ? 'Looking up things to do…' : found.length ? 'Find ideas for the new interests' : 'Find the top 3 things to do';
+  const button = found.length < items.length ? `<div class="ideas-actions"><button class="text-button" data-action="find-ideas" data-id="${escapeHtml(person.id)}" ${loading ? 'aria-disabled="true"' : ''}>${label}</button></div>` : '';
+  const list = found.length ? `<details class="group-responses ideas" data-traveler-id="${escapeHtml(person.id)}" ${openIdeas.has(person.id) ? 'open' : ''}><summary>Top 3 things to do in ${escapeHtml(current.destination)}</summary>
+    ${found.map(({ interest, lookup }) => `<div class="idea-group"><b>${escapeHtml(interestLabel(interest))}</b><ol>${lookup.ideas.map(idea => `<li><span class="idea-title">${escapeHtml(idea.title)}</span> <span class="idea-cost">· ${idea.estimated_cost_per_person ? 'about ' + escapeHtml(money(idea.estimated_cost_per_person, lookup.currency)) + ' per person' : 'free'}</span>${idea.description ? `<p>${escapeHtml(idea.description)}</p>` : ''}</li>`).join('')}</ol></div>`).join('')}</details>` : '';
+  return list + button;
+}
+
+// Redraw only the ideas area of each traveler card, so a lookup that finishes later
+// never wipes a vote or comment someone is typing elsewhere in the planner.
+function refreshIdeas(tripId) {
+  const current = trip();
+  if (route().view !== 'trip' || current?.id !== tripId) return;
+  for (const person of travelersFor(tripId)) {
+    const slot = document.querySelector(`.ideas-slot[data-traveler-id="${CSS.escape(person.id)}"]`);
+    if (slot) slot.innerHTML = renderIdeas(person, current);
+  }
+  setBusy(busy);
+}
+
+async function findIdeas(current, travelerId) {
+  if (lookingUp.has(current.id)) return;
+  const actorId = actor();
+  lookingUp.add(current.id);
+  openIdeas.add(travelerId);
+  refreshIdeas(current.id);
+  let properties = { trip_id: current.id, traveler_id: travelerId };
+  try {
+    const result = await api('/api/suggestions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ trip_id: current.id }) });
+    suggestions = result.lookups;
+    properties = { ...properties, outcome: 'found', new_lookups: result.added, failed_lookups: result.failed.length, remaining_lookups: result.remaining };
+    if (result.failed.length) notice('These interests could not be looked up: ' + result.failed.join(', ') + '. Please try again.', true);
+    else if (result.remaining) notice('There are more interests to look up. Select the button again to continue.');
+    else notice('');
+  } catch (error) {
+    properties = { ...properties, outcome: 'failed', reason: error.status === 503 ? 'not_configured' : error.status === 502 ? 'gemini_error' : 'request_failed' };
+    notice(error.message, true);
+  } finally {
+    lookingUp.delete(current.id);
+    refreshIdeas(current.id);
+  }
+  track(event('ideas_requested', properties, actorId)).catch(error => console.warn('Usage log:', error.message));
+}
+
 function renderPerson(person, current) {
   const partial = person.available_from > current.start_date || person.available_to < current.end_date;
   return `<article class="person"><div class="person-heading"><h3>${escapeHtml(person.name)}</h3><span class="quiet">${escapeHtml(money(person.budget))}</span></div>
     <p>${dateRange(person.available_from, person.available_to)}</p>${partial ? '<p class="availability-warning">Availability differs from the trip dates.</p>' : ''}
-    <p>${escapeHtml(person.interests.join(', ') || 'No interests added yet.')}</p><div class="person-actions"><button class="text-button" data-action="edit-traveler" data-id="${escapeHtml(person.id)}">Edit preferences</button><button class="text-button danger" data-action="remove-traveler" data-id="${escapeHtml(person.id)}">Remove</button></div></article>`;
+    <p>${escapeHtml(person.interests.map(interestLabel).join(', ') || 'No interests added yet.')}</p><div class="ideas-slot" data-traveler-id="${escapeHtml(person.id)}">${renderIdeas(person, current)}</div><div class="person-actions"><button class="text-button" data-action="edit-traveler" data-id="${escapeHtml(person.id)}">Edit preferences</button><button class="text-button danger" data-action="remove-traveler" data-id="${escapeHtml(person.id)}">Remove</button></div></article>`;
 }
 
 function renderPlanner() {
@@ -416,6 +471,7 @@ async function handleAction(button) {
   if (action === 'edit-trip') return openEditor('trip');
   if (action === 'add-traveler' || action === 'edit-traveler') return openEditor('traveler', id);
   if (action === 'add-activity' || action === 'edit-activity') return openEditor('activity', id);
+  if (action === 'find-ideas') return findIdeas(current, id);
   if (action === 'remove-traveler') {
     return saveChange(next => {
       next.travelers = next.travelers.filter(person => person.id !== id);
@@ -432,6 +488,13 @@ async function handleAction(button) {
   }
 }
 
+// Keep a traveler's idea list open across re-renders. Toggle events do not bubble, so listen in the capture phase.
+document.addEventListener('toggle', eventObject => {
+  const details = eventObject.target;
+  if (!details.matches?.('.ideas')) return;
+  if (details.open) openIdeas.add(details.dataset.travelerId); else openIdeas.delete(details.dataset.travelerId);
+}, true);
+
 document.addEventListener('click', eventObject => {
   const close = eventObject.target.closest('[data-close]');
   if (close) $('#' + close.dataset.close).close();
@@ -444,6 +507,8 @@ async function load() {
   $('#load-error').hidden = true;
   try {
     product = await api('/api/product');
+    // Suggestions are optional. The trip planner still loads if they cannot be read.
+    suggestions = (await api('/api/suggestions').catch(() => ({ lookups: [] }))).lookups;
     $('#app-loading').hidden = true;
     previousRoute = undefined;
     handleRoute();

@@ -61,6 +61,34 @@ The product snapshot does not need rows for virtual simulation actors.
 
 Suggested event names: landing_viewed, onboarding_started, trip_created, traveler_added, activity_proposed, response_submitted, plan_viewed, plan_updated, plan_confirmed.
 Your team can add event names as necessary.
+Fjord adds ideas_requested. See Interest suggestions below.
+
+## Interest suggestions (Fjord)
+
+Each traveler card shows the top 3 things to do at the trip destination for each of that traveler's interests.
+The local server asks the Gemini API, so the key never reaches the browser.
+
+- **Key and models:** `.env` in this folder holds `GEMINI_API_KEY`. Optional `GEMINI_MODEL` defaults to `gemini-3.6-flash`. Optional `GEMINI_FALLBACK_MODEL` defaults to `gemini-3.5-flash-lite`. Real environment variables win over `.env`. UTF-8 (with or without a BOM) and UTF-16 files both load.
+- **One lookup per interest:** the server looks up the trip's uncached interests in parallel, at most 12 per request. A busy or rate-limited answer (429, 500 or 503) is retried once, then sent to the fallback model.
+- **Cache:** `data/suggestions.json` stores results by trip, destination, currency, and lowercase interest. Each lookup runs once. Changing the trip destination or currency triggers a fresh lookup.
+- **Interest parsing:** a leading "and" or "&" is stripped, so "Food, photography, and sights" becomes Food, photography, sights.
+
+```json
+{ "version": 1, "lookups": [ { "id": "suggestion-…", "trip_id": "trip-001", "destination": "Quebec City", "currency": "CAD", "interest": "food",
+  "model": "gemini-3.6-flash", "created_at": "2026-11-04T01:25:00.000Z",
+  "ideas": [ { "title": "…", "description": "…", "estimated_cost_per_person": 45 } ] } ] }
+```
+
+GET /api/suggestions returns the cache.
+POST /api/suggestions with `{ "trip_id": "…" }` looks up the trip's missing interests. It returns `{ lookups, added, failed, remaining }`, where `remaining` counts interests left for the next request.
+Without a key it returns 503 with a setup message.
+The suggestions cache is separate from data/product.json. PUT /api/product never changes it.
+When a lookup finishes, the planner redraws only the ideas area of each traveler card. Unsaved votes and comments are kept.
+The `ideas_requested` event records:
+- `trip_id` and `traveler_id`
+- `outcome`: found or failed
+- `new_lookups`, `failed_lookups`, and `remaining_lookups`
+- `reason` for a failure: not_configured, gemini_error, or request_failed
 
 ## Extend the model
 

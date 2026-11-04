@@ -7,6 +7,8 @@
   <title>GroupAtion | Plan trips with friends</title>
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="apple-touch-icon" href="/groupation-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
   <script src="/app.js" type="module"></script>
 </head>
@@ -45,6 +47,11 @@
         </div>
         <div class="gx-hero-art">
           <img class="gx-badge" src="/groupation-logo.png" alt="GroupAtion trip planning logo: a red panda with a suitcase and passport" width="132" height="132">
+          <div class="trip-buddy gx-hero-buddy">
+            <div class="panda-art" data-mood="planning" role="img" aria-label="A happy red panda checking off the trip plan"></div>
+            <div class="buddy-copy"><span>Your trip buddy</span><strong>More plans.<br>More chill.</strong><p>Let's get your crew vacation-ready.</p></div>
+          </div>
+          <span class="gx-sticker gx-sticker-plane" aria-hidden="true">✈️</span>
           <span class="gx-sticker gx-sticker-palm" aria-hidden="true">🌴</span>
           <span class="gx-sticker gx-sticker-party" aria-hidden="true">🥂</span>
           <div id="sample-preview" class="sample-preview gx-ticket"></div>
@@ -129,6 +136,7 @@
       <p id="onboarding-step" class="eyebrow">Step 1 of 2 · The trip</p>
       <h1 id="onboarding-heading">Let's get this trip started.</h1>
       <p id="onboarding-intro" class="intro">Pick the occasion, then the basics. Nothing is locked in, so you can change anything later.</p>
+      <div class="trip-buddy trip-buddy-setup"><div id="setup-panda" class="panda-art" data-mood="starting" role="img" aria-label="Your red panda trip buddy is ready to start planning"></div><div class="buddy-copy"><span>One step closer to vacation</span><strong>Big trip energy.<br>Small, easy steps.</strong></div></div>
       <form id="new-trip-form" class="form-panel">
         <fieldset id="trip-basics"><legend class="sr-only">Trip details</legend>
           <!-- Occasion personalizes the hints on these screens. It is not saved with the trip (no new data field). -->

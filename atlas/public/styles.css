@@ -1,14 +1,14 @@
 /* A neutral baseline. Change the visual direction for your customers. */
 :root {
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  color:#332b27;
-  background:#fbf7f2;
+  color:#24322e;
+  background:#f6f7f3;
   font-synthesis:none;
-  --accent:#c56b48;
-  --muted:#796c64;
-  --line:#e9ddd2;
+  --accent:#32624d;
+  --muted:#64716a;
+  --line:#dce2d9;
   --paper:#fff;
-  --tint:#fff0e7;
+  --tint:#e8efe6;
   --danger:#9a432e
 }
 * {
@@ -44,7 +44,7 @@ button,.button {
   transition:background .15s,transform .15s
 }
 button:hover,.button:hover {
-  background:#a95335
+  background:#264d3c
 }
 button:active,.button:active {
   transform:translateY(1px)
@@ -80,7 +80,7 @@ button:disabled {
   color:var(--danger)
 }
 :focus-visible {
-  outline:3px solid #e3a78d;
+  outline:3px solid var(--accent);
   outline-offset:4px
 }
 [hidden] {
@@ -142,9 +142,6 @@ p {
 .actions {
   margin-top:30px
 }
-.actions+.quiet {
-  margin-top:26px
-}
 .site-header {
   max-width:1280px;
   padding:24px 40px;
@@ -183,13 +180,13 @@ main {
 .landing {
   display:grid;
   grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr);
-  column-gap:72px;
-  row-gap:54px;
+  column-gap:64px;
+  row-gap:34px;
   align-items:center;
-  padding-top:96px
+  padding-top:28px
 }
 .landing-copy {
-  padding:42px 0;
+  padding:8px 0;
   align-self:stretch;
   display:flex;
   flex-direction:column;
@@ -197,45 +194,46 @@ main {
 }
 .landing-copy h1 {
   max-width:11ch;
-  font-size:clamp(48px,6.2vw,76px);
+  font-size:clamp(46px,5.3vw,64px);
   font-weight:760;
   line-height:1.02;
   letter-spacing:-.055em
 }
 .landing-copy .eyebrow {
   color:var(--accent);
-  margin-bottom:24px
+  margin-bottom:18px
 }
 .landing-copy .intro {
-  font-size:19px;
+  font-size:17px;
   max-width:43ch;
-  margin-top:26px
+  margin-top:18px
+}
+.landing-copy .actions {
+  margin-top:22px
 }
 .hero-cta {
-  min-height:58px;
-  padding:17px 27px;
-  border-radius:10px;
-  font-size:17px;
-  box-shadow:0 9px 20px #9f583326
-}
-.hero-cta:hover {
-  box-shadow:0 11px 24px #9f583333
+  min-height:54px;
+  padding:15px 24px;
+  border-radius:9px;
+  font-size:16px;
+  box-shadow:0 7px 18px #24322e1c
 }
 .calendar-teaser {
-  max-width:470px;
-  margin-top:34px;
-  padding:19px 21px;
-  background:#fffdfb;
-  border:1px solid #ead9ca;
-  border-radius:14px;
-  box-shadow:0 14px 34px #55351b12
+  width:100%;
+  max-width:490px;
+  justify-self:end;
+  padding:20px 22px;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:12px;
+  box-shadow:0 12px 28px #24322e12
 }
 .calendar-teaser-heading {
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding-bottom:14px;
-  border-bottom:1px solid #f0e6dd
+  padding-bottom:12px;
+  border-bottom:1px solid var(--line)
 }
 .calendar-teaser-heading>div {
   display:grid;
@@ -243,38 +241,36 @@ main {
 }
 .calendar-kicker {
   color:var(--muted);
-  font-size:10px;
+  font-size:11px;
   font-weight:700;
   letter-spacing:.1em;
   text-transform:uppercase
 }
-.calendar-teaser-heading b {
-  font-size:15px
+.calendar-teaser-heading h2 {
+  font-size:17px
 }
-.calendar-weather {
-  display:grid;
-  place-items:center;
-  width:35px;
-  height:35px;
-  background:#fff0d5;
-  border-radius:50%;
-  color:#d28b36;
-  font-size:20px
+.calendar-going {
+  padding:6px 9px;
+  border-radius:999px;
+  background:var(--tint);
+  color:var(--accent);
+  font-size:12px;
+  font-weight:650
 }
 .calendar-event {
   display:grid;
   grid-template-columns:42px 10px 1fr;
   align-items:center;
   gap:11px;
-  min-height:52px;
-  border-bottom:1px solid #f5ede6
+  min-height:48px;
+  border-bottom:1px solid var(--line)
 }
 .calendar-event:last-child {
   border-bottom:0
 }
 .calendar-event time {
   color:var(--muted);
-  font-size:11px;
+  font-size:12px;
   font-variant-numeric:tabular-nums
 }
 .calendar-event>div {
@@ -282,23 +278,23 @@ main {
   gap:2px
 }
 .calendar-event b {
-  font-size:12px
+  font-size:13px
 }
 .calendar-event small {
   color:var(--muted);
-  font-size:10px
+  font-size:11px
 }
 .event-marker {
   width:9px;
   height:9px;
   border-radius:50%;
-  background:#c56b48
+  background:var(--accent)
 }
 .event-marker.outdoors {
-  background:#77a77b
+  background:#64866f
 }
 .event-marker.dinner {
-  background:#dfaa55
+  background:#8a9a78
 }
 .benefit-grid {
   grid-column:1/-1;
@@ -311,7 +307,7 @@ main {
   border:1px solid var(--line);
   border-radius:14px;
   padding:28px;
-  box-shadow:0 12px 28px #57351b0d
+  box-shadow:0 10px 24px #24322e0d
 }
 .benefit-icon {
   display:grid;
@@ -319,8 +315,8 @@ main {
   width:48px;
   height:48px;
   border-radius:14px;
-  color:#b85d3d;
-  background:#fff0e7;
+  color:var(--accent);
+  background:var(--tint);
   margin-bottom:25px
 }
 .benefit-icon svg {
@@ -343,11 +339,12 @@ main {
   font-size:14px
 }
 .sample-preview {
-  background:#fff3eb;
+  grid-column:1/-1;
+  background:#eef1e9;
   border:1px solid var(--line);
-  padding:32px;
-  border-radius:14px;
-  box-shadow:0 14px 34px #55351b12
+  padding:24px;
+  border-radius:12px;
+  box-shadow:0 10px 24px #24322e0d
 }
 .sample-preview h2 {
   margin-bottom:8px
@@ -405,7 +402,7 @@ main {
   border-radius:14px;
   padding:34px;
   margin-top:34px;
-  box-shadow:0 16px 36px #57351b10
+  box-shadow:0 16px 36px #24322e10
 }
 fieldset {
   border:0;
@@ -472,7 +469,7 @@ textarea {
 }
 .notice.error {
   border-color:var(--danger);
-  background:#f7ede7;
+  background:#eef0ec;
   color:#783820
 }
 .planner {
@@ -781,11 +778,11 @@ dialog::backdrop {
 @media(max-width:950px) {
   .landing {
     grid-template-columns:minmax(0,1fr) minmax(300px,.85fr);
-    gap:40px;
-    padding-top:56px
+    gap:30px;
+    padding-top:24px
   }
   .landing-copy h1 {
-    font-size:clamp(46px,6.2vw,64px)
+    font-size:clamp(42px,5.3vw,54px)
   }
   .benefit-grid {
     grid-template-columns:repeat(2,minmax(0,1fr))
@@ -827,11 +824,11 @@ dialog::backdrop {
   }
   .landing {
     grid-template-columns:1fr;
-    gap:30px;
-    padding-top:26px
+    gap:24px;
+    padding-top:22px
   }
   .landing-copy {
-    padding:20px 0 0
+    padding:0
   }
   .landing-copy h1 {
     max-width:12ch;
@@ -851,11 +848,10 @@ dialog::backdrop {
   }
   .calendar-teaser {
     max-width:none;
-    margin-top:26px;
-    padding:17px
+    padding:18px
   }
   .landing-note {
-    grid-template-columns:1fr
+    padding-top:18px
   }
   .benefit-grid {
     grid-template-columns:1fr

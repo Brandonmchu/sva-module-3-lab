@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Weekender turns group trip ideas into plans everyone agrees on.">
-  <title>Weekender — From group chat to calendar</title>
+  <meta name="description" content="Plan weekends together with Weekender. Vote on activities, build a shared trip calendar, and split costs without awkward math.">
+  <title>Weekender | Group weekend planning</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/styles.css">
   <script src="/app.js" type="module"></script>
@@ -31,21 +31,21 @@
         <h1>Stop planning trips that never happen.</h1>
         <p class="intro">Vote on what to do, see it on one shared calendar, and split costs without the awkward math.</p>
         <div class="actions"><a class="button hero-cta" href="#new">Plan a weekend</a><a id="sample-link" class="text-link" href="#home" hidden>Try the sample trip</a></div>
-        <div class="calendar-teaser" aria-label="A preview of a shared weekend calendar">
-          <div class="calendar-teaser-heading"><div><span class="calendar-kicker">Your weekend, together</span><b>Saturday, June 14</b></div><span class="calendar-weather" aria-hidden="true">☀</span></div>
-          <div class="calendar-event"><time>9:30</time><span class="event-marker coffee" aria-hidden="true"></span><div><b>Coffee &amp; pastries</b><small>Everyone’s in · 4 people</small></div></div>
-          <div class="calendar-event"><time>12:00</time><span class="event-marker outdoors" aria-hidden="true"></span><div><b>Waterfront bike ride</b><small>Everyone’s in · 4 people</small></div></div>
-          <div class="calendar-event"><time>18:30</time><span class="event-marker dinner" aria-hidden="true"></span><div><b>Patio dinner</b><small>On the agenda · split later</small></div></div>
-        </div>
       </div>
-      <div id="sample-preview" class="sample-preview"></div>
-      <div class="benefit-grid" aria-label="How Weekender works">
+      <section class="calendar-teaser" aria-labelledby="calendar-teaser-title">
+        <div class="calendar-teaser-heading"><div><span class="calendar-kicker">Your weekend, together</span><h2 id="calendar-teaser-title">Saturday, June 14</h2></div><span class="calendar-going">4 going</span></div>
+        <div class="calendar-event"><time>9:30</time><span class="event-marker" aria-hidden="true"></span><div><b>Coffee &amp; pastries</b><small>Everyone’s in · 4 people</small></div></div>
+        <div class="calendar-event"><time>12:00</time><span class="event-marker outdoors" aria-hidden="true"></span><div><b>Waterfront bike ride</b><small>Everyone’s in · 4 people</small></div></div>
+        <div class="calendar-event"><time>18:30</time><span class="event-marker dinner" aria-hidden="true"></span><div><b>Patio dinner</b><small>On the agenda · split later</small></div></div>
+      </section>
+      <section class="benefit-grid" aria-label="Weekender benefits">
         <article class="benefit"><span class="benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20M10 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM16 4.2a3.5 3.5 0 0 1 0 6.8m2 4h.5a3.5 3.5 0 0 1 3.5 3.5V20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h2>Decide together</h2><p>Everyone votes, and the winning activities are locked in.</p></article>
         <article class="benefit"><span class="benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5.5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M7.5 3.5v4M16.5 3.5v4M3.5 10h17m-12 4 2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h2>One shared agenda</h2><p>The agreed plan becomes a day-by-day schedule everyone can see.</p></article>
         <article class="benefit"><span class="benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.3" stroke="currentColor" stroke-width="1.7"/><path d="M3 20v-1.3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4V20m2-8 2 2 3.5-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h2>Know who’s coming</h2><p>Everyone taps I’m in or I’m out.</p></article>
         <article class="benefit"><span class="benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><ellipse cx="9" cy="7" rx="5.5" ry="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 7v4c0 1.4 2.5 2.5 5.5 2.5 1.1 0 2.1-.2 3-.5M3.5 11v4c0 1.4 2.5 2.5 5.5 2.5m0-8v4m0 0v4m0-4c0-1.7 2.5-3 5.5-3s5.5 1.3 5.5 3-2.5 3-5.5 3-5.5-1.3-5.5-3Zm0 0v4c0 1.7 2.5 3 5.5 3s5.5-1.3 5.5-3v-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h2>Settle up easily</h2><p>Log shared costs and see exactly who owes what.</p></article>
-      </div>
+      </section>
       <p class="landing-note">The group chat starts the idea. We turn it into the weekend.</p>
+      <div id="sample-preview" class="sample-preview"></div>
     </section>
 
     <section id="new-view" class="view narrow" hidden>

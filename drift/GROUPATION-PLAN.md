@@ -21,17 +21,20 @@ Help the whole group agree on a trip, organize the details, and keep track of wh
 
 1. **Shared trip hub:** occasion, destination, dates, and budget per person.
 2. **Group preferences:** each traveller's availability, budget, and interests.
-3. **Shared itinerary:** activity ideas, dates, and estimated costs.
-4. **Group decisions:** votes and comments so the group can agree on the plan.
-5. **Booking coordination:** a proposed next step for tracking booking links, who is responsible, and what still needs to be booked.
+3. **Shared itinerary:** flights, trains, hotels, Airbnb/VRBO stays, restaurants, concerts, activities, dates/time zones, and estimated costs in their original currency.
+4. **Group decisions and questions:** votes, comments, questions attached to each plan, and a general trip discussion.
+5. **Booking coordination:** tracking booking links, who is responsible, booking state, participants, and what still needs to be booked.
+6. **Potential group offers:** explore group discounts from providers/hosts, with source, terms, and confirmation status. No discount is guaranteed or implemented yet.
 
 The starter already supports trips, travellers, activities, and responses. Booking coordination is a proposed extension; actual booking transactions and integrations have not been implemented or chosen.
 
 ## Roles and decisions
 
 - **Product manager — Ben:** features, priorities, and product behaviour.
-- **Designer:** design, interactions, and product aesthetics.
-- **Product marketer:** positioning, landing page, and onboarding.
+- **Designer — Jessica:** design, interactions, and product aesthetics.
+- **Product marketer — Ronak:** positioning, landing page, and onboarding.
+
+The PM wireframe and design prompt are in `JESSICA-DESIGN-HANDOFF.md`. Open `/groupation-wireframe.html` while the app is running for the clickable proposal.
 
 The team still needs to agree on the first occasion to focus on, the scope of booking for the class prototype, and how work is divided across files. AI can help implement the agreed direction; customer choice and product priorities remain human decisions.
 

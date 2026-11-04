@@ -1,0 +1,79 @@
+/* Local design exploration. Existing trip actions and data stay intact. */
+.design-prototype { --canvas:#f6f8f5; --ink:#153d40; --accent:#0b7574; --accent-hover:#075b5a; --link:#126561; --line:#d4e3dd; background:#f6f8f5 }
+.design-prototype .site-header { max-width:1380px; padding:20px 36px; border:0 }
+.design-prototype .wordmark { font-size:25px }
+.design-prototype .wordmark::after { content:'DESIGN PREVIEW'; font-size:9px; letter-spacing:.1em; background:#e5eee8; color:#47716a; padding:6px 9px; border-radius:8px; margin-left:12px }
+.design-prototype main { max-width:1380px; padding:0 36px 80px }
+.design-prototype .planner { padding-top:10px }
+.escape-hero { position:relative; isolation:isolate; overflow:hidden; min-height:385px; border-radius:32px; background:linear-gradient(115deg,#073f47 0%,#106d73 49%,#58bfc0 100%); color:white; padding:48px; display:flex; align-items:center }
+.escape-copy { position:relative; z-index:2; max-width:62% }
+.escape-label { color:#ffe19c; letter-spacing:.16em; font-size:11px; font-weight:900; margin-bottom:18px }
+.escape-hero h1 { color:#fff9e9; font-size:clamp(32px,4.3vw,60px); line-height:1.03; font-weight:900; max-width:15ch; letter-spacing:-.04em }
+.escape-sub { color:#d7efeb; font-size:17px; margin-top:18px }
+.escape-details { display:flex; flex-wrap:wrap; gap:12px; margin-top:22px; font-size:12px; color:#fff6e5 }
+.escape-details span { padding:8px 12px; border:1px solid #ffffff45; border-radius:99px; background:#ffffff0c }
+.crew-line { display:flex; align-items:center; gap:12px; margin-top:26px; font-size:12px; color:#d7efeb }
+.crew-avatars { display:flex; padding-left:6px }
+.crew-avatars span { display:grid; place-items:center; width:36px; height:36px; margin-left:-6px; border:3px solid #0d6268; border-radius:50%; color:#153d40; font-weight:900; background:var(--avatar-color) }
+.escape-scene { position:absolute; inset:0; z-index:0; pointer-events:none }
+.escape-sun { position:absolute; width:270px; height:270px; border-radius:50%; background:#ffdb8a; right:9%; top:28px; box-shadow:0 0 0 32px #ffdf9b15,0 0 0 64px #ffdf9b0b }
+.skyline { position:absolute; right:-15px; bottom:0; width:47%; height:180px; display:flex; align-items:flex-end; gap:8px; opacity:.45; transform:rotate(-2deg) }
+.skyline i { display:block; flex:1; background:#0c5960; height:60%; border-radius:4px 4px 0 0; background-image:repeating-linear-gradient(0deg,transparent 0 17px,#a6e5d72b 18px 22px) }
+.skyline i:nth-child(2n) { height:85% }.skyline i:nth-child(3n) { height:45% }.skyline i:nth-child(5) { height:100%; clip-path:polygon(0 16%,22% 16%,22% 0,33% 16%,67% 16%,78% 0,78% 16%,100% 16%,100% 100%,0 100%) }
+.escape-buddy { position:absolute; z-index:2; right:6%; bottom:43px; width:300px; transform:rotate(3deg) }
+.escape-buddy .panda-art { width:300px; height:200px; border-radius:45% 45% 35% 35%; box-shadow:0 20px 30px #073f4733; background-color:#b9e7f5 }
+.buddy-sticker { position:relative; display:block; width:max-content; max-width:100%; margin:-6px auto 0; padding:11px 19px; border-radius:9px; background:#fff8e9; color:#873d27; font-weight:900; font-size:13px; transform:rotate(-6deg); box-shadow:0 5px 0 #133f4020 }
+.music-note { position:absolute; top:50px; right:4%; font-size:58px; color:#ffe09b; transform:rotate(12deg) }.music-note.second { top:120px; right:35%; font-size:34px; color:#fff6e5; transform:rotate(-15deg) }
+.postcard-stamp { position:absolute; top:27px; right:27px; color:#d0efdf; font-size:9px; letter-spacing:.13em; border:1px dashed #e4f7d780; border-radius:50%; padding:15px 9px; text-align:center; transform:rotate(16deg) }
+.trip-ribbon { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:20px 5px; border-bottom:1px solid var(--line); font-size:13px; color:#52716b }.trip-ribbon b { color:#a64a30; font-size:10px; letter-spacing:.1em; margin-right:14px }.trip-ribbon .trip-selector { font-size:10px; min-width:230px; gap:4px }.trip-ribbon select { min-height:34px; font-size:12px; padding:6px 10px; background:#fff }
+.design-prototype .planner-toolbar { padding:20px 0 }
+.design-prototype .planner-columns { gap:26px; grid-template-columns:minmax(0,1fr) 285px }
+.design-prototype .section-heading h2 { font-size:26px; font-weight:900 }
+.design-prototype .itinerary > .section-heading h2::before { content:'✦'; color:#bd593a; margin-right:10px }
+.design-prototype .itinerary-summary { background:#e8f0e9; padding:14px 18px; border-radius:14px; margin-bottom:4px; gap:15px }
+.design-prototype .itinerary-summary strong { color:#16544d }
+.design-prototype .day-heading { border:0; padding:23px 0 12px; color:#93603e; text-transform:uppercase; font-weight:900; letter-spacing:.12em; font-size:11px }
+.design-prototype .activity { border:1px solid #dce7df; padding:24px; border-radius:23px; box-shadow:0 6px 0 #e8eee7; margin-bottom:20px; transition:transform .18s,box-shadow .18s }
+.design-prototype .activity:hover { transform:translateY(-3px); box-shadow:0 10px 22px #173f4010 }
+.design-prototype .activity-heading h3 { font-size:21px; font-weight:900 }
+.design-prototype .activity-cost { background:#fff0d5; padding:7px 12px; border-radius:12px; color:#80511c; font-size:16px; font-weight:900 }
+.design-prototype .activity-meta { margin-top:13px }.design-prototype .activity-meta > span:first-child { background:#eff3f7; padding:5px 9px; border-radius:8px; color:#526779 }
+.design-prototype .activity-actions { gap:20px; margin-top:14px }.design-prototype .response-form { border-top-style:dashed }
+.design-prototype .people-panel { border:0; padding:22px; border-radius:24px; background:#fff0dc; align-self:start; box-shadow:0 6px 0 #eddfce }
+.design-prototype .people-panel h2 { font-size:22px }.design-prototype .people-panel .section-heading { gap:8px }.design-prototype .people-panel .section-heading .text-button { font-size:11px }
+.design-prototype .person { border-color:#e4d7c5 }.design-prototype .person-heading h3 { display:flex; align-items:center; gap:9px; font-size:15px }.design-prototype .person-heading h3::before { content:'☺'; display:grid; place-items:center; font-size:23px; width:32px; height:32px; color:#80512c; background:#ffdc9e; border-radius:50% }
+.design-prototype button,.design-prototype .button { transition:transform .16s,box-shadow .16s }.design-prototype button:hover,.design-prototype .button:hover { box-shadow:0 5px 12px #153d401c }
+@media(max-width:800px) { .design-prototype main { padding:0 18px 50px }.design-prototype .site-header { padding:18px }.design-prototype .wordmark::after { display:none }.escape-hero { padding:28px; min-height:530px; align-items:flex-start }.escape-copy { max-width:100% }.escape-hero h1 { font-size:38px; max-width:17ch }.escape-sub { font-size:14px }.escape-buddy { width:210px; right:25px; bottom:27px }.escape-buddy .panda-art { width:210px; height:140px }.escape-sun { width:200px; height:200px; top:auto; bottom:25px; right:25px }.crew-line { margin-top:17px }.postcard-stamp { display:none }.skyline { width:100%; height:140px }.music-note { top:auto; bottom:90px; left:30px }.music-note.second { display:none }.trip-ribbon { flex-wrap:wrap; padding:17px 3px }.trip-ribbon > span { font-size:11px }.trip-ribbon .trip-selector { width:100% }.design-prototype .planner-columns { grid-template-columns:1fr }.design-prototype .activity { padding:19px }.design-prototype .activity-heading h3 { font-size:19px }.buddy-sticker { font-size:11px }.escape-details { font-size:11px } }
+@media(prefers-reduced-motion:reduce) { .design-prototype * { transition:none!important; animation:none!important } }
+
+/* Match the landing page's airy travel palette and floating glass surfaces. */
+.design-prototype { --canvas:#f3faff; --ink:#17374b; --accent:#007da6; --accent-hover:#006583; --link:#006583; --line:#c3dce5; background:linear-gradient(160deg,#f3faff,#edf7ff 65%,#fff8ed) }
+.escape-hero { background:linear-gradient(155deg,#65bce0 0%,#a7dfea 55%,#e6f4ff 100%); box-shadow:0 24px 50px -30px #2f8cff66; border:1px solid #ffffffa8 }
+.escape-label { color:#974025 }
+.escape-hero h1 { color:#17374b }
+.escape-sub { color:#254f61 }
+.escape-details { color:#17374b }
+.escape-details span { background:#ffffff85; border-color:#ffffffb8; backdrop-filter:blur(8px) }
+.crew-line { color:#254f61 }
+.crew-avatars span { border-color:#d8f0f7 }
+.escape-sun { background:#ffe08a; box-shadow:0 0 0 32px #ffe08a20,0 0 0 64px #ffe08a12 }
+.escape-scene::before,.escape-scene::after { content:''; position:absolute; width:220px; height:70px; border-radius:100px; background:#ffffff8f; filter:blur(3px); box-shadow:45px -25px 0 5px #ffffff8f,95px 0 0 8px #ffffff8f }
+.escape-scene::before { left:-90px; bottom:15px }
+.escape-scene::after { right:30%; top:-35px; transform:scale(.7) }
+.skyline { opacity:.22 }
+.skyline i { background-color:#308ca2; background-image:repeating-linear-gradient(0deg,transparent 0 17px,#ffffff6b 18px 22px) }
+.music-note { color:#fff8ed; text-shadow:0 3px 12px #317d9c33 }
+.music-note.second { color:#974025 }
+.postcard-stamp { color:#20566b; border-color:#20566b70 }
+.buddy-sticker { background:#fff8ed; color:#974025; box-shadow:0 8px 20px -12px #17374b66 }
+.escape-buddy .panda-art { box-shadow:0 20px 35px -15px #237c9e55 }
+.trip-ribbon { color:#4e6674 }
+.design-prototype .activity { background:#ffffffcf; border-color:#ffffff; box-shadow:0 14px 30px -22px #257caa55; backdrop-filter:blur(12px) }
+.design-prototype .activity:hover { box-shadow:0 18px 35px -20px #257caa66 }
+.design-prototype .itinerary-summary { background:#e0f3fb }
+.design-prototype .itinerary-summary strong { color:#17374b }
+.design-prototype .people-panel { background:linear-gradient(150deg,#ffffffdc,#e3f5f1dc); border:1px solid #ffffff; box-shadow:0 20px 40px -28px #257caa66; backdrop-filter:blur(14px) }
+.design-prototype .person { border-color:#c3dce5 }
+.design-prototype .person-heading h3::before { background:#ffe08a; color:#80511c }
+.design-prototype .day-heading { color:#974025 }
+.design-prototype .activity-cost { background:#ffe8ad; color:#735116 }

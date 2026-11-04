@@ -732,3 +732,72 @@ dialog::backdrop {
     transition:none!important
   }
 }
+
+/* Beacon marketing: photo-led landing and calm, focused onboarding. */
+:root { background:#f8f7f2; }
+.site-header { max-width:1440px; border-bottom:0; padding:25px 48px; }
+.wordmark { font-size:30px; letter-spacing:-.07em; font-weight:800; }
+.wordmark-dot { background:#c6e86b; width:10px; height:10px; }
+.site-header .button { border-radius:30px; padding:12px 22px; }
+main { max-width:1440px; padding:0 48px 32px; }
+.landing { display:block; padding-top:8px; }
+.hero-trip { min-height:620px; position:relative; overflow:hidden; isolation:isolate; border-radius:24px; background:#2c514b url('/images/lake-weekend.jpg') center 56% / cover; color:#fff; display:flex; flex-direction:column; justify-content:space-between; }
+.hero-trip::before { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(90deg,rgba(9,29,24,.74),rgba(9,29,24,.28) 65%,rgba(9,29,24,.12)); }
+.landing-copy { padding:80px 64px 50px; }
+.landing-copy .eyebrow { color:#e5efcf; font-size:11px; margin-bottom:26px; }
+.landing-copy h1 { font-size:clamp(54px,6.5vw,94px); line-height:1.02; letter-spacing:-.065em; font-weight:650; }
+.landing-copy .intro { color:#f4f5ee; font-size:17px; max-width:29ch; margin-top:24px; }
+.landing-copy .actions { margin-top:30px; gap:24px; }
+.landing-copy .button { border-radius:32px; background:#d4f28a; color:#19362b; border-color:#d4f28a; padding:16px 25px; gap:25px; font-size:15px; }
+.landing-copy .button:hover { background:#e4ffab; }
+.landing-copy .text-link { color:white; font-size:13px; }
+.hero-footer { margin:0 40px; padding:22px 0; border-top:1px solid #ffffff55; display:flex; justify-content:space-between; align-items:center; font-size:10px; letter-spacing:.17em; }
+.hero-footer>span:last-child { font-size:27px; }
+.landing-bottom { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:24px; }
+.weekend-card { min-height:330px; padding:32px; border-radius:20px; overflow:hidden; position:relative; isolation:isolate; background:#384e47 url('/images/mountain-escape.jpg') center 48% / cover; color:white; display:flex; flex-direction:column; }
+.weekend-card::before { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,#14251c99,#14251c22 65%,#14251c88); }
+.weekend-card .eyebrow { color:#f4f4ea; font-size:10px; }
+.weekend-card h2 { font-size:40px; font-weight:600; letter-spacing:-.045em; }
+.photo-caption { margin-top:auto; padding-top:50px; font-size:12px; }
+.sample-wrap { background:#eeeee5; border-radius:20px; padding:27px 32px; }
+.sample-label { display:flex; justify-content:space-between; font-size:10px; text-transform:uppercase; letter-spacing:.14em; color:#59634f; margin-bottom:20px; }
+.sample-preview { padding:0; border:0; background:transparent; }
+.sample-preview>.eyebrow { display:none; }
+.sample-preview h2 { font-size:25px; }
+.sample-preview .quiet { margin-bottom:12px; }
+.sample-meta { padding:14px 0; }
+.sample-activity { padding:9px 0; }
+.sample-preview .text-link { margin-top:16px; }
+.landing-note { display:flex; flex-wrap:wrap; justify-content:space-between; gap:16px; margin-top:32px; padding-top:22px; font-size:12px; }
+.landing-note>span { font-size:10px; letter-spacing:.12em; color:var(--muted); }
+#new-view { max-width:1080px; padding:40px 48px; border-radius:24px; background:#eeeee5; position:relative; isolation:isolate; margin:8px auto 0; overflow:hidden; }
+#new-view::before { content:""; position:absolute; inset:0 0 0 64%; z-index:-1; background:linear-gradient(0deg,#183a2b33,#183a2b11),url('/images/mountain-escape.jpg') center / cover; }
+#new-view>.back-link,#new-view>.eyebrow,#new-view>h1,#new-view>.intro,#new-view>form { max-width:56%; }
+#new-view h1 { font-size:40px; }
+#new-view .intro { font-size:14px; margin-top:14px; }
+#new-view .form-panel { padding:24px; border:0; border-radius:16px; margin-top:24px; }
+#new-view .back-link { margin-bottom:28px; }
+#new-view .eyebrow { margin-bottom:14px; }
+#new-view input { border-radius:8px; }
+#new-view button { border-radius:24px; }
+@media(max-width:900px) {
+  .site-header { padding:22px 24px; } main { padding:0 24px 28px; }
+  .hero-trip { min-height:570px; } .landing-copy { padding:65px 36px 40px; }
+  .landing-bottom { gap:18px; } .sample-wrap { padding:25px; }
+  #new-view { padding:32px; } #new-view::before { left:70%; }
+  #new-view>.back-link,#new-view>.eyebrow,#new-view>h1,#new-view>.intro,#new-view>form { max-width:64%; }
+}
+@media(max-width:600px) {
+  .site-header { padding:20px; } .wordmark { font-size:26px; } main { padding:0 16px 24px; }
+  .site-header .button { padding:10px 16px; }
+  .hero-trip { min-height:570px; border-radius:20px; background-position:58% center; }
+  .landing-copy { padding:65px 26px 32px; } .landing-copy h1 { font-size:58px; }
+  .landing-copy .intro { font-size:16px; } .landing-copy .actions { align-items:flex-start; flex-direction:column; gap:22px; }
+  .hero-footer { margin:0 26px; font-size:8px; letter-spacing:.1em; }
+  .landing-bottom { grid-template-columns:1fr; margin-top:16px; gap:16px; }
+  .weekend-card { min-height:280px; padding:26px; } .weekend-card h2 { font-size:36px; }
+  .landing-note { flex-direction:column; gap:8px; margin-top:24px; }
+  #new-view { padding:28px 20px; } #new-view::before { display:none; }
+  #new-view>.back-link,#new-view>.eyebrow,#new-view>h1,#new-view>.intro,#new-view>form { max-width:100%; }
+  #new-view h1 { font-size:34px; } #new-view .form-panel { padding:20px; }
+}

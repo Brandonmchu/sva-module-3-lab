@@ -125,9 +125,9 @@ function renderOnboardingStep() {
   $('#organizer-details').disabled = basics;
   $('#onboarding-back').hidden = basics;
   $('#onboarding-step').textContent = `Step ${wizardStep} of 2`;
-  $('#onboarding-heading').textContent = basics ? 'Give your weekend a starting point.' : 'Add your preferences.';
-  $('#onboarding-intro').textContent = basics ? 'Choose a destination, dates, and a budget. You can change these later.' : 'Tell the group when you can go and what you enjoy. Add the other travelers next.';
-  $('#onboarding-submit').textContent = basics ? 'Continue' : 'Create trip';
+  $('#onboarding-heading').textContent = basics ? 'Where are we going?' : 'And you’re coming too.';
+  $('#onboarding-intro').textContent = basics ? 'A place, a date, a budget. You can change it all later.' : 'Your dates, your budget, your kind of fun.';
+  $('#onboarding-submit').textContent = basics ? 'Next: your vibe →' : 'Let’s do this ↗';
 }
 
 function renderHome() {

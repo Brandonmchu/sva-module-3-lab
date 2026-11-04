@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Plan a weekend away with friends. Keep dates, budgets, ideas, and responses together.">
-  <title>Group trip</title>
+  <meta name="description" content="Your people. Your weekend. Plan dates, budgets, and good times together with Beacon.">
+  <title>Beacon — Less planning. More going.</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/styles.css">
   <script src="/app.js" type="module"></script>
 </head>
 <body>
   <header class="site-header">
-    <a class="wordmark" href="#home">Group trip<span class="wordmark-dot" aria-hidden="true"></span></a>
+    <a class="wordmark" href="#home">beacon<span class="wordmark-dot" aria-hidden="true"></span></a>
     <nav aria-label="Main navigation">
       <a href="#home">Home</a>
       <a id="planner-link" href="#home" hidden>Open planner</a>
@@ -26,25 +26,30 @@
   <main>
     <!-- Product marketers: start with the promise, calls to action, and onboarding in this file. -->
     <section id="home-view" class="view landing" hidden>
-      <div class="landing-copy">
-        <p class="eyebrow">A weekend with your people</p>
-        <h1>Make a plan<br>everyone can join.</h1>
-        <p class="intro">Keep the dates, budget, and ideas in one place. Build a weekend plan your group can agree on.</p>
-        <div class="actions"><a class="button" href="#new">Plan a weekend</a><a id="sample-link" class="text-link" href="#home" hidden>Try the sample trip</a></div>
-        <p class="quiet">Start a trip. Add your people. Decide together.</p>
+      <div class="hero-trip">
+        <div class="landing-copy">
+          <p class="eyebrow">Good weekends start here</p>
+          <h1>Less planning.<br>More going.</h1>
+          <p class="intro">Your people. One plan. A weekend worth leaving for.</p>
+          <div class="actions"><a class="button" href="#new">Make it a trip <span aria-hidden="true">↗</span></a><a id="sample-link" class="text-link" href="#home" hidden>Take a look around</a></div>
+        </div>
+        <div class="hero-footer"><span>OUT OF THE CHAT. INTO THE WEEKEND.</span><span aria-hidden="true">↗</span></div>
       </div>
-      <div id="sample-preview" class="sample-preview"></div>
-      <div class="landing-note"><b>One shared plan.</b><p>Everyone can add their preferences, propose activities, and respond to the ideas.</p></div>
+      <div class="landing-bottom">
+        <div class="weekend-card"><p class="eyebrow">Make room for a little escape</p><h2>Same people.<br>New scenery.</h2><span class="photo-caption">Go somewhere together.</span></div>
+        <div class="sample-wrap"><div class="sample-label"><span>A little inspiration</span><span aria-hidden="true">↘</span></div><div id="sample-preview" class="sample-preview"></div></div>
+      </div>
+      <footer class="landing-note"><b>Good company. Great weekends.</b><p>Pick your dates. Find your budget. Go together.</p><span>BEACON © 2026</span></footer>
     </section>
 
     <section id="new-view" class="view narrow" hidden>
       <a class="text-link back-link" href="#home">Back to home</a>
       <p id="onboarding-step" class="eyebrow">Step 1 of 2</p>
-      <h1 id="onboarding-heading">Give your weekend a starting point.</h1>
-      <p id="onboarding-intro" class="intro">Choose a destination, dates, and a budget. You can change these later.</p>
+      <h1 id="onboarding-heading">Where are we going?</h1>
+      <p id="onboarding-intro" class="intro">A place, a date, a budget. You can change it all later.</p>
       <form id="new-trip-form" class="form-panel">
         <fieldset id="trip-basics"><legend class="sr-only">Trip details</legend>
-          <label>Trip name<input name="title" required maxlength="100" placeholder="A weekend with friends"></label>
+          <label>Trip name<input name="title" required maxlength="100" placeholder="The weekend we finally booked"></label>
           <label>Destination<input name="destination" required maxlength="150" placeholder="Where would you like to go?"></label>
           <div class="form-grid"><label>Start date<input name="start_date" type="date" required></label><label>End date<input name="end_date" type="date" required></label></div>
           <div class="form-grid"><label>Budget per person<input name="budget_per_person" type="number" min="0" step="0.01" required placeholder="350"></label><label>Currency<input name="currency" value="CAD" pattern="[A-Za-z]{3}" maxlength="3" required aria-describedby="currency-help"><span id="currency-help" class="field-help">Three-letter code, such as CAD.</span></label></div>

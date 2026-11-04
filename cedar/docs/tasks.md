@@ -28,3 +28,4 @@ The decorative Unsplash cover loads over the network and has a forest-color fall
 
 Release: Author identity supplied by Jake Whittamore. Publish the scoped design commit through team/cedar, preserving the current marketing work. Local trip data and usage events are excluded.
 
+Release verification: Merged the design session into team/cedar while preserving the marketer's page title, description, landing copy, and onboarding messaging. The combined app passed node syntax and product/event validation. Reviewed every outgoing commit and changed path: all are inside cedar/. User trip data and usage events remain outside this release commit.

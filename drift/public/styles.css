@@ -1070,3 +1070,29 @@ body:has(#new-view.gx-onboard:not([hidden])) .wordmark-dot { background:#2f8cff 
 }
 @media(prefers-reduced-motion:reduce) { .gx-progress span,.gx-chip > span { transition:none } }
 .gx-chip > span { gap:.45em; word-spacing:.05em }
+
+/* ===== GroupAtion logo ===== */
+.wordmark-logo { width:40px; height:40px; border-radius:50%; flex:none; box-shadow:0 4px 10px -4px rgba(15,42,74,.45) }
+.gx-badge {
+  position:absolute;
+  z-index:3;
+  top:-34px;
+  left:-26px;
+  width:132px;
+  height:132px;
+  border-radius:50%;
+  background:#fff;
+  transform:rotate(-8deg);
+  box-shadow:0 18px 30px -14px rgba(15,42,74,.55)
+}
+@media(max-width:700px) {
+  .wordmark-logo { width:34px; height:34px }
+  .gx-badge { width:92px; height:92px; top:-26px; left:-10px }
+}
+.gx-badge { top:-44px; left:auto; right:-18px; transform:rotate(8deg) }
+.gx-hero-art .gx-sticker-party { right:auto; left:-6px; top:-14px; transform:rotate(-12deg) }
+.gx-ticket h2 { padding-right:96px }
+@media(max-width:700px) {
+  .gx-badge { top:-30px; right:-6px; left:auto }
+  .gx-ticket h2 { padding-right:64px }
+}

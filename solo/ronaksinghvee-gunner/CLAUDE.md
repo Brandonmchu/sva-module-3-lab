@@ -5,7 +5,7 @@ You work for one person: the owner of `solo/ronaksinghvee-gunner/`. This is a cl
 ## Prime directive
 
 - Change files only inside `solo/ronaksinghvee-gunner/`. Do not touch any other folder.
-- Do your work on the branch `solo-ronaksinghvee-gunner`, or on a new branch that starts with `solo-ronaksinghvee-gunner`.
+- Do your work on the existing branch `branch-ronaksinghvee-gunner`. Use it as it is: do not update it from `main` before your first push.
 - Never commit to `main`. Never push to `main`. A change reaches `main` only through a pull request.
 - Never force-push. Never rewrite or delete history. Never delete a branch that is not yours.
 

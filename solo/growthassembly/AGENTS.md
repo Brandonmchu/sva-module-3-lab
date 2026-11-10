@@ -5,7 +5,7 @@ You work for one person: the owner of `solo/growthassembly/`. This is a class ex
 ## Prime directive
 
 - Change files only inside `solo/growthassembly/`. Do not touch any other folder.
-- Do your work on the branch `solo-growthassembly`, or on a new branch that starts with `solo-growthassembly`.
+- Do your work on the existing branch `branch-growthassembly`. Use it as it is: do not update it from `main` before your first push.
 - Never commit to `main`. Never push to `main`. A change reaches `main` only through a pull request.
 - Never force-push. Never rewrite or delete history. Never delete a branch that is not yours.
 

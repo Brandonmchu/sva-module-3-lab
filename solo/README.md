@@ -1,6 +1,6 @@
 # Solo exercise: unblock your pull request
 
-Your folder is `solo/<your-github-handle>/`. Your branch is `solo-<your-github-handle>`.
+Your folder is `solo/<your-github-handle>/`. Your branch is `branch-<your-github-handle>`.
 
 ## The riddle
 
